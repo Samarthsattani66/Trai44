@@ -21,7 +21,7 @@
             width: 220px;
             height: auto;
         }
-        
+
         :root {
             --bg-color: #121212;
             --text-color: #ffffff;
@@ -125,27 +125,15 @@
             background-size: 200%;
         }
 
-        .watch-button.watch::before {
-            content: "Watch";
-        }
+        .watch-button.watch::before { content: "Watch"; }
+        .watch-button.adfree::before { content: "Ad-free"; }
 
-        .watch-button.adfree::before {
-            content: "Ad-free";
-        }
-
-        .watch-button:hover::before {
+        .watch-button:hover::before, .watch-button:hover {
             background-position: right;
             transition-duration: 1s;
         }
 
-        .watch-button:hover {
-            background-position: right;
-            transition-duration: 1s;
-        }
-
-        .watch-button:active {
-            transform: scale(0.95);
-        }
+        .watch-button:active { transform: scale(0.95); }
 
         footer {
             margin-top: 20px;
@@ -153,7 +141,9 @@
             font-size: 14px;
             color: var(--text-color);
         }
-      #popup {
+
+        /* Popup Styling */
+        #popup {
             position: fixed;
             top: 0;
             left: 0;
@@ -174,6 +164,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             width: 300px;
+            position: relative;
         }
 
         .popup-content h2 {
@@ -181,9 +172,7 @@
             color: #ff0000;
         }
 
-        .popup-content p {
-            margin: 0 0 20px;
-        }
+        .popup-content p { margin: 0 0 20px; }
 
         .popup-content button {
             width: 100%;
@@ -195,14 +184,17 @@
             cursor: pointer;
         }
 
-        .popup-content .join-btn {
-            background-color: #ff0000;
-            color: white;
-        }
+        .popup-content .join-btn { background-color: #ff0000; color: white; }
+        .popup-content .close-btn { background-color: #555; color: white; }
 
-        .popup-content .close-btn {
-            background-color: #555;
+        .popup-close {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 24px;
             color: white;
+            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -210,11 +202,14 @@
     <div class="logo-container">
         <img src="https://i.ibb.co/XZBBsR7/Fan-Code-Logo-2022-Fan-Code-Orange-On-Transarent.png" alt="Fancode">
     </div>
+
     <h1>Fancode Live Matches</h1>
     <div class="match-container" id="matches"></div>
 
+    <!-- Popup with cross button -->
     <div id="popup">
         <div class="popup-content">
+            <span class="popup-close" onclick="closePopup()">×</span>
             <h2>Support Us!</h2>
             <p>Join our Telegram channel @teamrohitoffical45 for more updates.</p>
             <button class="join-btn" onclick="window.open('https://t.me/+lkbpBqFd0FljNzJl', '_blank')">Join Now</button>
@@ -222,32 +217,34 @@
         </div>
     </div>
 
+    <footer>&copy; 2025 Respective owner. All rights reserved.</footer>
+
     <script>
         async function fetchMatches() {
             const response = await fetch('https://raw.githubusercontent.com/drmlive/fancode-live-events/main/fancode.json');
             const data = await response.json();
             const matchesContainer = document.getElementById('matches');
-            
+
             data.matches.forEach(match => {
                 const matchCard = document.createElement('div');
                 matchCard.className = 'match-card';
-                matchCard.innerHTML = 
+                matchCard.innerHTML = `
                     <img src="${match.src}" alt="Match Image">
                     <div class="match-title">${match.title}</div>
                     <div class="match-subtitle">${match.event_category}</div>
-                    ${match.status === "LIVE" ? 
+                    ${match.status === "LIVE" ? `
                         <div class="button-container">
                             <button class="watch-button watch" onclick="redirect('${match.match_id}', false)"></button>
                             <button class="watch-button adfree" onclick="redirect('${match.match_id}', true)"></button>
-                        </div>
-                     : <p>Starts at: ${match.startTime}</p>}
-                ;
+                        </div>` 
+                    : `<p>Starts at: ${match.startTime}</p>`}
+                `;
                 matchesContainer.appendChild(matchCard);
             });
         }
 
         function redirect(matchId, adfree) {
-            const url = ./match?id=${matchId}${adfree ? '&adfree' : ''};
+            const url = `./match?id=${matchId}${adfree ? '&adfree' : ''}`;
             window.location.href = url;
         }
 
@@ -256,16 +253,10 @@
         }
 
         window.onload = function () {
-            setTimeout(() => {
-                document.getElementById("popup").style.display = "flex";
-            }, 3000);
+            setTimeout(() => document.getElementById("popup").style.display = "flex", 3000);
         };
 
         fetchMatches();
     </script>
-
-    <footer>
-        &copy; 2025 Respective owner . All rights reserved.
-    </footer>
 </body>
 </html>
