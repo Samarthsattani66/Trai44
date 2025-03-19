@@ -4,179 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TEAMROHITOFFICIAL45_LIVE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Staatliches&display=swap" rel="stylesheet">
     <style>
         @keyframes heartbeat {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0, 116, 255, 0.5); }
-            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(0, 116, 255, 0.8); }
-            100% { transform: scale(1); box-shadow: 0 0 10px rgba(0, 116, 255, 0.5); }
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
         }
 
         @keyframes livePulse {
             0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 0.6; }
             100% { transform: scale(1); opacity: 1; }
         }
 
         body {
             font-family: 'Roboto', sans-serif;
-            text-align: center;
-            background: linear-gradient(to right, #003B5C, #00A6D6); /* Mumbai Indians Blue Gradient */
-            color: white;
-            padding: 20px;
+            background: linear-gradient(135deg, #121212, #1e1e1e);
+            color: #fff;
             margin: 0;
-            height: 100vh;
-        }
-
-        /* Cricket Score Section */
-        .score-board {
-            background: #FFC72C; /* Mumbai Indians Gold */
-            color: white;
-            padding: 15px;
-            margin-bottom: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-            border-radius: 8px;
+            padding: 0;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            max-width: 90%;
-            margin: 20px auto;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-        }
-
-        .score-board div {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .score-board .team {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .score-board .score {
-            font-size: 18px;
+            height: 100vh;
+            overflow: hidden;
         }
 
         h1 {
-            font-family: 'Staatliches', cursive;
-            font-size: 40px;
+            font-size: 36px;
+            font-weight: 600;
+            color: #ffcc00;
             text-transform: uppercase;
-            margin-bottom: 20px;
-            color: #FFC72C; /* Mumbai Indians Gold */
-            letter-spacing: 3px;
+            margin-bottom: 40px;
+            text-shadow: 0px 0px 15px rgba(255, 215, 0, 0.7);
         }
 
         .event-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 40px;
+            padding: 0 20px;
+            justify-items: center;
         }
 
         .event {
-            width: 350px;
-            background: #003B5C; /* Mumbai Indians Blue */
-            border-radius: 12px;
+            background: #292929;
+            border-radius: 15px;
             overflow: hidden;
             position: relative;
-            padding-bottom: 15px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.4);
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease-in-out;
+            perspective: 1000px;
             animation: heartbeat 3s infinite;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .event:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(255, 199, 44, 0.8); /* Mumbai Indians Gold Glow on hover */
+            transform: rotateY(15deg) scale(1.05);
+            box-shadow: 0px 15px 50px rgba(0, 0, 0, 0.5);
         }
 
         .event img {
             width: 100%;
-            height: 200px;
+            height: 230px;
             object-fit: cover;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
+            transition: transform 0.3s ease-in-out;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .event:hover img {
+            transform: scale(1.1);
         }
 
         .event-content {
-            padding: 15px;
+            padding: 20px;
+            z-index: 1;
         }
 
         .title {
             font-size: 20px;
-            font-weight: bold;
-            color: #FFC72C; /* Mumbai Indians Gold */
-            margin-bottom: 5px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            text-transform: capitalize;
         }
 
         .league {
             font-size: 14px;
-            color: #ccc;
-            margin-bottom: 10px;
+            color: #bbb;
+            margin-bottom: 15px;
         }
 
         .buttons {
             display: flex;
+            gap: 12px;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
         }
 
         .watch-btn {
-            display: block;
-            width: 90%;
-            padding: 12px;
-            background: transparent;
+            background: linear-gradient(135deg, #ffcc00, #ff6600);
             color: white;
-            text-decoration: none;
-            border: 2px solid #FFC72C; /* Mumbai Indians Gold border */
-            border-radius: 8px;
             font-size: 16px;
             font-weight: bold;
-            margin: 0 auto;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 10px;
             text-align: center;
-            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 5px 15px rgba(255, 100, 0, 0.3);
+            transition: transform 0.3s, background 0.3s;
         }
 
         .watch-btn:hover {
-            background: #FFC72C; /* Mumbai Indians Gold background */
-            color: black;
+            background: linear-gradient(135deg, #ff6600, #ffcc00);
             transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(255, 199, 44, 0.8); /* Mumbai Indians Gold Glow on hover */
+            box-shadow: 0px 10px 20px rgba(255, 100, 0, 0.6);
         }
 
         .live-badge {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #00A6D6; /* Mumbai Indians Blue */
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 0, 0, 0.8);
             color: white;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 5px;
+            padding: 6px 12px;
+            border-radius: 8px;
             animation: livePulse 1.5s infinite;
+            box-shadow: 0px 0px 12px rgba(255, 0, 0, 0.7);
         }
+
     </style>
 </head>
 <body>
 
-    <!-- Cricket Score Section -->
-    <div class="score-board">
-        <div>
-            <div class="team">Team 1</div>
-            <div class="score">150/3 (15 overs)</div>
-        </div>
-        <div>
-            <div class="team">Team 2</div>
-            <div class="score">120/4 (14 overs)</div>
-        </div>
+    <div>
+        <h1>Live Events</h1>
+        <div class="event-container" id="events"></div>
     </div>
-
-    <h1>Live Events</h1>
-    <div class="event-container" id="events"></div>
 
     <script>
         async function fetchEvents() {
@@ -190,7 +156,9 @@
                 data.matches.forEach(event => {
                     const eventDiv = document.createElement("div");
                     eventDiv.classList.add("event");
-
+                    let eventDate = new Date(event.startTime);
+                    let formattedDate = eventDate.toLocaleDateString();
+                    let formattedTime = eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     let isLive = event.status === "LIVE"; // Check if match is live
                     let videoLink = event.dai_url ? `https://teamrohitofficalnew.netlify.app?videoUrl=${encodeURIComponent(event.dai_url)}` : "#";
 
