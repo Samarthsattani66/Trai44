@@ -70,6 +70,16 @@
             color: #bbb;
             margin-bottom: 10px;
         }
+        .viewer-count {
+            font-size: 14px;
+            color: #ff5733; /* Light red color for viewer count */
+            margin-bottom: 10px;
+        }
+        .match-time {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 10px;
+        }
         .buttons {
             display: flex;
             flex-direction: column;
@@ -134,6 +144,7 @@
                     let formattedTime = eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     let isLive = event.status === "LIVE"; // Check if match is live
                     let videoLink = event.dai_url ? `https://teamrohitofficalnew.netlify.app?videoUrl=${encodeURIComponent(event.dai_url)}` : "#";
+                    let viewers = event.viewers || "N/A";  // Get viewer count if available, else show N/A
 
                     eventDiv.innerHTML = `
                         <img src="${event.src}" alt="${event.title}">
@@ -141,6 +152,8 @@
                         <div class="event-content">
                             <div class="title">${event.title}</div>
                             <div class="league">${event.event_name}</div>
+                            <div class="match-time">Match Time: ${formattedDate}, ${formattedTime}</div>
+                            <div class="viewer-count">Viewers: ${viewers}</div>
                             <div class="buttons">
                                 ${event.dai_url ? `<a href="${videoLink}" target="_blank" class="watch-btn">Watch Now</a>` : ''}
                                 ${event.dai_url ? `<a href="${videoLink}" target="_blank" class="watch-btn">Ad-Free</a>` : ''}
