@@ -5,89 +5,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TEAMROHITOFFICIAL45_LIVE</title>
     <style>
-        @keyframes heartbeat {
-            0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
-            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
-            100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
-        }
-
-        @keyframes livePulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.6; }
-            100% { transform: scale(1); opacity: 1; }
+        /* General reset and body styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #121212, #1e1e1e);
+            font-family: 'Arial', sans-serif;
+            background: #121212;
             color: #fff;
-            margin: 0;
-            padding: 0;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             overflow: hidden;
+            perspective: 1200px;
+            margin: 0;
         }
 
         h1 {
-            font-size: 36px;
-            font-weight: 600;
-            color: #ffcc00;
+            font-size: 40px;
+            text-align: center;
             text-transform: uppercase;
-            margin-bottom: 40px;
-            text-shadow: 0px 0px 15px rgba(255, 215, 0, 0.7);
+            letter-spacing: 3px;
+            color: #ffcc00;
+            margin-bottom: 50px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+            animation: fadeIn 2s ease-in-out forwards;
         }
 
-        .event-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* 3D Container for the whole page */
+        .scene {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
             gap: 40px;
-            padding: 0 20px;
-            justify-items: center;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease-in-out;
         }
 
+        .scene:hover {
+            transform: rotateY(10deg);
+        }
+
+        /* Event container */
         .event {
+            width: 350px;
+            height: 480px;
             background: #292929;
             border-radius: 15px;
-            overflow: hidden;
             position: relative;
-            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.4);
-            transform-style: preserve-3d;
-            transition: transform 0.3s ease-in-out;
-            perspective: 1000px;
-            animation: heartbeat 3s infinite;
+            transform: rotateY(0deg);
+            transition: transform 0.5s ease-in-out, box-shadow 0.3s ease;
+            box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.3);
+            perspective: 1500px;
         }
 
         .event:hover {
-            transform: rotateY(15deg) scale(1.05);
-            box-shadow: 0px 15px 50px rgba(0, 0, 0, 0.5);
+            transform: rotateY(10deg);
+            box-shadow: 0px 20px 50px rgba(0, 0, 0, 0.6);
         }
 
+        /* Event image */
         .event img {
             width: 100%;
             height: 230px;
             object-fit: cover;
-            transition: transform 0.3s ease-in-out;
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
+            border-radius: 15px 15px 0 0;
+            transition: transform 0.3s ease;
         }
 
         .event:hover img {
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
 
+        /* Event details and content */
         .event-content {
             padding: 20px;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
             z-index: 1;
         }
 
         .title {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 8px;
             text-transform: capitalize;
+            margin-bottom: 10px;
         }
 
         .league {
@@ -98,7 +114,7 @@
 
         .buttons {
             display: flex;
-            gap: 12px;
+            gap: 15px;
             flex-direction: column;
         }
 
@@ -111,8 +127,8 @@
             text-decoration: none;
             border-radius: 10px;
             text-align: center;
+            transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
             box-shadow: 0px 5px 15px rgba(255, 100, 0, 0.3);
-            transition: transform 0.3s, background 0.3s;
         }
 
         .watch-btn:hover {
@@ -121,6 +137,7 @@
             box-shadow: 0px 10px 20px rgba(255, 100, 0, 0.6);
         }
 
+        /* Live badge animation */
         .live-badge {
             position: absolute;
             top: 20px;
@@ -135,14 +152,19 @@
             box-shadow: 0px 0px 12px rgba(255, 0, 0, 0.7);
         }
 
+        @keyframes livePulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
     </style>
 </head>
 <body>
 
-    <div>
-        <h1>Live Events</h1>
-        <div class="event-container" id="events"></div>
-    </div>
+    <h1>Live Events</h1>
+
+    <div class="scene" id="events"></div>
 
     <script>
         async function fetchEvents() {
@@ -156,6 +178,7 @@
                 data.matches.forEach(event => {
                     const eventDiv = document.createElement("div");
                     eventDiv.classList.add("event");
+
                     let eventDate = new Date(event.startTime);
                     let formattedDate = eventDate.toLocaleDateString();
                     let formattedTime = eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
