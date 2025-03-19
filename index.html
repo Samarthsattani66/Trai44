@@ -21,9 +21,43 @@
         body {
             font-family: 'Roboto', sans-serif;
             text-align: center;
-            background: #181818; /* Dark background */
+            background: linear-gradient(to right, #000000, #1a1a1a); /* Dark background with gradient */
             color: white;
             padding: 20px;
+            margin: 0;
+            height: 100vh;
+        }
+
+        /* Cricket Score Section */
+        .score-board {
+            background: #F0B90B; /* JioHotstar Yellow */
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 90%;
+            margin: 20px auto;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .score-board div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .score-board .team {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .score-board .score {
+            font-size: 18px;
         }
 
         h1 {
@@ -31,7 +65,7 @@
             font-size: 40px;
             text-transform: uppercase;
             margin-bottom: 20px;
-            color: #FF5733; /* Orange for IPL vibe */
+            color: #F0B90B; /* JioHotstar Yellow */
             letter-spacing: 3px;
         }
 
@@ -44,7 +78,7 @@
 
         .event {
             width: 350px;
-            background: #222; /* Slightly lighter dark background */
+            background: #222; /* Darker background */
             border-radius: 12px;
             overflow: hidden;
             position: relative;
@@ -55,7 +89,7 @@
 
         .event:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(255, 87, 34, 0.8); /* IPL Orange Glow on hover */
+            box-shadow: 0 0 30px rgba(240, 185, 11, 0.8); /* JioHotstar Yellow Glow on hover */
         }
 
         .event img {
@@ -128,6 +162,18 @@
     </style>
 </head>
 <body>
+
+    <!-- Cricket Score Section -->
+    <div class="score-board">
+        <div>
+            <div class="team">Team 1</div>
+            <div class="score">150/3 (15 overs)</div>
+        </div>
+        <div>
+            <div class="team">Team 2</div>
+            <div class="score">120/4 (14 overs)</div>
+        </div>
+    </div>
 
     <h1>Live IPL Events</h1>
     <div class="event-container" id="events"></div>
