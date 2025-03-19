@@ -7,9 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Staatliches&display=swap" rel="stylesheet">
     <style>
         @keyframes heartbeat {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); }
-            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); }
-            100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); }
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0, 116, 255, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(0, 116, 255, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(0, 116, 255, 0.5); }
         }
 
         @keyframes livePulse {
@@ -21,7 +21,7 @@
         body {
             font-family: 'Roboto', sans-serif;
             text-align: center;
-            background: linear-gradient(to right, #000000, #1a1a1a); /* Dark background with gradient */
+            background: linear-gradient(to right, #003B5C, #00A6D6); /* Mumbai Indians Blue Gradient */
             color: white;
             padding: 20px;
             margin: 0;
@@ -30,7 +30,7 @@
 
         /* Cricket Score Section */
         .score-board {
-            background: #F0B90B; /* JioHotstar Yellow */
+            background: #FFC72C; /* Mumbai Indians Gold */
             color: white;
             padding: 15px;
             margin-bottom: 20px;
@@ -65,7 +65,7 @@
             font-size: 40px;
             text-transform: uppercase;
             margin-bottom: 20px;
-            color: #F0B90B; /* JioHotstar Yellow */
+            color: #FFC72C; /* Mumbai Indians Gold */
             letter-spacing: 3px;
         }
 
@@ -78,7 +78,7 @@
 
         .event {
             width: 350px;
-            background: #222; /* Darker background */
+            background: #003B5C; /* Mumbai Indians Blue */
             border-radius: 12px;
             overflow: hidden;
             position: relative;
@@ -89,7 +89,7 @@
 
         .event:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(240, 185, 11, 0.8); /* JioHotstar Yellow Glow on hover */
+            box-shadow: 0 0 30px rgba(255, 199, 44, 0.8); /* Mumbai Indians Gold Glow on hover */
         }
 
         .event img {
@@ -107,7 +107,7 @@
         .title {
             font-size: 20px;
             font-weight: bold;
-            color: #FFDC00; /* Yellow for title */
+            color: #FFC72C; /* Mumbai Indians Gold */
             margin-bottom: 5px;
         }
 
@@ -131,7 +131,7 @@
             background: transparent;
             color: white;
             text-decoration: none;
-            border: 2px solid #FFDC00; /* JioHotstar Yellow border */
+            border: 2px solid #FFC72C; /* Mumbai Indians Gold border */
             border-radius: 8px;
             font-size: 16px;
             font-weight: bold;
@@ -141,17 +141,17 @@
         }
 
         .watch-btn:hover {
-            background: #FFDC00; /* JioHotstar Yellow background */
+            background: #FFC72C; /* Mumbai Indians Gold background */
             color: black;
             transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(255, 140, 0, 0.8); /* JioHotstar Orange Glow on hover */
+            box-shadow: 0 0 20px rgba(255, 199, 44, 0.8); /* Mumbai Indians Gold Glow on hover */
         }
 
         .live-badge {
             position: absolute;
             top: 10px;
             left: 10px;
-            background: #FF5733; /* JioHotstar Orange */
+            background: #00A6D6; /* Mumbai Indians Blue */
             color: white;
             font-size: 12px;
             font-weight: bold;
