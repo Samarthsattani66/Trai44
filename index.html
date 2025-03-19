@@ -21,8 +21,8 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            perspective: 1200px;
             margin: 0;
+            transition: all 0.3s ease;
         }
 
         h1 {
@@ -32,8 +32,8 @@
             letter-spacing: 3px;
             color: #ffcc00;
             margin-bottom: 50px;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
-            animation: fadeIn 2s ease-in-out forwards;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            animation: fadeIn 1.5s ease-in-out forwards;
         }
 
         @keyframes fadeIn {
@@ -41,40 +41,33 @@
             100% { opacity: 1; }
         }
 
-        /* 3D Container for the whole page */
-        .scene {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 40px;
-            transform-style: preserve-3d;
-            transition: transform 0.5s ease-in-out;
+        /* Event container styling */
+        .event-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 0 20px;
+            justify-items: center;
+            transition: all 0.3s ease;
         }
 
-        .scene:hover {
-            transform: rotateY(10deg);
-        }
-
-        /* Event container */
+        /* Event item styling */
         .event {
-            width: 350px;
-            height: 480px;
+            width: 100%;
+            height: 450px;
             background: #292929;
             border-radius: 15px;
             position: relative;
-            transform: rotateY(0deg);
-            transition: transform 0.5s ease-in-out, box-shadow 0.3s ease;
-            box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.3);
-            perspective: 1500px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .event:hover {
-            transform: rotateY(10deg);
-            box-shadow: 0px 20px 50px rgba(0, 0, 0, 0.6);
+            transform: scale(1.05);
+            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.5);
         }
 
-        /* Event image */
         .event img {
             width: 100%;
             height: 230px;
@@ -84,17 +77,15 @@
         }
 
         .event:hover img {
-            transform: scale(1.05);
+            transform: scale(1.1);
         }
 
-        /* Event details and content */
         .event-content {
             padding: 20px;
-            height: 250px;
+            height: 220px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            position: relative;
             z-index: 1;
         }
 
@@ -127,7 +118,7 @@
             text-decoration: none;
             border-radius: 10px;
             text-align: center;
-            transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+            transition: background 0.3s ease, transform 0.3s ease;
             box-shadow: 0px 5px 15px rgba(255, 100, 0, 0.3);
         }
 
@@ -148,14 +139,15 @@
             font-weight: bold;
             padding: 6px 12px;
             border-radius: 8px;
-            animation: livePulse 1.5s infinite;
             box-shadow: 0px 0px 12px rgba(255, 0, 0, 0.7);
+            opacity: 0;
+            animation: liveBadgePulse 2s infinite;
         }
 
-        @keyframes livePulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.6; }
-            100% { transform: scale(1); opacity: 1; }
+        @keyframes liveBadgePulse {
+            0% { opacity: 0; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0; transform: scale(1); }
         }
 
     </style>
@@ -164,7 +156,7 @@
 
     <h1>Live Events</h1>
 
-    <div class="scene" id="events"></div>
+    <div class="event-container" id="events"></div>
 
     <script>
         async function fetchEvents() {
