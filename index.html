@@ -1,10 +1,11 @@
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="stylesheet" href="./style.css">
-      <title>Tata IPL Live</title>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>Tata IPL Live</title>
     <style>
         #popup {
             position: fixed;
@@ -57,41 +58,17 @@
             background-color: #555;
             color: white;
         }
-                #popup .popup-content {
+
+        #popup .popup-content {
             border: 3px solid #5CABFF;
             box-shadow: 0px 0px 15px rgba(92, 171, 255, 0.8);
         }
-    </style>
 
-  </head>
-  <body>
-  <center>
-      <img src="https://i.ibb.co/mr3mypnF/tata-ipl-logo-png-white-by-harshmore7781-dezxlwr-pre.png" alt="IPL 2025" class="logo">
-
-
-      <div class="iframe-container" id="iframeContainer"></div>
-      <div class="container">
-          <div id="title" class="match-title">IPL Live Streaming</div>
-          <div id="subtitle" class="match-subtitle">Select a channel to start watching</div>
-      </div>
-      <div class="container">
-          <strong>Channels</strong><br><select id="channelDropdown"></select>
-      </div>
-      <div class="container telegram-container">
-          <a class="tg-button" href="https://t.me/+lkbpBqFd0FljNzJl" target="_blank">
-              <img src="https://telegram.org/img/t_logo.png" alt="Telegram Logo">
-              Join Telegram
-          </a>
-      </div>
-    <div id="ad-container" class="container"></div>
-
-
-    <style>
         /* CSS for the ad container */
         #ad-container {
             margin: 20px auto;
             text-align: center;
-            width: 95vw; /* Full width on smaller devices */
+            width: 95vw;
         }
 
         #ad-container img {
@@ -106,8 +83,8 @@
             display: inline-block;
             margin-top: 10px;
             padding: 10px 20px;
-            background-color: #ff6b6b; /* Light red */
-            color: #000; /* Black text */
+            background-color: #ff6b6b;
+            color: #000;
             text-decoration: none;
             border-radius: 5px;
             font-size: 16px;
@@ -116,18 +93,37 @@
         }
 
         #ad-container .ad-btn:hover {
-            background-color: #ff4c4c; /* Slightly darker red on hover */
+            background-color: #ff4c4c;
         }
 
         /* Media query for larger devices */
         @media (min-width: 768px) {
             #ad-container {
-                width: 75vw; /* 75% width on larger devices */
+                width: 75vw;
             }
         }
     </style>
+</head>
 
-
+<body>
+    <center>
+        <img src="https://i.ibb.co/mr3mypnF/tata-ipl-logo-png-white-by-harshmore7781-dezxlwr-pre.png" alt="IPL 2025" class="logo">
+        <div class="iframe-container" id="iframeContainer"></div>
+        <div class="container">
+            <div id="title" class="match-title">IPL Live Streaming</div>
+            <div id="subtitle" class="match-subtitle">Select a channel to start watching</div>
+        </div>
+        <div class="container">
+            <strong>Channels</strong><br><select id="channelDropdown"></select>
+        </div>
+        <div class="container telegram-container">
+            <a class="tg-button" href="https://t.me/+lkbpBqFd0FljNzJl" target="_blank">
+                <img src="https://telegram.org/img/t_logo.png" alt="Telegram Logo">
+                Join Telegram
+            </a>
+        </div>
+        <div id="ad-container" class="container"></div>
+    </center>
 
     <script>
         // Function to get the query parameter from the URL
@@ -158,102 +154,82 @@
             .catch(error => console.error('Error fetching JSON:', error));
     </script>
 
+    <script>
+        async function checkMatchAccess() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const matchId = urlParams.get("id");
 
-</center>
-      <script src="./stream.js"></script>
+            if (!matchId) {
+                window.location.href = "https://t.me/Axtream_Bingewav";
+                return;
+            }
 
-          <script src="./info.js"></script>
-<script>
-async function checkMatchAccess() {
-  // Step 1: Extract the "id" parameter from the URL.
-  const urlParams = new URLSearchParams(window.location.search);
-  const matchId = urlParams.get("id");
+            try {
+                const response = await fetch("https://binge-api.vercel.app/ipl.json");
+                const data = await response.json();
+                const match = data.matches.find(m => m.id === matchId);
+                if (!match) {
+                    window.location.href = "https://t.me/Axtream_Bingewav";
+                    return;
+                }
 
-  if (!matchId) {
-    window.location.href = "https://t.me/Axtream_Bingewav";
-    return;
-  }
+                const [day, month, year] = match.date.split("-").map(Number);
+                let matchDateIST = new Date(year, month - 1, day, 4, 0, 0);
+                matchDateIST.setDate(matchDateIST.getDate() + 1);
 
-  try {
-    // Step 2: Fetch the match data from the JSON file.
-    const response = await fetch("https://binge-api.vercel.app/ipl.json");
-    const data = await response.json();
-    const match = data.matches.find(m => m.id === matchId);
-    if (!match) {
-      window.location.href = "https://t.me/Axtream_Bingewav";
-      return;
-    }
+                let nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+                nowIST = new Date(nowIST);
 
-    // Step 3: Build the next day's cutoff time from the match date.
-    // The JSON date is in "DD-MM-YYYY". We create an IST-based Date object.
-    const [day, month, year] = match.date.split("-").map(Number);
-    
-    // Create a Date object in IST
-    let matchDateIST = new Date(year, month - 1, day, 4, 0, 0); // Next day 4:00 AM IST
+                console.log("Current IST:", nowIST);
+                console.log("Cutoff (Next Day 04:00 AM IST):", matchDateIST);
 
-    // Add 1 day to move to next day's 4:00 AM
-    matchDateIST.setDate(matchDateIST.getDate() + 1);
+                if (nowIST > matchDateIST) {
+                    window.location.href = "https://t.me/Axtream_Bingewav";
+                }
 
-    // Step 4: Get the current IST time locally
-    let nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-    nowIST = new Date(nowIST);
-
-    console.log("Current IST:", nowIST);
-    console.log("Cutoff (Next Day 04:00 AM IST):", matchDateIST);
-
-    // Step 5: Compare and redirect if the current time is beyond cutoff.
-    if (nowIST > matchDateIST) {
-      window.location.href = "https://t.me/Axtream_Bingewav";
-    }
-
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    window.location.href = "https://t.me/Axtream_Bingewav"; // Redirect in case of errors
-  }
-}
-
-checkMatchAccess();
-</script>
-
-
-  <div id="popup" class="popup">
-    <div class="popup-content">
-      <h2>Support Us!</h2>
-      <p>Join Our Telegram Channel @TEAMROHITOFFICAL45</p>
-      <button class="join-btn" onclick="window.open('https://t.me/+lkbpBqFd0FljNzJl', '_blank')">Join Now</button>
-      <button class="close-btn" onclick="closePopup()">Already Joined</button>
-    </div>
-  </div>
-
-<script>
-        // Show the alert
-        if (confirm("Join Our Telegram Channel @TEAMROHITOFFICAL45")) {
-            // Redirect to the Telegram channel if 'OK' is clicked
-            window.location.href = "https://t.me/+lkbpBqFd0FljNzJl";
-        } else {
-            // Close the alert if 'Cancel' is clicked (do nothing)
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                window.location.href = "https://t.me/Axtream_Bingewav"; 
+            }
         }
-         // Close popup function
- function closePopup() {
-    const popup = document.getElementById('popup');
-    popup.style.display = 'none';
-  }
-</script>
-<div class="container">
-<center>
-<script type="text/javascript">
-	atOptions = {
-		'key' : 'f987b8d0a45365a126993d3430a5f0e5',
-		'format' : 'iframe',
-		'height' : 60,
-		'width' : 468,
-		'params' : {}
-	};
-<script type="text/javascript" src="//www.highperformanceformat.com/f987b8d0a45365a126993d3430a5f0e5/invoke.js"></script>
-</center>
-</div>
-</script>
 
+        checkMatchAccess();
+    </script>
 
-  </body>
-  </html>
+    <div id="popup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <h2>Support Us!</h2>
+            <p>Join Our Telegram Channel @TEAMROHITOFFICAL45</p>
+            <button class="join-btn" onclick="window.open('https://t.me/+lkbpBqFd0FljNzJl', '_blank')">Join Now</button>
+            <button class="close-btn" onclick="closePopup()">Already Joined</button>
+        </div>
+    </div>
+
+    <script>
+        // Show the popup
+        document.getElementById("popup").style.display = "flex";  // Show the popup
+
+        // Close popup function
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'none';
+        }
+    </script>
+
+    <div class="container">
+        <center>
+            <script type="text/javascript">
+                var atOptions = {
+                    'key': 'f987b8d0a45365a126993d3430a5f0e5',
+                    'format': 'iframe',
+                    'height': 60,
+                    'width': 468,
+                    'params': {}
+                };
+            </script>
+            <script type="text/javascript" src="//www.highperformanceformat.com/f987b8d0a45365a126993d3430a5f0e5/invoke.js"></script>
+        </center>
+    </div>
+</body>
+
+</html>
