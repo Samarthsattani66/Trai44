@@ -1,195 +1,60 @@
-<!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="stylesheet" href="./style.css">
-      <title>Tata IPL Live</title>
-  </head>
-  <body>
-  <center>
-      <img src="https://i.ibb.co/mr3mypnF/tata-ipl-logo-png-white-by-harshmore7781-dezxlwr-pre.png" alt="IPL 2025" class="logo">
-
-<div class="container">
-<center>
-<script type="text/javascript">
- atOptions = {
-  'key' : '6f8560f0346748875f7a1562035e55dd',
-  'format' : 'iframe',
-  'height' : 60,
-  'width' : 468,
-  'params' : {}
- };
-</script>
-<script type="text/javascript" src="//www.highperformanceformat.com/6f8560f0346748875f7a1562035e55dd/invoke.js"></script>
-</center>
-</div>
-      <div class="iframe-container" id="iframeContainer"></div>
-      <div class="container">
-          <div id="title" class="match-title">IPL Live Streaming</div>
-          <div id="subtitle" class="match-subtitle">Select a channel to start watching</div>
-      </div>
-      <div class="container">
-          <strong>Channels</strong><br><select id="channelDropdown"></select>
-      </div>
-      <div class="container telegram-container">
-          <a class="tg-button" href="https://t.me/sportifylive" target="_blank">
-              <img src="https://telegram.org/img/t_logo.png" alt="Telegram Logo">
-              Join Telegram
-          </a>
-      </div>
-    <div id="ad-container" class="container"></div>
-      <div class="container match-details">
-        <h2 style="text-align: center; color: yellow;"><strong>Match Details</strong></h2>
-          <div class="flags-container">
-              <img id="team1-flag" class="flag" src="" alt="Team 1 Flag">
-              <span class="vs-text">VS</span>
-              <img id="team2-flag" class="flag" src="" alt="Team 2 Flag">
-          </div>
-          <div id="number" style="text-align: left;"></div>
-          <div id="home-team" style="text-align: left;"></div>
-          <div id="away-team" style="text-align: left;"></div>
-          <div id="venue" style="text-align: left;"></div>
-          <div id="start-time" style="text-align: left;"></div>
-      </div>
-
-
-    <style>
-        /* CSS for the ad container */
-        #ad-container {
-            margin: 20px auto;
-            text-align: center;
-            width: 95vw; /* Full width on smaller devices */
-        }
-
-        #ad-container img {
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Style for the button */
-        #ad-container .ad-btn {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #ff6b6b; /* Light red */
-            color: #000; /* Black text */
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-
-        #ad-container .ad-btn:hover {
-            background-color: #ff4c4c; /* Slightly darker red on hover */
-        }
-
-        /* Media query for larger devices */
-        @media (min-width: 768px) {
-            #ad-container {
-                width: 75vw; /* 75% width on larger devices */
-            }
-        }
-    </style>
-
-
-
-    <script>
-        // Function to get the query parameter from the URL
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
-        }
-
-        // Fetch the JSON data
-        fetch('https://raw.githubusercontent.com/sportifylive/IPL/main/ads.json')
-            .then(response => response.json())
-            .then(data => {
-                const matchId = getQueryParam('id'); // Get the 'id' parameter from the URL
-                const match = data.matches.find(match => match.id === matchId); // Find the match with the given ID
-                  if (match) {
-                    const adContainer = document.getElementById('ad-container');
-                    adContainer.innerHTML = 
-                        <a href="${match.url}" target="_blank">
-                            <img src="${match.poster}" alt="${match.team1} vs ${match.team2}">
-                        </a>
-                        <a href="https://t.me/advertisement_sportify_bot" class="ad-btn" target="_blank">Place your ad here</a>
-                    ;
-                } else {
-                    console.log('Match not found');
-                }
-            })
-            .catch(error => console.error('Error fetching JSON:', error));
-    </script>
-
-</center>
-      <script src="./stream.js"></script>
-
-          <script src="./info.js"></script>
 <script>
-async function checkMatchAccess() {
-  // Step 1: Extract the "id" parameter from the URL.
-  const urlParams = new URLSearchParams(window.location.search);
-  const matchId = urlParams.get("id");
-
-  if (!matchId) {
-    window.location.href = "https://t.me/Axtream_Bingewav";
-    return;
-  }
-
-  try {
-    // Step 2: Fetch the match data from the JSON file.
-    const response = await fetch("https://binge-api.vercel.app/ipl.json");
-    const data = await response.json();
-    const match = data.matches.find(m => m.id === matchId);
-    if (!match) {
-      window.location.href = "https://t.me/Axtream_Bingewav";
-      return;
-    }
-
-    // Step 3: Build the next day's cutoff time from the match date.
-    // The JSON date is in "DD-MM-YYYY". We create an IST-based Date object.
-    const [day, month, year] = match.date.split("-").map(Number);
-    
-    // Create a Date object in IST
-    let matchDateIST = new Date(year, month - 1, day, 4, 0, 0); // Next day 4:00 AM IST
-
-    // Add 1 day to move to next day's 4:00 AM
-    matchDateIST.setDate(matchDateIST.getDate() + 1);
-
-    // Step 4: Get the current IST time locally
-    let nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-    nowIST = new Date(nowIST);
-
-    console.log("Current IST:", nowIST);
-    console.log("Cutoff (Next Day 04:00 AM IST):", matchDateIST);
-
-    // Step 5: Compare and redirect if the current time is beyond cutoff.
-    if (nowIST > matchDateIST) {
-      window.location.href = "https://t.me/Axtream_Bingewav";
-    }
-
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    window.location.href = "https://t.me/Axtream_Bingewav"; // Redirect in case of errors
-  }
+<!-- code by https://www.html-code-generator.com -->
+document.write(unescape('<!DOCTYPE html>
+<html>
+   <head>
+      <title>USA Network</title>
+      <link rel=icon href=https://i.postimg.cc/prMQRWMR/skfav.png type=image/png sizes=250x250>
+      <meta name=viewport content='width=device-width, initial-scale=1.0'/>
+      <script src=https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.ui.min.js crossorigin=anonymous></script>
+      <link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/controls.min.css crossorigin=anonymous />
+      <style>
+  
+/* Overflow menu style */
+.shaka-overflow-menu {
+    background-color: rgb(41, 41, 163);
+    color: rgb(153, 153, 153);
 }
-
-checkMatchAccess();
-</script>
-
-<script>
-      // Show the alert
-      if (confirm("Join Our Telegram Channel @Sportifylive for updates and more")) {
-          // Redirect to the Telegram channel if 'OK' is clicked
-          window.location.href = "https://t.me/sportifylive";
-      } else {
-          // Close the alert if 'Cancel' is clicked (do nothing)
+.shaka-overflow-menu button:hover {
+    background-color: rgb(45, 45, 45);
+}
+.shaka-overflow-button-label {
+    color: rgb(245, 245, 245);
+}
+.shaka-current-selection-span {
+    color: rgb(202, 202, 202);
+}
+.material-icons-round {
+    color: rgb(230, 230, 230);
+}
+/* Overflow sub menu style */
+.shaka-settings-menu {
+    background-color: rgb(35, 35, 35);
+    color: rgb(255, 255, 255);
+}
+.shaka-settings-menu button {
+    color: rgb(255, 255, 255);
+}
+.shaka-settings-menu button:hover {
+    background-color: rgb(45, 45, 45);
+}
+      </style>
+   </head>
+   <center>
+      <body bgcolor=black style=margin:0>
+         <div data-shaka-player-container style=position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover>
+            <video autoplay muted data-shaka-player id=video poster=https://images.fubo.tv/channel-config-ui/station-logos/on-dark/willow_2023_primary-white.png style=width:100%;height:100%></video>
+   </center>
+   </div>
+   <script>async function init(){let e=document.getElementById("video"),r=e.ui,n=r.getControls(),o=n.getPlayer();o.configure({drm:{clearKeys:{"1779c27b9d077a3ba0c9cc1bb9a94b9f":"cc5cf3b7928fb9e0a1ee6a8b566f0a8e"}}}),r.configure({controlPanelElements:["play_pause","mute","volume","spacer","time_and_duration","quality","fullscreen","overflow_menu"],'volumeBarColors':{base:'rgba(63, 187, 1, 1)',level:'rgb(255, 69, 0)',},'seekBarColors':{base:'rgb(41, 41, 163)',buffered:'rgb(35, 99, 3)',played:'rgba(63, 187, 1, 1)',}}),window.player=o,window.ui=r,o.addEventListener("error",onPlayerErrorEvent),n.addEventListener("error",onUIErrorEvent);try{await o.load("https://a201aivottlinear-a.akamaihd.net/OTTB/lhr-nitro/clients/dash/enc/f60kqesunw/out/v1/a435ed7a00f947deb4369b46d8f2fb70/cenc.mpd"),console.log("The video has now been loaded!")}catch(a){onPlayerError(a)}}function onPlayerErrorEvent(e){onPlayerError(event.detail)}function onPlayerError(e){console.error("Error code",e.code,"object",e)}function onUIErrorEvent(e){onPlayerError(event.detail)}function initFailed(e){console.error("Unable to load the UI library!")}document.addEventListener("shaka-ui-loaded",init),document.addEventListener("shaka-ui-load-failed",initFailed);
+function welcome() {
+        window.open("https://t.me/+e6G48oujQuExOTg1");
       }
-</script>   
-
-  </body>
-  </html>
+        const message = "JOIN OUR TELEGRAM CHANNEL FOR MORE LIVE STREAM LINKS";
+        if (confirm(message)) {
+            window.location.href = "https://t.me/+e6G48oujQuExOTg1";
+        }
+</script>
+   </body>
+</html>'));
+   </script>
