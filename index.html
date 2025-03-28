@@ -41,7 +41,7 @@
     #player {
       width: 100%;
       height: 480px;
-      border: none; /* Removed the border */
+      border: 5px solid var(--csk-yellow); /* Initial yellow border */
       border-radius: 10px;
       box-shadow: none; /* Removed the shadow */
     }
@@ -53,6 +53,15 @@
       cursor: pointer;
       color: #fff;
       background-color: var(--current-color);
+    }
+    #remove-border-btn {
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: 2px solid #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #fff;
+      background-color: #333;
     }
     .player-images img {
       display: none;
@@ -71,6 +80,7 @@
   </div>
 
   <button id="theme-selector">Change Theme</button>
+  <button id="remove-border-btn">Remove Yellow Border</button>
 
   <div class="player-images">
     <img id="mi" src="https://i.ibb.co/21s780zd/6.png" alt="Rohit Sharma (Mumbai Indians)" class="active">
@@ -116,6 +126,7 @@
     ];
 
     const themeSelector = document.getElementById('theme-selector');
+    const removeBorderBtn = document.getElementById('remove-border-btn');
     const root = document.documentElement;
     const playerImages = document.querySelectorAll('.player-images img');
 
@@ -131,7 +142,14 @@
       currentThemeIndex = (currentThemeIndex + 1) % themes.length;
     }
 
+    function removeYellowBorder() {
+      const player = document.getElementById('player');
+      player.style.border = 'none'; // Remove the yellow border
+    }
+
     themeSelector.addEventListener('click', updateThemeAndImage);
+    removeBorderBtn.addEventListener('click', removeYellowBorder);
+
     updateThemeAndImage();
   </script>
 </body>
