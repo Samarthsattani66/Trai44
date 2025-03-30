@@ -1,156 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>TEAMROHITOFFICAL45_LIVE</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orion+Esperanto+Dika&display=swap" rel="stylesheet">
-  <script src="https://cdn.jwplayer.com/libraries/IDzF9Zmk.js"></script>
-  <style>
-    :root {
-      --mi-blue: #045093;
-      --csk-yellow: #FFD700;
-      --rcb-red: #A50C1B;
-      --kkr-purple: #3F2A56;
-      --dc-blue: #004BA0;
-      --rr-pink: #EA1C69;
-      --srh-orange: #F26522;
-      --lsg-skyblue: #87CEEB;
-      --gt-navy: #1B1F3B;
-      --current-color: var(--mi-blue);
-    }
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Orion Esperanto Dika', sans-serif;
-      background: var(--current-color);
-      height: 100%;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-    }
-    #player-container {
-      width: 100%;
-      max-width: 800px;
-      margin-top: 20px;
-    }
-    #player {
-      width: 100%;
-      height: 480px;
-      border: 5px solid var(--csk-yellow); /* Initial yellow border */
-      border-radius: 10px;
-      box-shadow: none; /* Removed the shadow */
-    }
-    #theme-selector {
-      margin-top: 20px;
-      padding: 10px 20px;
-      border: 2px solid #fff;
-      border-radius: 5px;
-      cursor: pointer;
-      color: #fff;
-      background-color: var(--current-color);
-    }
-    #remove-border-btn {
-      margin-top: 10px;
-      padding: 10px 20px;
-      border: 2px solid #fff;
-      border-radius: 5px;
-      cursor: pointer;
-      color: #fff;
-      background-color: #333;
-    }
-    .player-images img {
-      display: none;
-      margin-top: 20px;
-      max-width: 300px;
-      border-radius: 10px;
-    }
-    .player-images img.active {
-      display: block;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEAMROHITOFFICAL45_LIVE</title>
+    <link rel="icon" href="https://i.postimg.cc/prMQRWMR/skfav.png" type="image/png" sizes="250x250">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/controls.min.css" crossorigin="anonymous">
+    <style>
+        /* Overflow menu style */
+        .shaka-overflow-menu {
+            background-color: rgb(41, 41, 163);
+            color: rgb(153, 153, 153);
+        }
+        .shaka-overflow-menu button:hover {
+            background-color: rgb(45, 45, 45);
+        }
+        .shaka-overflow-button-label {
+            color: rgb(245, 245, 245);
+        }
+        .shaka-current-selection-span {
+            color: rgb(202, 202, 202);
+        }
+        .material-icons-round {
+            color: rgb(230, 230, 230);
+        }
+        /* Overflow sub menu style */
+        .shaka-settings-menu {
+            background-color: rgb(35, 35, 35);
+            color: rgb(255, 255, 255);
+        }
+        .shaka-settings-menu button {
+            color: rgb(255, 255, 255);
+        }
+        .shaka-settings-menu button:hover {
+            background-color: rgb(45, 45, 45);
+        }
+    </style>
 </head>
-<body>
-  <div id="player-container">
-    <div id="player"></div>
-  </div>
+<body style="margin:0">
+    <center>
+        <div data-shaka-player-container style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+            <video autoplay muted data-shaka-player id="video" 
+                poster="https://images.fubo.tv/channel-config-ui/station-logos/on-dark/willow_2023_primary-white.png" 
+                style="width:100%;height:100%"></video>
+        </div>
+    </center>
 
-  <button id="theme-selector">Change Theme</button>
-  <button id="remove-border-btn">Remove Yellow Border</button>
+    <script>
+        async function init() {
+            let video = document.getElementById("video");
+            let ui = video.ui;
+            let controls = ui.getControls();
+            let player = controls.getPlayer();
 
-  <div class="player-images">
-    <img id="mi" src="https://i.ibb.co/21s780zd/6.png" alt="Rohit Sharma (Mumbai Indians)" class="active">
-    <img id="csk" src="https://i.ibb.co/84Dw1rP5/57.png" alt="MS Dhoni (Chennai Super Kings)">
-    <img id="rcb" src="https://i.ibb.co/Mys3x0Tz/2.png" alt="Virat Kohli (Royal Challengers Bangalore)">
-    <img id="kkr" src="https://i.ibb.co/YBk5KTr/177.webp" alt="Andre Russell (Kolkata Knight Riders)">
-    <img id="dc" src="https://i.ibb.co/gj6nQw9/6436bbd9eab5fb001d25777e.png" alt="Axar Patel (Delhi Capitals)">
-    <img id="rr" src="https://i.ibb.co/ph8ZFff/qb-ZX65zm-At6-Rh28z-Apmgbg-HM2-SEONh-Tj-a1-D-tg-Gz-GUd-DZEeck3e96v-1s-UAKy-Ev-XTJy-YHCHkxzg8-X6-GY4.webp" alt="Sanju Samson (Rajasthan Royals)">
-    <img id="srh" src="https://i.ibb.co/Qf6WCXY/SRH-65ff0065378444-86036306s405v9hx.png" alt="Heinrich Klaasen (Sunrisers Hyderabad)">
-    <img id="lsg" src="https://i.ibb.co/BCNj0tC/63726.png" alt="Nicholas Pooran (Lucknow Super Giants)">
-    <img id="gt" src="https://i.ibb.co/bvwvs1s/66818.png" alt="Shubman Gill (Gujarat Titans)">
-  </div>
+            player.configure({
+                drm: {
+                    clearKeys: {
+                        "6016f23a660b6428d767758b52e54a72": "df006c09745771c9d820f79c667f5a8b"
+                    }
+                }
+            });
 
-  <script>
-    // Dynamic URL Parameter Extraction
-    const urlParams = new URLSearchParams(window.location.search);
-    const videoUrl = urlParams.get('videoUrl');
+            ui.configure({
+                controlPanelElements: ["play_pause", "mute", "volume", "spacer", "time_and_duration", "quality", "fullscreen", "overflow_menu"],
+                volumeBarColors: {
+                    base: 'rgba(63, 187, 1, 1)',
+                    level: 'rgb(255, 69, 0)'
+                },
+                seekBarColors: {
+                    base: 'rgb(41, 41, 163)',
+                    buffered: 'rgb(35, 99, 3)',
+                    played: 'rgba(63, 187, 1, 1)'
+                }
+            });
 
-    // Player Initialization
-    if (videoUrl) {
-      var playerInstance = jwplayer("player").setup({
-        file: videoUrl,
-        width: "100%",
-        height: "480px",
-        aspectratio: "16:9",
-        primary: "html5",
-        controls: true,
-        autostart: false,
-        stretching: "uniform"
-      });
-    }
+            window.player = player;
+            window.ui = ui;
 
-    const themes = [
-      { name: "Mumbai Indians", color: "var(--mi-blue)", imageId: "mi" },
-      { name: "Chennai Super Kings", color: "var(--csk-yellow)", imageId: "csk" },
-      { name: "Royal Challengers Bangalore", color: "var(--rcb-red)", imageId: "rcb" },
-      { name: "Kolkata Knight Riders", color: "var(--kkr-purple)", imageId: "kkr" },
-      { name: "Delhi Capitals", color: "var(--dc-blue)", imageId: "dc" },
-      { name: "Rajasthan Royals", color: "var(--rr-pink)", imageId: "rr" },
-      { name: "Sunrisers Hyderabad", color: "var(--srh-orange)", imageId: "srh" },
-      { name: "Lucknow Super Giants", color: "var(--lsg-skyblue)", imageId: "lsg" },
-      { name: "Gujarat Titans", color: "var(--gt-navy)", imageId: "gt" }
-    ];
+            player.addEventListener("error", onPlayerErrorEvent);
+            controls.addEventListener("error", onUIErrorEvent);
 
-    const themeSelector = document.getElementById('theme-selector');
-    const removeBorderBtn = document.getElementById('remove-border-btn');
-    const root = document.documentElement;
-    const playerImages = document.querySelectorAll('.player-images img');
+            try {
+                // Fixed URL (removed the line break)
+                await player.load("https://a179aivottepl-a.akamaihd.net/lhr-nitro/live/clients/dash/enc/ll8ogw2giu/out/v1/0a60e89eae5a4d92ab556fa559f4c5cd/cenc.mpd");
+                console.log("The video has now been loaded!");
+            } catch (error) {
+                onPlayerError(error);
+            }
+        }
 
-    let currentThemeIndex = 0;
+        function onPlayerErrorEvent(event) {
+            onPlayerError(event.detail);
+        }
 
-    function updateThemeAndImage() {
-      playerImages.forEach(img => img.classList.remove('active'));
+        function onPlayerError(error) {
+            console.error("Shaka Player Error:", error.message || error);
+        }
 
-      const nextTheme = themes[currentThemeIndex];
-      root.style.setProperty('--current-color', nextTheme.color);
-      document.getElementById(nextTheme.imageId).classList.add('active');
+        function onUIErrorEvent(event) {
+            onPlayerError(event.detail);
+        }
 
-      currentThemeIndex = (currentThemeIndex + 1) % themes.length;
-    }
+        function initFailed(error) {
+            console.error("Unable to load the UI library!");
+        }
 
-    function removeYellowBorder() {
-      const player = document.getElementById('player');
-      player.style.border = 'none'; // Remove the yellow border
-    }
+        function welcome() {
+            window.open("https://t.me/+e6G48oujQuExOTg1");
+        }
 
-    themeSelector.addEventListener('click', updateThemeAndImage);
-    removeBorderBtn.addEventListener('click', removeYellowBorder);
+        document.addEventListener("shaka-ui-loaded", init);
+        document.addEventListener("shaka-ui-load-failed", initFailed);
 
-    updateThemeAndImage();
-  </script>
+        // Telegram prompt
+        const message = "JOIN OUR TELEGRAM CHANNEL FOR MORE LIVE STREAM LINKS";
+        if (confirm(message)) {
+            window.location.href = "https://t.me/+e6G48oujQuExOTg1";
+        }
+    </script>
 </body>
 </html>
