@@ -1,163 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TEAMROHITOFFICIAL45 _LIVE</title>
-  <script src="https://content.jwplatform.com/libraries/KB5zFt7A.js"></script>
-  <style>
-    body {
-      margin: 0;
-    }
-
-    .jwplayer {
-      position: absolute !important;
-    }
-
-    #video-selector, #multi-cam-selector {
-      margin: 10px;
-    }
-
-    #language-switch, #multi-cam-switch, #special-button {
-      padding: 10px 20px;
-      background-color: #007bff; /* Blue color */
-      color: #fff; /* White text color */
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 10px;
-      transition: background-color 0.3s ease;
-    }
-
-    #language-switch:hover, #multi-cam-switch:hover, #special-button:hover {
-      background-color: #0056b3; /* Darker blue on hover */
-    }
-  </style>
-</head>
-<body>
-  <br>
-  <select id="video-select">
-    <option value="ENGLISH" selected>ENGLISH</option>
-    <option value="HINDI">HINDI</option>
-    <option value="HARYANWI">HARYANWI</option>
-    <option value="BHOJPURI">BHOJPURI</option>
-    <option value="TELUGU">TELUGU</option>
-    <option value="TAMIL">TAMIL</option>
-    <option value="BENGALI">BENGALI</option>
-    <option value="KANADA">KANNADA</option>
-    <option value="PUNJABI">PUNJABI</option>
-    <option value="GUJRATI">GUJRATI</option>
-    <option value="MALAYALAM">MALAYALAM</option>
-    <option value="MARATHI">MARATHI</option>
-  </select>
-
-  <button id="language-switch">Select Your Feed Here</button>
-
-  <!-- Multi-Cam Selector -->
-  <select id="multi-cam-selector">
-    <option value="BATTER_CAM">Batter Cam</option>
-    <option value="HERO_CAM">Hero Cam</option>
-    <option value="STUMP_CAM">Stump Cam</option>
-    <option value="FIELD_VIEW_CAM">Field View Cam</option>
-  </select>
-
-  <button id="multi-cam-switch">Switch Camera View</button>
-
-  <!-- Special Button -->
-  <button id="special-button">Special Button (Highlights)</button>
-
-  <div id="video"></div>
-
-  <script>
-    // Prompt for joining Telegram channel
-    if (confirm("Join Our Telegram Channel @TEAMROHITOFFICIAL45_LIVE")) {
-      window.location.href = "https://t.me/+avV8vpMfkOJmZDhl";
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-      var videoSources = {
-        "ENGLISH": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_ENG_IDC_MOB/Fallback/index.m3u8",
-        "HINDI": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8",
-        "HARYANWI": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_HAR_IDC_MOB/Fallback/index.m3u8",
-        "BHOJPURI": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_Bhoj_IDC_MOB/Fallback/index.m3u8",
-        "TELUGU": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_TEL_IDC_MOB/Fallback/index.m3u8",
-        "TAMIL": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_TAM_IDC_MOB/Fallback/index.m3u8",
-        "BENGALI": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_BEN_IDC_MOB/Fallback/index.m3u8",
-        "KANADA": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_KAN_IDC_MOB/Fallback/index.m3u8",
-        "PUNJABI": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_Punj_IDC_MOB/Fallback/index.m3u8",
-        "GUJRATI": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_Guj_IDC_MOB/Fallback/index.m3u8",
-        "MALAYALAM": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_Mal_IDC_MOB/Fallback/index.m3u8",
-        "MARATHI": "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_MAR_IDC_MOB/Fallback/index.m3u8"
-      };
-
-      // Multi-Cam Sources
-      var multiCamSources = {
-        "BATTER_CAM": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_CAM01_IDC_MOB/Fallback/index.m3u8",
-        "HERO_CAM": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_CAM02_IDC_MOB/Fallback/index.m3u8",
-        "STUMP_CAM": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_CAM03_IDC_MOB/Fallback/index.m3u8",
-        "FIELD_VIEW_CAM": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_CAM04_IDC_MOB/Fallback/index.m3u8"
-      };
-
-      // Special Highlights Video Source
-      var specialHighlightsSource = "https://prod-ent-live-cf.jiocinema.com/bpk-tv/JS_M1_IPL25_Highlights/Fallback/index.m3u8";
-
-      var playerInstance = jwplayer("video");
-
-      // Event listener for language change from the dropdown
-      document.getElementById("video-select").addEventListener("change", function() {
-        var selectedValue = this.value;
-        var videoSource = videoSources[selectedValue];
-
-        playerInstance.load([{ file: videoSource }]);
-        playerInstance.play();
-      });
-
-      // Event listener for switching to the next language on button click
-      document.getElementById("language-switch").addEventListener("click", function() {
-        var selectedValue = document.getElementById("video-select").value;
-        var currentIndex = Object.keys(videoSources).indexOf(selectedValue);
-        var nextIndex = (currentIndex + 1) % Object.keys(videoSources).length;
-        var nextLanguage = Object.keys(videoSources)[nextIndex];
-        document.getElementById("video-select").value = nextLanguage;
-
-        var videoSource = videoSources[nextLanguage];
-        playerInstance.load([{ file: videoSource }]);
-        playerInstance.play();
-      });
-
-      // Event listener for switching multi-cam views
-      document.getElementById("multi-cam-switch").addEventListener("click", function() {
-        var selectedValue = document.getElementById("multi-cam-selector").value;
-        var camSource = multiCamSources[selectedValue];
-
-        playerInstance.load([{ file: camSource }]);
-        playerInstance.play();
-      });
-
-      // Special Button functionality (Toggle Highlights feed)
-      document.getElementById("special-button").addEventListener("click", function() {
-        var currentSource = playerInstance.getPlaylistItem().file;
-        
-        if (currentSource !== specialHighlightsSource) {
-          playerInstance.load([{ file: specialHighlightsSource }]);
-          playerInstance.play();
-        } else {
-          alert("You are already viewing the highlights feed.");
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEAMROHITOFFICAL45_LIVE</title>
+    <link rel="icon" href="https://i.postimg.cc/prMQRWMR/skfav.png" type="image/png" sizes="250x250">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/controls.min.css" crossorigin="anonymous">
+    <style>
+        /* Overflow menu style */
+        .shaka-overflow-menu {
+            background-color: rgb(41, 41, 163);
+            color: rgb(153, 153, 153);
         }
-      });
+        .shaka-overflow-menu button:hover {
+            background-color: rgb(45, 45, 45);
+        }
+        .shaka-overflow-button-label {
+            color: rgb(245, 245, 245);
+        }
+        .shaka-current-selection-span {
+            color: rgb(202, 202, 202);
+        }
+        .material-icons-round {
+            color: rgb(230, 230, 230);
+        }
+        /* Overflow sub menu style */
+        .shaka-settings-menu {
+            background-color: rgb(35, 35, 35);
+            color: rgb(255, 255, 255);
+        }
+        .shaka-settings-menu button:hover {
+            background-color: rgb(45, 45, 45);
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body bgcolor="black" style="margin:0">
+    <center>
+        <div data-shaka-player-container style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover">
+            <video id="video" autoplay muted style="width:100%; height:100%" 
+                poster="https://images.fubo.tv/channel-config-ui/station-logos/on-dark/willow_2023_primary-white.png"></video>
+        </div>
+    </center>
 
-      // Set up the player with the initial language
-      var selectedValue = document.getElementById("video-select").value;
-      var videoSource = videoSources[selectedValue];
+    <script>
+        async function init() {
+            let video = document.getElementById("video");
+            let player = new shaka.Player(video);
+            let ui = new shaka.ui.Controls(video, player);
 
-      playerInstance.setup({
-        autostart: true,
-        mute: false,
-        playlist: [{ file: videoSource }]
-      });
-    });
-  </script>
+            player.configure({
+                drm: {
+                    clearKeys: {
+                        "2621df523d47739fdf58ef0ce68f4c27": "98139d5b94e8228bb1bc7e3074013a72" // Placeholder for DRM key
+                    }
+                }
+            });
 
-  <div style="background-color: #007
-      
+            ui.configure({
+                controlPanelElements: ["play_pause", "mute", "volume", "spacer", "time_and_duration", "quality", "fullscreen", "overflow_menu"],
+                volumeBarColors: {
+                    base: 'rgba(63, 187, 1, 1)',
+                    level: 'rgb(255, 69, 0)'
+                },
+                seekBarColors: {
+                    base: 'rgb(41, 41, 163)',
+                    buffered: 'rgb(35, 99, 3)',
+                    played: 'rgba(63, 187, 1, 1)'
+                }
+            });
+
+            player.addEventListener("error", onPlayerErrorEvent);
+
+            try {
+                const videoURL = "https://abgqjfuaaaaaaaamcswtescdjn66h.0eee773031d3434d8c65ff46ac9a6070.emt.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/wn4ivz5ch0/out/v1/ecce90775f6c427b8e7f98eef4157e04/cenc.mpd";
+                await player.load(videoURL);
+                console.log("The video has now been loaded!");
+                await player.play().catch(function(error) {
+                    console.error('Autoplay failed: ', error);
+                });
+
+            } catch (error) {
+                console.error("Error loading video: ", error);
+            }
+        }
+
+        function onPlayerErrorEvent(event) {
+            onPlayerError(event.detail);
+        }
+
+        function onPlayerError(error) {
+            console.error("Error code", error.code, "object", error);
+        }
+
+        function initFailed(error) {
+            console.error("Unable to load the Shaka UI library!");
+            document.body.innerHTML = "<h2>Sorry, there was an issue loading the video player. Please try again later.</h2>";
+        }
+
+        document.addEventListener("shaka-ui-loaded", init);
+        document.addEventListener("shaka-ui-load-failed", initFailed);
+
+        setTimeout(function() {
+            const message = "JOIN OUR TELEGRAM CHANNEL FOR MORE LIVE STREAM LINKS";
+            if (confirm(message)) {
+                window.location.href = "https://t.me/+e6G48oujQuExOTg1";
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
