@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>TEAMROHITOFFICAL45_LIVE</title>
-    <link rel="icon" href="https://i.postimg.cc/prMQRWMR/skfav.png" type="image/png" sizes="250x250">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVE</title>
+    <link rel="icon" href="https://i.postimg.cc/prMQRWMR/skfav.png" type="image/png" sizes="250x250">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/controls.min.css" crossorigin="anonymous">
     <style>
@@ -29,9 +30,6 @@
             background-color: rgb(35, 35, 35);
             color: rgb(255, 255, 255);
         }
-        .shaka-settings-menu button {
-            color: rgb(255, 255, 255);
-        }
         .shaka-settings-menu button:hover {
             background-color: rgb(45, 45, 45);
         }
@@ -39,28 +37,33 @@
 </head>
 <body bgcolor="black" style="margin:0">
     <center>
-        <div data-shaka-player-container style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
-            <video autoplay muted data-shaka-player id="video" 
-                poster="https://images.fubo.tv/channel-config-ui/station-logos/on-dark/willow_2023_primary-white.png" 
-                style="width:100%;height:100%"></video>
+        <div data-shaka-player-container style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover">
+            <video id="video" autoplay muted style="width:100%; height:100%" 
+                poster="https://images.fubo.tv/channel-config-ui/station-logos/on-dark/willow_2023_primary-white.png"></video>
         </div>
     </center>
 
     <script>
         async function init() {
-            let video = document.getElementById("video");
-            let ui = video.ui;
-            let controls = ui.getControls();
-            let player = controls.getPlayer();
+            // Get the video element
+            const video = document.getElementById("video");
 
+            // Initialize the Shaka Player with the video element
+            const player = new shaka.Player(video);
+
+            // Initialize UI controls
+            const ui = new shaka.ui.Controls(video, player);
+
+            // Configure the player (optional, for DRM or other settings)
             player.configure({
                 drm: {
                     clearKeys: {
-                        "2621df523d47739fdf58ef0ce68f4c27":"98139d5b94e8228bb1bc7e3074013a72" // New clear key pair
+                        "2621df523d47739fdf58ef0ce68f4c27": "98139d5b94e8228bb1bc7e3074013a72" // Example clear key for DRM
                     }
                 }
             });
 
+            // Configure the UI (controls)
             ui.configure({
                 controlPanelElements: ["play_pause", "mute", "volume", "spacer", "time_and_duration", "quality", "fullscreen", "overflow_menu"],
                 volumeBarColors: {
@@ -74,49 +77,31 @@
                 }
             });
 
-            window.player = player;
-            window.ui = ui;
+            // Event listener for errors
+            player.addEventListener("error", function(event) {
+                console.error("Player error:", event.detail);
+            });
 
-            player.addEventListener("error", onPlayerErrorEvent);
-            controls.addEventListener("error", onUIErrorEvent);
-
+            // Load the video
             try {
-                // Updated MPD URL with no line breaks
-                await player.load("https://abgqjfuaaaaaaaamcswtescdjn66h.0eee773031d3434d8c65ff46ac9a6070.emt.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/wn4ivz5ch0/out/v1/ecce90775f6c427b8e7f98eef4157e04/cenc.mpd");
+                const videoURL = "https://abgqjfuaaaaaaaamcswtescdjn66h.0eee773031d3434d8c65ff46ac9a6070.emt.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/wn4ivz5ch0/out/v1/ecce90775f6c427b8e7f98eef4157e04/cenc.mpd";
+                await player.load(videoURL);
                 console.log("The video has now been loaded!");
+
+                // Ensure autoplay starts by calling play
+                await video.play();
             } catch (error) {
-                onPlayerError(error);
+                console.error("Error loading video:", error);
             }
         }
 
-        function onPlayerErrorEvent(event) {
-            onPlayerError(event.detail);
-        }
-
-        function onPlayerError(error) {
-            console.error("Error code", error.code, "object", error);
-        }
-
-        function onUIErrorEvent(event) {
-            onPlayerError(event.detail);
-        }
-
+        // Handle Shaka UI load failure
         function initFailed(error) {
-            console.error("Unable to load the UI library!");
+            console.error("Unable to load the Shaka UI library:", error);
         }
-
-        function welcome() {
-            window.open("https://t.me/+e6G48oujQuExOTg1");
-        }
-
+        // Initialize Shaka Player and UI
         document.addEventListener("shaka-ui-loaded", init);
         document.addEventListener("shaka-ui-load-failed", initFailed);
-
-        // Telegram prompt
-        const message = "JOIN OUR TELEGRAM CHANNEL FOR MORE LIVE STREAM LINKS";
-        if (confirm(message)) {
-            window.location.href = "https://t.me/+e6G48oujQuExOTg1";
-        }
     </script>
 </body>
 </html>
