@@ -3,105 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIVE</title>
-    <link rel="icon" href="https://i.postimg.cc/prMQRWMR/skfav.png" type="image/png" sizes="250x250">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/controls.min.css" crossorigin="anonymous">
+    <title>Shaka Player ClearKey DRM Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.1.0/shaka-player.compiled.js"></script>
     <style>
-        /* Overflow menu style */
-        .shaka-overflow-menu {
-            background-color: rgb(41, 41, 163);
-            color: rgb(153, 153, 153);
+        body {
+            margin: 0;
+            padding: 0;
         }
-        .shaka-overflow-menu button:hover {
-            background-color: rgb(45, 45, 45);
-        }
-        .shaka-overflow-button-label {
-            color: rgb(245, 245, 245);
-        }
-        .shaka-current-selection-span {
-            color: rgb(202, 202, 202);
-        }
-        .material-icons-round {
-            color: rgb(230, 230, 230);
-        }
-        /* Overflow sub menu style */
-        .shaka-settings-menu {
-            background-color: rgb(35, 35, 35);
-            color: rgb(255, 255, 255);
-        }
-        .shaka-settings-menu button:hover {
-            background-color: rgb(45, 45, 45);
+        #video {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
-<body bgcolor="black" style="margin:0">
-    <center>
-        <div data-shaka-player-container style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover">
-            <video id="video" autoplay muted style="width:100%; height:100%" 
-                poster="https://images.fubo.tv/channel-config-ui/station-logos/on-dark/willow_2023_primary-white.png"></video>
-        </div>
-    </center>
+<body>
 
-    <script>
-        async function init() {
-            // Get the video element
-            const video = document.getElementById("video");
+<video id="video" controls></video>
 
-            // Initialize the Shaka Player with the video element
-            const player = new shaka.Player(video);
+<script>
+    // Shaka Player initialization
+    function initApp() {
+        const video = document.getElementById('video');
 
-            // Initialize UI controls
-            const ui = new shaka.ui.Controls(video, player);
+        // MPD URL with the encrypted content
+        const manifestUri = "https://abgqjfuaaaaaaaamcswtescdjn66h.0eee773031d3434d8c65ff46ac9a6070.emt.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/wn4ivz5ch0/out/v1/ecce90775f6c427b8e7f98eef4157e04/cenc.mpd";
 
-            // Configure the player (optional, for DRM or other settings)
-            player.configure({
-                drm: {
-                    clearKeys: {
-                        "2621df523d47739fdf58ef0ce68f4c27": "98139d5b94e8228bb1bc7e3074013a72" // Example clear key for DRM
-                    }
-                }
-            });
-
-            // Configure the UI (controls)
-            ui.configure({
-                controlPanelElements: ["play_pause", "mute", "volume", "spacer", "time_and_duration", "quality", "fullscreen", "overflow_menu"],
-                volumeBarColors: {
-                    base: 'rgba(63, 187, 1, 1)',
-                    level: 'rgb(255, 69, 0)'
-                },
-                seekBarColors: {
-                    base: 'rgb(41, 41, 163)',
-                    buffered: 'rgb(35, 99, 3)',
-                    played: 'rgba(63, 187, 1, 1)'
-                }
-            });
-
-            // Event listener for errors
-            player.addEventListener("error", function(event) {
-                console.error("Player error:", event.detail);
-            });
-
-            // Load the video
-            try {
-                const videoURL = "https://abgqjfuaaaaaaaamcswtescdjn66h.0eee773031d3434d8c65ff46ac9a6070.emt.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/wn4ivz5ch0/out/v1/ecce90775f6c427b8e7f98eef4157e04/cenc.mpd";
-                await player.load(videoURL);
-                console.log("The video has now been loaded!");
-
-                // Ensure autoplay starts by calling play
-                await video.play();
-            } catch (error) {
-                console.error("Error loading video:", error);
+        // Define the ClearKey DRM key (replace it with your actual key)
+        const clearKey = {
+            'keySystem': 'com.widevine.alpha',
+            'licenseUri': '',
+            'getLicenseFunction': function() {
+                return Promise.resolve(new ArrayBuffer(0));
+            },
+            'clearKeys': {
+                'cenc': '2621df523d47739fdf58ef0ce68f4c27:98139d5b94e8228bb1bc7e3074013a72'
             }
-        }
+        };
 
-        // Handle Shaka UI load failure
-        function initFailed(error) {
-            console.error("Unable to load the Shaka UI library:", error);
-        }
-        // Initialize Shaka Player and UI
-        document.addEventListener("shaka-ui-loaded", init);
-        document.addEventListener("shaka-ui-load-failed", initFailed);
-    </script>
+        // Create the Shaka Player
+        const player = new shaka.Player(video);
+
+        // Attach the player to the video element
+        player.configure({
+            drm: {
+                clearKeys: clearKey.clearKeys // Setting the ClearKey for decryption
+            }
+        });
+
+        // Load the manifest and start playback
+        player.load(manifestUri).then(function() {
+            console.log('The video has been successfully loaded!');
+        }).catch(function(error) {
+            console.error('Error loading the video: ', error);
+        });
+    }
+
+    // Wait for the Shaka Player to initialize and then call initApp
+    if (shaka.Player.isBrowserSupported()) {
+        initApp();
+    } else {
+        console.error('Browser not supported!');
+    }
+</script>
+
 </body>
 </html>
