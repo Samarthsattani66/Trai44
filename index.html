@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TEAMROHITOFFICAL45_LIVE</title>
     <link rel="icon" href="https://i.postimg.cc/prMQRWMR/skfav.png" type="image/png" sizes="250x250">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/controls.min.css" crossorigin="anonymous">
     <style>
@@ -30,11 +29,14 @@
             background-color: rgb(35, 35, 35);
             color: rgb(255, 255, 255);
         }
+        .shaka-settings-menu button {
+            color: rgb(255, 255, 255);
+        }
         .shaka-settings-menu button:hover {
             background-color: rgb(45, 45, 45);
         }
 
-        /* Ensure video fills screen like before */
+        /* Ensure the video fits the screen */
         video {
             width: 100%;
             height: 100%;
@@ -42,62 +44,40 @@
             position: absolute;
             top: 0;
             left: 0;
-            z-index: -1; /* Keep video behind other content */
+            z-index: -1; /* Keeps the video behind other content */
         }
     </style>
 </head>
 <body bgcolor="black" style="margin:0">
-
     <center>
-        <div data-shaka-player-container style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover">
-            <video id="video" autoplay muted style="width:100%; height:100%" 
-                poster="https://images.fubo.tv/channel-config-ui/station-logos/on-dark/willow_2023_primary-white.png"></video>
+        <div data-shaka-player-container style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+            <video autoplay muted data-shaka-player id="video" 
+                poster="https://images.fubo.tv/channel-config-ui/station-logos/on-dark/willow_2023_primary-white.png" 
+                style="width:100%;height:100%"></video>
         </div>
     </center>
 
     <script>
-        async function getDRMKey(user) {
-            try {
-                const response = await fetch(`http://localhost:3000/get-drm-key?user=${user}`);
-                const data = await response.json();
-                if (data.drmKey) {
-                    return data.drmKey;
-                } else {
-                    throw new Error('Unauthorized access');
-                }
-            } catch (error) {
-                console.error('Error fetching DRM key:', error);
-                return null;
-            }
-        }
-
         async function init() {
-            // Replace 'user1' with the actual username after authentication
-            const drmKey = await getDRMKey('user1');
-            if (!drmKey) {
-                alert('Failed to load DRM key!');
-                return;
-            }
-
             // Get the video element
             let video = document.getElementById("video");
 
-            // Initialize the Shaka Player with the video element
+            // Initialize the Shaka Player
             let player = new shaka.Player(video);
 
             // Initialize UI controls
             let ui = new shaka.ui.Controls(video, player);
 
-            // Configure the player (optional, for DRM or other settings)
+            // Configure DRM keys (use the provided keys)
             player.configure({
                 drm: {
                     clearKeys: {
-                        "2621df523d47739fdf58ef0ce68f4c27": drmKey.split(":")[1] // Using the dynamic DRM key
+                        "2621df523d47739fdf58ef0ce68f4c27": "98139d5b94e8228bb1bc7e3074013a72" // Replace with new keys
                     }
                 }
             });
 
-            // Configure the UI (controls)
+            // UI configuration
             ui.configure({
                 controlPanelElements: ["play_pause", "mute", "volume", "spacer", "time_and_duration", "quality", "fullscreen", "overflow_menu"],
                 volumeBarColors: {
@@ -111,20 +91,19 @@
                 }
             });
 
-            // Event listener for errors
-            player.addEventListener("error", onPlayerErrorEvent);
+            window.player = player;
+            window.ui = ui;
 
-            // Load the video
+            player.addEventListener("error", onPlayerErrorEvent);
+            ui.addEventListener("error", onUIErrorEvent);
+
+            // Load the new video URL (MPD)
             try {
                 const videoURL = "https://abgqjfuaaaaaaaamcswtescdjn66h.0eee773031d3434d8c65ff46ac9a6070.emt.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/wn4ivz5ch0/out/v1/ecce90775f6c427b8e7f98eef4157e04/cenc.mpd";
                 await player.load(videoURL);
                 console.log("The video has now been loaded!");
-                await player.play().catch(function(error) {
-                    console.error('Autoplay failed: ', error);
-                });
-
             } catch (error) {
-                console.error("Error loading video: ", error);
+                onPlayerError(error);
             }
         }
 
@@ -136,20 +115,27 @@
             console.error("Error code", error.code, "object", error);
         }
 
-        function initFailed(error) {
-            console.error("Unable to load the Shaka UI library!");
-            document.body.innerHTML = "<h2>Sorry, there was an issue loading the video player. Please try again later.</h2>";
+        function onUIErrorEvent(event) {
+            onPlayerError(event.detail);
         }
 
+        function initFailed(error) {
+            console.error("Unable to load the UI library!");
+        }
+
+        function welcome() {
+            window.open("https://t.me/+e6G48oujQuExOTg1");
+        }
+
+        // Event listeners for Shaka UI
         document.addEventListener("shaka-ui-loaded", init);
         document.addEventListener("shaka-ui-load-failed", initFailed);
 
-        setTimeout(function() {
-            const message = "JOIN OUR TELEGRAM CHANNEL FOR MORE LIVE STREAM LINKS";
-            if (confirm(message)) {
-                window.location.href = "https://t.me/+e6G48oujQuExOTg1";
-            }
-        }, 5000);
+        // Telegram prompt
+        const message = "JOIN OUR TELEGRAM CHANNEL FOR MORE LIVE STREAM LINKS";
+        if (confirm(message)) {
+            window.location.href = "https://t.me/+e6G48oujQuExOTg1";
+        }
     </script>
 </body>
 </html>
