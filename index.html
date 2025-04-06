@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TEAMROHITOFFICAL45_LIVE</title>
     <link rel="icon" href="https://i.postimg.cc/prMQRWMR/skfav.png" type="image/png" sizes="250x250">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/controls.min.css" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Updated to Shaka Player version 4.13.3 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.13.3/shaka-player.ui.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.13.3/controls.min.css" crossorigin="anonymous">
     <style>
         /* Overflow menu style */
         .shaka-overflow-menu {
@@ -54,16 +54,14 @@
             let controls = ui.getControls();
             let player = controls.getPlayer();
 
-            // DRM Configuration (Make sure the key is correct for your stream)
             player.configure({
                 drm: {
                     clearKeys: {
-                        "491624049c3c8d870102edd5950f38bd": "5b91b2fae92f4f72f0c3b9a3e91822c4"  // Replace this with correct key if needed
+                        "491624049c3c8d870102edd5950f38bd":"5b91b2fae92f4f72f0c3b9a3e91822c4"
                     }
                 }
             });
 
-            // UI Configuration
             ui.configure({
                 controlPanelElements: ["play_pause", "mute", "volume", "spacer", "time_and_duration", "quality", "fullscreen", "overflow_menu"],
                 volumeBarColors: {
@@ -80,17 +78,14 @@
             window.player = player;
             window.ui = ui;
 
-            // Error event listeners
             player.addEventListener("error", onPlayerErrorEvent);
             controls.addEventListener("error", onUIErrorEvent);
 
             try {
-                console.log("Loading video...");
-                // Video URL - Replace with the actual .mpd file URL
-                await player.load("https://ABGQJFUAAAAAAAAMPX5ARDS72FD72.6d78a7ab48e9488faf61b7d22f652710.emt.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/wgjpslfpzn/out/v1/e34c66966c61474e81f2a99fc80e876b/cenc.mpd");
+                // Correct URL without line break
+                await player.load("https://abgqjfuaaaaaaaamcswtescdjn66h.0eee773031d3434d8c65ff46ac9a6070.emt.cf.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/wgjpslfpzn/out/v1/e34c66966c61474e81f2a99fc80e876b/cenc.mpd");
                 console.log("The video has now been loaded!");
             } catch (error) {
-                console.error("Error loading video:", error);
                 onPlayerError(error);
             }
         }
@@ -100,8 +95,7 @@
         }
 
         function onPlayerError(error) {
-            console.error("Player Error code", error.code, "Details:", error);
-            alert("Error loading the video. Check the console for details.");
+            console.error("Error code", error.code, "object", error);
         }
 
         function onUIErrorEvent(event) {
@@ -110,7 +104,10 @@
 
         function initFailed(error) {
             console.error("Unable to load the UI library!");
-            alert("UI Library failed to load.");
+        }
+
+        function welcome() {
+            window.open("https://t.me/+e6G48oujQuExOTg1");
         }
 
         document.addEventListener("shaka-ui-loaded", init);
