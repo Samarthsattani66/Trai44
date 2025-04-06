@@ -4,7 +4,6 @@
     <title>TEAMROHITOFFICAL45_LIVE</title>
     <link rel="icon" href="https://i.postimg.cc/prMQRWMR/skfav.png" type="image/png" sizes="250x250">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Updated to Shaka Player version 4.13.3 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.13.3/shaka-player.ui.min.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.13.3/controls.min.css" crossorigin="anonymous">
     <style>
@@ -36,6 +35,24 @@
         .shaka-settings-menu button:hover {
             background-color: rgb(45, 45, 45);
         }
+        /* PiP Button */
+        #pipButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        /* Captions Button */
+        #captionsButton {
+            position: absolute;
+            top: 10px;
+            right: 50px;
+        }
+        /* Error Display */
+        #errorDisplay {
+            color: red;
+            font-size: 18px;
+            display: none;
+        }
     </style>
 </head>
 <body bgcolor="black" style="margin:0">
@@ -46,6 +63,11 @@
                 style="width:100%;height:100%"></video>
         </div>
     </center>
+
+    <!-- PiP and Captions Buttons -->
+    <button id="pipButton">Toggle PiP</button>
+    <button id="captionsButton">Toggle Captions</button>
+    <div id="errorDisplay">Error loading video. Please try again later.</div>
 
     <script>
         async function init() {
@@ -63,7 +85,7 @@
             });
 
             ui.configure({
-                controlPanelElements: ["play_pause", "mute", "volume", "spacer", "time_and_duration", "quality", "fullscreen", "overflow_menu"],
+                controlPanelElements: ["play_pause", "mute", "volume", "spacer", "time_and_duration", "quality", "fullscreen", "overflow_menu", "captions"],
                 volumeBarColors: {
                     base: 'rgba(63, 187, 1, 1)',
                     level: 'rgb(255, 69, 0)'
@@ -82,12 +104,38 @@
             controls.addEventListener("error", onUIErrorEvent);
 
             try {
-                // Correct URL without line break
                 await player.load("https://abgqjfuaaaaaaaamcswtescdjn66h.0eee773031d3434d8c65ff46ac9a6070.emt.cf.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/wgjpslfpzn/out/v1/e34c66966c61474e81f2a99fc80e876b/cenc.mpd");
                 console.log("The video has now been loaded!");
             } catch (error) {
                 onPlayerError(error);
             }
+
+            // PiP button functionality
+            if (video.requestPictureInPicture) {
+                document.getElementById('pipButton').addEventListener('click', () => {
+                    if (document.pictureInPictureElement) {
+                        document.exitPictureInPicture();
+                    } else {
+                        video.requestPictureInPicture();
+                    }
+                });
+            }
+
+            // Enable captions by default (if available)
+            let textTracks = player.getTextTracks();
+            if (textTracks.length > 0) {
+                player.selectTextTrack(textTracks[0]);
+            }
+
+            // Captions toggle functionality
+            document.getElementById('captionsButton').addEventListener('click', () => {
+                const currentTrack = player.getTextTracks().find(track => track.mode === 'showing');
+                if (currentTrack) {
+                    player.selectTextTrack(currentTrack);
+                } else {
+                    player.selectTextTrack(player.getTextTracks()[0]);
+                }
+            });
         }
 
         function onPlayerErrorEvent(event) {
@@ -96,6 +144,7 @@
 
         function onPlayerError(error) {
             console.error("Error code", error.code, "object", error);
+            document.getElementById("errorDisplay").style.display = "block";
         }
 
         function onUIErrorEvent(event) {
