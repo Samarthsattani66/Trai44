@@ -124,23 +124,23 @@
 
         #popup-content {
             background: #fff;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
+            max-width: 350px;
             width: 80%;
         }
 
         #popup-content h2 {
-            font-size: 24px;
-            margin-bottom: 20px;
+            font-size: 20px;
+            margin-bottom: 15px;
             color: #333;
         }
 
         #popup-content p {
             color: #666;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         #popup-content a {
@@ -158,11 +158,11 @@
 
         #close-popup {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 5px;
+            right: 5px;
             color: #999;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 22px;
         }
     </style>
 </head>
@@ -256,11 +256,13 @@
                         default: s[0],
                         options: s,
                         forced: !0,
-                        onChange: e => (function (e) {
+                        onChange: e => {
                             window.hls.levels.forEach((n, o) => {
-                                n.height === e && (window.hls.currentLevel = o)
-                            })
-                        })(e)
+                                if (n.height === e) {
+                                    window.hls.currentLevel = o;
+                                }
+                            });
+                        }
                     };
                     new Plyr(e, o);
                 });
