@@ -156,14 +156,30 @@
             background-color: #006fa1;
         }
 
-        #close-popup {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            color: #999;
+        /* Close button and Join Now button */
+        #close-popup, #join-now {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #ff3333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 22px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
         }
+
+        #close-popup:hover, #join-now:hover {
+            background-color: #cc0000;
+        }
+
+        /* Align buttons side by side */
+        .popup-buttons {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -171,7 +187,7 @@
     <!-- Loading screen -->
     <div class="loading" id="loading">
         <div class="loading-text">
-            <span>L</span><span>O</span><span>A</span><span>D</span><span>I</span><span>N</span><span>G</span>
+            <span>T</span><span>E</span><span>A</span><span>M</span><span>R</span><span>O</span><span>H</span><span>I</span><span>T</span><span>O</span><span>F</span><span>F</span><span>I</span><span>C</span><span>A</span><span>L</span><span>4</span><span>5</span>
         </div>
     </div>
 
@@ -179,16 +195,15 @@
         <source id="m3u8-url" src="" type="application/x-mpegURL">
     </video>
 
-    <!-- Fallback poster image -->
-    <img id="fallback-poster" src="https://example.com/fallback-poster.jpg" alt="Fallback Poster" style="display:none;">
-
     <!-- Telegram Join Pop-up -->
     <div id="telegram-popup">
         <div id="popup-content">
-            <span id="close-popup">×</span>
             <h2>Join Our Telegram Channel for Free Live Links!</h2>
             <p>Get access to all the free live streams and more. Click below to join:</p>
-            <a href="https://t.me/+lkbpBqFd0FljNzJl" target="_blank">Join Now</a>
+            <div class="popup-buttons">
+                <a id="join-now" href="https://t.me/+lkbpBqFd0FljNzJl" target="_blank">Join Now</a>
+                <button id="close-popup">Close</button>
+            </div>
         </div>
     </div>
 
@@ -234,17 +249,16 @@
             video.setAttribute('poster', 'https://example.com/fallback-poster.jpg'); // Fallback image
         };
 
-        img.src = posterURL; // Set the image source to check if the poster URL is valid
+        img.src = posterURL; // Set the image source to check if the poster is valid
 
-        // Set the poster for the video
+        // Set the valid poster
         video.setAttribute('poster', posterURL);
 
-        // Plyr and HLS.js setup
+        // Plyr setup with HLS.js for live streaming
         document.addEventListener("DOMContentLoaded", () => {
             const e = document.querySelector("video"),
                 n = e.getElementsByTagName("source")[0].src,
                 o = {};
-            
             if (Hls.isSupported()) {
                 var config = {
                     maxMaxBufferLength: 100,
@@ -273,5 +287,6 @@
             }
         });
     </script>
+
 </body>
 </html>
