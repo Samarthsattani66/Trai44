@@ -107,6 +107,63 @@
             background: url('') no-repeat;
             background-size: 100px, auto, auto;
         }
+
+        /* Popup styles */
+        #telegram-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #popup-content {
+            background: #fff;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 80%;
+        }
+
+        #popup-content h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        #popup-content p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        #popup-content a {
+            background-color: #0088cc;
+            color: #fff;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        #popup-content a:hover {
+            background-color: #006fa1;
+        }
+
+        #close-popup {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #999;
+            cursor: pointer;
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
@@ -125,7 +182,22 @@
     <!-- Fallback poster image -->
     <img id="fallback-poster" src="https://example.com/fallback-poster.jpg" alt="Fallback Poster" style="display:none;">
 
+    <!-- Telegram Join Pop-up -->
+    <div id="telegram-popup">
+        <div id="popup-content">
+            <span id="close-popup">×</span>
+            <h2>Join Our Telegram Channel for Free Live Links!</h2>
+            <p>Get access to all the free live streams and more. Click below to join:</p>
+            <a href="https://t.me/+lkbpBqFd0FljNzJl" target="_blank">Join Now</a>
+        </div>
+    </div>
+
     <script>
+        // Close the popup when the close button is clicked
+        document.getElementById('close-popup').addEventListener('click', function() {
+            document.getElementById('telegram-popup').style.display = 'none';
+        });
+
         // Check for 'id' parameter in the URL
         var urlParams = new URLSearchParams(window.location.search),
             maxvalue = urlParams.get("id");
