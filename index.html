@@ -130,13 +130,9 @@
         var urlParams = new URLSearchParams(window.location.search),
             maxvalue = urlParams.get("id");
 
-        // Validate the URL parameter for video source
+        // If the URL parameter is available, set the video source
         if (maxvalue && maxvalue.trim() !== "") {
             document.getElementById("m3u8-url").setAttribute("src", maxvalue);
-        } else {
-            console.error("No video source provided!");
-            // Optionally, show an error or hide the player
-            alert("Video source not provided!");
         }
 
         // Function to hide loading screen after the video is ready
