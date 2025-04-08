@@ -20,6 +20,27 @@
             background: #000;
             margin: 0;
             padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+        }
+
+        /* Center the video player */
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .loading {
@@ -91,35 +112,24 @@
             0% {
                 filter: blur(0px);
             }
+
             100% {
                 filter: blur(4px);
             }
-        }
-
-        .plyr__video-wrapper::after {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            z-index: 10;
-            content: '';
-            height: 50px;
-            width: 100px;
-            background: url('') no-repeat;
-            background-size: 100px, auto, auto;
         }
 
         /* Smaller Telegram button styling */
         .telegram-button {
             display: block;
             margin: 20px auto;
-            padding: 6px 10px;  /* Even smaller padding */
+            padding: 6px 10px;
             background-color: #0088cc;
             color: #fff;
             text-align: center;
-            font-size: 14px;  /* Even smaller font size */
+            font-size: 14px;
             text-decoration: none;
             border-radius: 5px;
-            width: 140px;  /* Smaller width */
+            width: 140px;
             transition: background-color 0.3s ease;
         }
 
@@ -129,7 +139,6 @@
     </style>
 </head>
 <body>
-
     <!-- Loading screen -->
     <div class="loading" id="loading">
         <div class="loading-text">
@@ -137,10 +146,12 @@
         </div>
     </div>
 
-    <!-- Video Player -->
-    <video id="player" autoplay controls crossorigin playsinline style="--plyr-color-main:#15b4ff">
-        <source id="m3u8-url" src="" type="application/x-mpegURL">
-    </video>
+    <!-- Centered video player -->
+    <div class="video-container">
+        <video id="player" autoplay controls crossorigin playsinline style="--plyr-color-main:#15b4ff">
+            <source id="m3u8-url" src="" type="application/x-mpegURL">
+        </video>
+    </div>
 
     <!-- Telegram Channel Button -->
     <a href="https://t.me/+lkbpBqFd0FljNzJl" class="telegram-button" target="_blank">
