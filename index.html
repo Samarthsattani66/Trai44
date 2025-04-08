@@ -36,10 +36,9 @@
             height: 100%;
             background: #000;
             z-index: 9999;
-            display: none; /* Hide by default */
+            display: flex;
             justify-content: center;
             align-items: center;
-            display: flex;
         }
 
         .loading-text {
@@ -48,13 +47,17 @@
             color: #00b3ff;
         }
 
-        /* Centering the video player */
+        /* Player styling */
         .plyr__video-wrapper {
             position: relative;
-            display: block;
+            width: 100%;
             max-width: 100%;
-            max-height: 100%;
             margin: 0 auto;
+        }
+
+        video {
+            width: 100%; /* Keep video width at 100% */
+            height: 100%; /* Keep video height at 100% */
         }
 
         /* Poster Image Style */
@@ -70,6 +73,11 @@
             bottom: 0;
             z-index: 1;
             opacity: 0.8;
+        }
+
+        /* Hides the error message */
+        .plyr__error {
+            display: none !important;
         }
     </style>
 </head>
