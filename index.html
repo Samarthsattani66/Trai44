@@ -18,7 +18,16 @@
             background: #000;
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
+
+        body {
+            margin: 0;
+        }
+
         .loading {
             position: fixed;
             top: 0;
@@ -28,47 +37,46 @@
             background: #000;
             z-index: 9999;
             display: none; /* Hide by default */
-        }
-        .loading-text {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-            text-align: center;
-            width: 100%;
-            height: 100px;
-            line-height: 100px;
-        }
-        .loading-text span {
-            display: inline-block;
-            margin: 0 5px;
-            color: #00b3ff;
-            font-family: 'Quattrocento Sans', sans-serif;
-        }
-        .plyr__video-wrapper::after {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            z-index: 10;
-            content: '';
-            height: 50px;
-            width: 100px;
-            background: url('') no-repeat;
-            background-size: 100px, auto, auto;
+            justify-content: center;
+            align-items: center;
+            display: flex;
         }
 
-        /* Hide the error message */
-        .plyr__error {
-            display: none !important;  /* Hides the error message */
+        .loading-text {
+            text-align: center;
+            font-size: 24px;
+            color: #00b3ff;
+        }
+
+        /* Centering the video player */
+        .plyr__video-wrapper {
+            position: relative;
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            margin: 0 auto;
+        }
+
+        /* Poster Image Style */
+        .plyr__video-wrapper::before {
+            content: "";
+            background-image: url('https://i.postimg.cc/Y0918Y71/IMG-20240810-011453-139.jpg');
+            background-size: cover;
+            background-position: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
     <div id="loading" class="loading">
         <div class="loading-text">
-            <span>L</span><span>O</span><span>A</span><span>D</span><span>I</span><span>N</span><span>G</span>
+            Loading...
         </div>
     </div>
 
@@ -90,16 +98,6 @@
 
             // Initialize Plyr with options
             const player = new Plyr(videoElement, playerOptions);
-
-            // Handle errors
-            videoElement.addEventListener('error', function (event) {
-                // Hide the error message if there's an issue
-                const errorMessage = document.querySelector('.plyr__error');
-                if (errorMessage) {
-                    errorMessage.style.display = 'none';
-                }
-                console.error("Error loading the video:", event);
-            });
 
             var urlParams = new URLSearchParams(window.location.search),
                 maxvalue = urlParams.get("id");
@@ -139,6 +137,14 @@
             } else {
                 new Plyr(videoElement, playerOptions);
             }
+
+            // Disable all error messages from showing in the player UI
+            videoElement.addEventListener('error', function () {
+                const errorMessage = document.querySelector('.plyr__error');
+                if (errorMessage) {
+                    errorMessage.style.display = 'none';  // Hides any error message element
+                }
+            });
         });
     </script>
 </body>
