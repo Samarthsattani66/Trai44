@@ -15,11 +15,29 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 
     <style>
+        /* Base styles */
         html {
             font-family: Poppins;
-            background: #000;
             margin: 0;
             padding: 0;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Dark theme styles */
+        body.dark-theme {
+            background: #1e1e1e;
+            color: #fff;
+        }
+
+        /* Light theme styles */
+        body.light-theme {
+            background: #fff;
+            color: #000;
         }
 
         .loading {
@@ -52,50 +70,7 @@
             font-family: 'Quattrocento Sans', sans-serif;
         }
 
-        .loading-text span:nth-child(1) {
-            filter: blur(0px);
-            animation: blur-text 1.5s 0s infinite linear alternate;
-        }
-
-        .loading-text span:nth-child(2) {
-            filter: blur(0px);
-            animation: blur-text 1.5s 0.2s infinite linear alternate;
-        }
-
-        .loading-text span:nth-child(3) {
-            filter: blur(0px);
-            animation: blur-text 1.5s 0.4s infinite linear alternate;
-        }
-
-        .loading-text span:nth-child(4) {
-            filter: blur(0px);
-            animation: blur-text 1.5s 0.6s infinite linear alternate;
-        }
-
-        .loading-text span:nth-child(5) {
-            filter: blur(0px);
-            animation: blur-text 1.5s 0.8s infinite linear alternate;
-        }
-
-        .loading-text span:nth-child(6) {
-            filter: blur(0px);
-            animation: blur-text 1.5s 1s infinite linear alternate;
-        }
-
-        .loading-text span:nth-child(7) {
-            filter: blur(0px);
-            animation: blur-text 1.5s 1.2s infinite linear alternate;
-        }
-
-        @keyframes blur-text {
-            0% {
-                filter: blur(0px);
-            }
-            100% {
-                filter: blur(4px);
-            }
-        }
-
+        /* Plyr video wrapper custom styling */
         .plyr__video-wrapper::after {
             position: absolute;
             top: 15px;
@@ -112,23 +87,47 @@
         .telegram-button {
             display: block;
             margin: 20px auto;
-            padding: 6px 10px;  /* Even smaller padding */
+            padding: 6px 10px;  
             background-color: #0088cc;
             color: #fff;
             text-align: center;
-            font-size: 14px;  /* Even smaller font size */
+            font-size: 14px;  
             text-decoration: none;
             border-radius: 5px;
-            width: 140px;  /* Smaller width */
+            width: 140px;  
             transition: background-color 0.3s ease;
         }
 
         .telegram-button:hover {
             background-color: #006a99;
         }
+
+        /* Theme toggle button */
+        .theme-toggle-button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px 15px;
+            background-color: #333;
+            color: #fff;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 999;
+        }
+
+        .theme-toggle-button.light-theme {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .theme-toggle-button:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
-<body>
+<body class="dark-theme">
 
     <!-- Loading screen -->
     <div class="loading" id="loading">
@@ -146,6 +145,9 @@
     <a href="https://t.me/+lkbpBqFd0FljNzJl" class="telegram-button" target="_blank">
         Join Our Telegram Channel
     </a>
+
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle-button" onclick="toggleTheme()">Toggle Theme</button>
 
     <script>
         // Check for 'id' parameter in the URL
@@ -221,6 +223,21 @@
                 new Plyr(e, o);
             }
         });
+
+        // Toggle Theme function
+        function toggleTheme() {
+            const body = document.body;
+            const button = document.querySelector('.theme-toggle-button');
+            body.classList.toggle('dark-theme');
+            body.classList.toggle('light-theme');
+
+            // Toggle button styles
+            if (body.classList.contains('dark-theme')) {
+                button.classList.remove('light-theme');
+            } else {
+                button.classList.add('light-theme');
+            }
+        }
     </script>
 
 </body>
