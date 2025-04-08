@@ -1,31 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEAMROHITOFFICAL45_LIVE</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="description" content="ENJOY FREE LIVE">
     <meta name="keywords" content="JIOTV, LIVETV, SPORTS, MOVIES, MUSIC">
     <meta name="author" content="unknown">
-    <title>TEAMROHITOFFICAL45_LIVE</title>
-    <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <video autoplay controls crossorigin poster="https://i.postimg.cc/Y0918Y71/IMG-20240810-011453-139.jpg" playsinline style="--plyr-color-main:#15b4ff">
+        <source id="m3u8-url" src="" type="application/x-mpegURL">
+    </video>
+
+    <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet"></link>
     <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+
     <style>
-        /* Custom Styles */
         html {
             font-family: Poppins;
             background: #000;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        body {
-            margin: 0;
         }
 
         .loading {
@@ -36,124 +32,149 @@
             height: 100%;
             background: #000;
             z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         .loading-text {
-            text-align: center;
-            font-size: 24px;
-            color: #00b3ff;
-        }
-
-        /* Player styling */
-        .plyr__video-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 100%;
-            margin: 0 auto;
-        }
-
-        video {
-            width: 100%; /* Keep video width at 100% */
-            height: 100%; /* Keep video height at 100% */
-        }
-
-        /* Poster Image Style */
-        .plyr__video-wrapper::before {
-            content: "";
-            background-image: url('https://i.postimg.cc/Y0918Y71/IMG-20240810-011453-139.jpg');
-            background-size: cover;
-            background-position: center;
             position: absolute;
             top: 0;
+            bottom: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            z-index: 1;
-            opacity: 0.8;
+            margin: auto;
+            text-align: center;
+            width: 100%;
+            height: 100px;
+            line-height: 100px;
         }
 
-        /* Hides the error message */
-        .plyr__error {
-            display: none !important;
+        .loading-text span {
+            display: inline-block;
+            margin: 0 5px;
+            color: #00b3ff;
+            font-family: 'Quattrocento Sans', sans-serif;
+        }
+
+        .loading-text span:nth-child(1) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 0s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(2) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 0.2s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(3) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 0.4s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(4) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 0.6s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(5) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 0.8s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(6) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 1s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(7) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 1.2s infinite linear alternate;
+        }
+
+        @keyframes blur-text {
+            0% {
+                filter: blur(0px);
+            }
+
+            100% {
+                filter: blur(4px);
+            }
+        }
+
+        .plyr__video-wrapper::after {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 10;
+            content: '';
+            height: 50px;
+            width: 100px;
+            background: url('') no-repeat;
+            background-size: 100px, auto, auto;
         }
     </style>
 </head>
+
 <body>
-    <div id="loading" class="loading">
+
+    <div class="loading" id="loading">
         <div class="loading-text">
-            Loading...
+            <span>Loading...</span><span>...</span><span>...</span><span>...</span><span>...</span><span>...</span><span>...</span>
         </div>
     </div>
 
+    <div class="entry-content gridshow-clearfix"></div>
+
     <video id="player" autoplay controls crossorigin playsinline>
-        <source id="m3u8-url" type="application/x-mpegURL">
+        <source id="m3u8-url" src="" type="application/vnd.apple.mpegurl">
     </video>
 
     <script>
+        var urlParams = new URLSearchParams(window.location.search),
+            maxvalue = urlParams.get("id");
+
+        if (maxvalue) {
+            document.getElementById("m3u8-url").setAttribute("src", maxvalue);
+        } else {
+            console.error("No video URL provided!");
+        }
+
+        setTimeout(videovisible, 1000);
+
+        function videovisible() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
-            const videoElement = document.querySelector("video");
-            const sourceElement = videoElement.getElementsByTagName("source")[0];
-            const videoURL = sourceElement.src;
-            
-            const playerOptions = {
-                error: {
-                    displayError: false // Disable the error message UI in Plyr
-                }
-            };
-
-            // Initialize Plyr with options
-            const player = new Plyr(videoElement, playerOptions);
-
-            var urlParams = new URLSearchParams(window.location.search),
-                maxvalue = urlParams.get("id");
-            if (maxvalue) {
-                document.getElementById("m3u8-url").setAttribute("src", maxvalue);
-            }
-
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-            }, 1000);
+            const e = document.querySelector("video"),
+                n = e.getElementsByTagName("source")[0].src,
+                o = {};
 
             if (Hls.isSupported()) {
-                const config = {
+                var config = {
                     maxMaxBufferLength: 100,
                 };
-                const hls = new Hls(config);
-
-                hls.loadSource(videoURL);
-                hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                    const qualityLevels = hls.levels.map(level => level.height);
-                    playerOptions.quality = {
-                        default: qualityLevels[0],
-                        options: qualityLevels,
-                        forced: true,
-                        onChange: (e) => {
-                            hls.levels.forEach((level, index) => {
-                                if (level.height === e) {
-                                    hls.currentLevel = index;
-                                }
-                            });
-                        }
+                const t = new Hls(config);
+                t.loadSource(n), t.on(Hls.Events.MANIFEST_PARSED, function (n, l) {
+                    const s = t.levels.map(e => e.height);
+                    o.quality = {
+                        default: s[0],
+                        options: s,
+                        forced: !0,
+                        onChange: e => (function (e) {
+                            window.hls.levels.forEach((n, o) => {
+                                n.height === e && (window.hls.currentLevel = o)
+                            })
+                        })(e)
                     };
-                    new Plyr(videoElement, playerOptions);
+                    new Plyr(e, o);
                 });
-                hls.attachMedia(videoElement);
-                window.hls = hls;
-            } else {
-                new Plyr(videoElement, playerOptions);
-            }
 
-            // Disable all error messages from showing in the player UI
-            videoElement.addEventListener('error', function () {
-                const errorMessage = document.querySelector('.plyr__error');
-                if (errorMessage) {
-                    errorMessage.style.display = 'none';  // Hides any error message element
-                }
-            });
+                t.attachMedia(e), window.hls = t;
+            } else {
+                new Plyr(e, o);
+            }
         });
     </script>
+
 </body>
+
 </html>
