@@ -1,17 +1,15 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>TEAMROHITOFFICAL45_LIVE</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="description" content="ENJOY FREE LIVE">
+    <meta charset="UTF-8">
+    <meta name="description" content="ENJOY FREE LIVE ">
     <meta name="keywords" content="JIOTV, LIVETV, SPORTS, MOVIES, MUSIC">
     <meta name="author" content="unknown">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <video autoplay controls crossorigin poster="https://i.postimg.cc/Y0918Y71/IMG-20240810-011453-139.jpg" playsinline style="--plyr-color-main:#15b4ff">
-        <source id="m3u8-url" src="" type="application/x-mpegURL">
-    </video>
+    <title>TEAMROHITOFFICAL45_LIVE</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet"></link>
+    <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -32,19 +30,19 @@
             height: 100%;
             background: #000;
             z-index: 9999;
-            color: #00b3ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            font-size: 24px;
-            text-align: center;
         }
 
         .loading-text {
-            font-size: 36px;
-            color: #00b3ff;
-            font-family: 'Quattrocento Sans', sans-serif;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            text-align: center;
+            width: 100%;
+            height: 100px;
+            line-height: 100px;
         }
 
         .loading-text span {
@@ -93,7 +91,6 @@
             0% {
                 filter: blur(0px);
             }
-
             100% {
                 filter: blur(4px);
             }
@@ -112,56 +109,80 @@
         }
     </style>
 </head>
-
 <body>
 
-    <!-- Loading Screen -->
+    <!-- Loading screen -->
     <div class="loading" id="loading">
         <div class="loading-text">
-            <span>TEAMROHITOFFICAL45_LIVE</span><br>
-            <span>Loading...</span><span>...</span><span>...</span><span>...</span><span>...</span><span>...</span><span>...</span>
+            <span>L</span><span>O</span><span>A</span><span>D</span><span>I</span><span>N</span><span>G</span>
         </div>
     </div>
 
-    <div class="entry-content gridshow-clearfix"></div>
-
-    <video id="player" autoplay controls crossorigin playsinline>
-        <source id="m3u8-url" src="" type="application/vnd.apple.mpegurl">
+    <video id="player" autoplay controls crossorigin playsinline style="--plyr-color-main:#15b4ff">
+        <source id="m3u8-url" src="" type="application/x-mpegURL">
     </video>
 
+    <!-- Fallback poster image -->
+    <img id="fallback-poster" src="https://example.com/fallback-poster.jpg" alt="Fallback Poster" style="display:none;">
+
     <script>
+        // Check for 'id' parameter in the URL
         var urlParams = new URLSearchParams(window.location.search),
             maxvalue = urlParams.get("id");
 
-        // If no valid source URL is provided, prevent errors
-        if (maxvalue) {
+        // Validate the URL parameter for video source
+        if (maxvalue && maxvalue.trim() !== "") {
             document.getElementById("m3u8-url").setAttribute("src", maxvalue);
         } else {
-            console.error("No video URL provided!");
-            // Hide the player or show an error message if needed
-            document.getElementById('loading').innerHTML = '<div class="loading-text"><span>Error: Video source not available.</span></div>';
+            console.error("No video source provided!");
+            // Optionally, show an error or hide the player
+            alert("Video source not provided!");
         }
 
-        // Hide the loading screen after the video starts
+        // Function to hide loading screen after the video is ready
         setTimeout(videovisible, 1000);
-
         function videovisible() {
-            document.getElementById('loading').style.display = 'none';
+            var loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
         }
 
+        // Poster URL (Old Poster)
+        var oldPosterURL = "https://i.postimg.cc/Y0918Y71/IMG-20240810-011453-139.jpg"; // Original poster URL
+
+        // Check if the poster image is valid
+        var video = document.getElementById('player');
+        var posterURL = oldPosterURL; // Use the old poster URL
+
+        var img = new Image(); // Create a new image object
+        img.onload = function() {
+            // If the image loads correctly, the poster is valid, do nothing
+        };
+
+        img.onerror = function() {
+            // If the poster image fails to load, set a fallback image
+            console.log('Poster image failed to load, using fallback.');
+            video.setAttribute('poster', 'https://example.com/fallback-poster.jpg'); // Fallback image
+        };
+
+        img.src = posterURL; // Set the image source to check if the poster URL is valid
+
+        // Set the poster for the video
+        video.setAttribute('poster', posterURL);
+
+        // Plyr and HLS.js setup
         document.addEventListener("DOMContentLoaded", () => {
             const e = document.querySelector("video"),
                 n = e.getElementsByTagName("source")[0].src,
                 o = {};
-
+            
             if (Hls.isSupported()) {
                 var config = {
                     maxMaxBufferLength: 100,
                 };
                 const t = new Hls(config);
-                t.loadSource(n);
-
-                t.on(Hls.Events.MANIFEST_PARSED, function (n, l) {
+                t.loadSource(n), t.on(Hls.Events.MANIFEST_PARSED, function (n, l) {
                     const s = t.levels.map(e => e.height);
                     o.quality = {
                         default: s[0],
@@ -175,21 +196,12 @@
                     };
                     new Plyr(e, o);
                 });
-
-                t.on(Hls.Events.ERROR, function (event, data) {
-                    // Handle errors related to HLS.js
-                    console.error("HLS.js error: ", data);
-                    document.getElementById('loading').innerHTML = '<div class="loading-text"><span>Error loading video.</span></div>';
-                });
-
-                t.attachMedia(e), window.hls = t;
+                t.attachMedia(e);
+                window.hls = t;
             } else {
-                // If HLS.js isn't supported, use Plyr directly
                 new Plyr(e, o);
             }
         });
     </script>
-
 </body>
-
 </html>
