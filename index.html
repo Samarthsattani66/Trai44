@@ -107,6 +107,25 @@
             background: url('') no-repeat;
             background-size: 100px, auto, auto;
         }
+
+        /* Telegram button styling */
+        .telegram-button {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 25px;
+            background-color: #0088cc;
+            color: #fff;
+            text-align: center;
+            font-size: 18px;
+            text-decoration: none;
+            border-radius: 5px;
+            width: 200px;
+            transition: background-color 0.3s ease;
+        }
+
+        .telegram-button:hover {
+            background-color: #006a99;
+        }
     </style>
 </head>
 <body>
@@ -118,9 +137,15 @@
         </div>
     </div>
 
+    <!-- Video Player -->
     <video id="player" autoplay controls crossorigin playsinline style="--plyr-color-main:#15b4ff">
         <source id="m3u8-url" src="" type="application/x-mpegURL">
     </video>
+
+    <!-- Telegram Channel Button -->
+    <a href="https://t.me/+lkbpBqFd0FljNzJl" class="telegram-button" target="_blank">
+        Join Our Telegram Channel
+    </a>
 
     <script>
         // Check for 'id' parameter in the URL
