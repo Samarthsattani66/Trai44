@@ -25,19 +25,7 @@
         body {
             background: #000;
             color: #fff;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        /* Dark theme styles */
-        body.dark-theme {
-            background: #1e1e1e;
-            color: #fff;
-        }
-
-        /* Light theme styles */
-        body.light-theme {
-            background: #fff;
-            color: #000;
+            position: relative; /* Ensure watermark is positioned correctly */
         }
 
         .loading {
@@ -70,6 +58,18 @@
             font-family: 'Quattrocento Sans', sans-serif;
         }
 
+        /* Position watermark over the video player */
+        .watermark {
+            position: absolute;
+            bottom: 10px;  /* Distance from the bottom */
+            left: 10px;    /* Distance from the left */
+            font-size: 20px;  /* Small size */
+            color: rgba(255, 255, 255, 0.5); /* White color with transparency */
+            font-style: italic;
+            pointer-events: none; /* Prevent interaction with the video */
+            z-index: 10; /* Ensure it's above the video */
+        }
+
         /* Plyr video wrapper custom styling */
         .plyr__video-wrapper::after {
             position: absolute;
@@ -87,47 +87,23 @@
         .telegram-button {
             display: block;
             margin: 20px auto;
-            padding: 6px 10px;  
+            padding: 6px 10px;
             background-color: #0088cc;
             color: #fff;
             text-align: center;
-            font-size: 14px;  
+            font-size: 14px;
             text-decoration: none;
             border-radius: 5px;
-            width: 140px;  
+            width: 140px;
             transition: background-color 0.3s ease;
         }
 
         .telegram-button:hover {
             background-color: #006a99;
         }
-
-        /* Theme toggle button */
-        .theme-toggle-button {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 10px 15px;
-            background-color: #333;
-            color: #fff;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 999;
-        }
-
-        .theme-toggle-button.light-theme {
-            background-color: #f0f0f0;
-            color: #333;
-        }
-
-        .theme-toggle-button:hover {
-            opacity: 0.8;
-        }
     </style>
 </head>
-<body class="dark-theme">
+<body>
 
     <!-- Loading screen -->
     <div class="loading" id="loading">
@@ -137,17 +113,21 @@
     </div>
 
     <!-- Video Player -->
-    <video id="player" autoplay controls crossorigin playsinline style="--plyr-color-main:#15b4ff">
-        <source id="m3u8-url" src="" type="application/x-mpegURL">
-    </video>
+    <div style="position: relative;">
+        <video id="player" autoplay controls crossorigin playsinline style="--plyr-color-main:#15b4ff; width: 100%;">
+            <source id="m3u8-url" src="" type="application/x-mpegURL">
+        </video>
+
+        <!-- Watermark -->
+        <div class="watermark">
+            TEAMROHITOFFICIAL45
+        </div>
+    </div>
 
     <!-- Telegram Channel Button -->
     <a href="https://t.me/+lkbpBqFd0FljNzJl" class="telegram-button" target="_blank">
         Join Our Telegram Channel
     </a>
-
-    <!-- Theme Toggle Button -->
-    <button class="theme-toggle-button" onclick="toggleTheme()">Toggle Theme</button>
 
     <script>
         // Check for 'id' parameter in the URL
@@ -223,21 +203,6 @@
                 new Plyr(e, o);
             }
         });
-
-        // Toggle Theme function
-        function toggleTheme() {
-            const body = document.body;
-            const button = document.querySelector('.theme-toggle-button');
-            body.classList.toggle('dark-theme');
-            body.classList.toggle('light-theme');
-
-            // Toggle button styles
-            if (body.classList.contains('dark-theme')) {
-                button.classList.remove('light-theme');
-            } else {
-                button.classList.add('light-theme');
-            }
-        }
     </script>
 
 </body>
