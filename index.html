@@ -2,209 +2,136 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="ENJOY FREE LIVE ">
-    <meta name="keywords" content="JIOTV, LIVETV, SPORTS, MOVIES, MUSIC">
-    <meta name="author" content="unknown">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>TEAMROHITOFFICAL45_LIVE</title>
+    <title>TEAMROHITOFFICIAL45_LIVE</title>
+    <link rel="icon" href="https://i.postimg.cc/prMQRWMR/skfav.png" type="image/png" sizes="250x250">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <!-- Shaka Player -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/controls.min.css" crossorigin="anonymous">
 
+    <!-- Custom Styles -->
     <style>
-        /* Base styles */
-        html {
-            font-family: Poppins;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            background: #000;
-            color: #fff;
-            position: relative; /* Ensure watermark is positioned correctly */
+            margin: 0;
+            background-color: black;
         }
 
-        .loading {
-            position: fixed;
+        video {
+            width: 100%;
+            height: 100%;
+        }
+
+        [data-shaka-player-container] {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #000;
-            z-index: 9999;
+            object-fit: cover;
         }
 
-        .loading-text {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-            text-align: center;
-            width: 100%;
-            height: 100px;
-            line-height: 100px;
+        /* Shaka UI Custom Styles */
+        .shaka-overflow-menu {
+            background-color: rgb(41, 41, 163);
+            color: rgb(153, 153, 153);
         }
 
-        .loading-text span {
-            display: inline-block;
-            margin: 0 5px;
-            color: #00b3ff;
-            font-family: 'Quattrocento Sans', sans-serif;
+        .shaka-overflow-menu button:hover,
+        .shaka-settings-menu button:hover {
+            background-color: rgb(45, 45, 45);
         }
 
-        /* Position watermark on the right side */
-        .watermark {
-            position: absolute;
-            bottom: 2px;  /* Even smaller distance from the bottom */
-            right: 2px;   /* Position watermark on the right side */
-            font-size: 8px;  /* Much smaller font size */
-            color: rgba(255, 255, 255, 0.2); /* White color with higher transparency */
-            font-style: italic;
-            pointer-events: none; /* Prevent interaction with the video */
-            z-index: 10; /* Ensure it's above the video */
-            font-family: "Courier New", Courier, monospace; /* Monospace font to match the style */
+        .shaka-overflow-button-label,
+        .shaka-current-selection-span,
+        .material-icons-round,
+        .shaka-settings-menu button {
+            color: rgb(230, 230, 230);
         }
 
-        /* Plyr video wrapper custom styling */
-        .plyr__video-wrapper::after {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            z-index: 10;
-            content: '';
-            height: 50px;
-            width: 100px;
-            background: url('') no-repeat;
-            background-size: 100px, auto, auto;
-        }
-
-        /* Smaller Telegram button styling */
-        .telegram-button {
-            display: block;
-            margin: 20px auto;
-            padding: 6px 10px;
-            background-color: #0088cc;
-            color: #fff;
-            text-align: center;
-            font-size: 14px;
-            text-decoration: none;
-            border-radius: 5px;
-            width: 140px;
-            transition: background-color 0.3s ease;
-        }
-
-        .telegram-button:hover {
-            background-color: #006a99;
+        .shaka-settings-menu {
+            background-color: rgb(35, 35, 35);
         }
     </style>
 </head>
 <body>
-
-    <!-- Loading screen -->
-    <div class="loading" id="loading">
-        <div class="loading-text">
-            <span>T</span><span>E</span><span>A</span><span>M</span><span>R</span><span>O</span><span>H</span><span>I</span><span>T</span><span>O</span><span>F</span><span>F</span><span>I</span><span>C</span><span>A</span><span>L</span><span>4</span><span>5</span>
-        </div>
-    </div>
-
-    <!-- Video Player -->
-    <div style="position: relative;">
-        <video id="player" autoplay controls crossorigin playsinline style="--plyr-color-main:#15b4ff; width: 100%;">
-            <source id="m3u8-url" src="" type="application/x-mpegURL">
+    <div data-shaka-player-container>
+        <video autoplay muted data-shaka-player id="video"
+            poster="https://images.fubo.tv/channel-config-ui/station-logos/on-dark/willow_2023_primary-white.png">
         </video>
-
-        <!-- Watermark -->
-        <div class="watermark">
-            𝙏𝙀𝘼𝙈𝙍𝙊𝙃𝙄𝙏𝙊𝙁𝙁𝙄𝘾𝙄𝘼𝙇𝟰𝟱
-        </div>
     </div>
-
-    <!-- Telegram Channel Button -->
-    <a href="https://t.me/+lkbpBqFd0FljNzJl" class="telegram-button" target="_blank">
-        Join Our Telegram Channel
-    </a>
 
     <script>
-        // Check for 'id' parameter in the URL
-        var urlParams = new URLSearchParams(window.location.search),
-            maxvalue = urlParams.get("id");
+        async function init() {
+            const video = document.getElementById('video');
+            const ui = video.ui;
+            const controls = ui.getControls();
+            const player = controls.getPlayer();
 
-        // If the URL parameter is available, set the video source
-        if (maxvalue && maxvalue.trim() !== "") {
-            document.getElementById("m3u8-url").setAttribute("src", maxvalue);
-        }
+            player.configure({
+                drm: {
+                    clearKeys: {
+                        'f912fa528f10ba46e035c5fb6f988744': '8080b1f738fd62d6d692c7db101c4fb'
+                    }
+                }
+            });
 
-        // Function to hide loading screen after the video is ready
-        setTimeout(videovisible, 1000);
-        function videovisible() {
-            var loadingElement = document.getElementById('loading');
-            if (loadingElement) {
-                loadingElement.style.display = 'none';
+            ui.configure({
+                controlPanelElements: [
+                    'play_pause', 'mute', 'volume', 'spacer',
+                    'time_and_duration', 'quality', 'fullscreen', 'overflow_menu'
+                ],
+                volumeBarColors: {
+                    base: 'rgba(63, 187, 1, 1)',
+                    level: 'rgb(255, 69, 0)'
+                },
+                seekBarColors: {
+                    base: 'rgb(41, 41, 163)',
+                    buffered: 'rgb(35, 99, 3)',
+                    played: 'rgba(63, 187, 1, 1)'
+                }
+            });
+
+            window.player = player;
+            window.ui = ui;
+
+            player.addEventListener('error', onPlayerErrorEvent);
+            controls.addEventListener('error', onUIErrorEvent);
+
+            try {
+                await player.load('https://ABGQJFUAAAAAAAAMDDTLEHDAXLN3S.c901becad35b4fb8b74c1b67321d8b1f.emt.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/vbesk5lbkm/out/v1/52a4f46e2b3e41438e4147baec0797d6/cenc.mpd');
+                console.log('The video has now been loaded!');
+            } catch (error) {
+                onPlayerError(error);
             }
         }
 
-        // Poster URL (Old Poster)
-        var oldPosterURL = "https://i.postimg.cc/Y0918Y71/IMG-20240810-011453-139.jpg"; // Original poster URL
+        function onPlayerErrorEvent(event) {
+            onPlayerError(event.detail);
+        }
 
-        // Check if the poster image is valid
-        var video = document.getElementById('player');
-        var posterURL = oldPosterURL; // Use the old poster URL
+        function onUIErrorEvent(event) {
+            onPlayerError(event.detail);
+        }
 
-        var img = new Image(); // Create a new image object
-        img.onload = function() {
-            // If the image loads correctly, the poster is valid, do nothing
-        };
+        function onPlayerError(error) {
+            console.error('Error code', error.code, 'object', error);
+        }
 
-        img.onerror = function() {
-            // If the poster image fails to load, set a fallback image
-            console.log('Poster image failed to load, using fallback.');
-            video.setAttribute('poster', 'https://example.com/fallback-poster.jpg'); // Fallback image
-        };
+        function initFailed(error) {
+            console.error('Unable to load the UI library!', error);
+        }
 
-        img.src = posterURL; // Set the image source to check if the poster is valid
+        document.addEventListener('shaka-ui-loaded', init);
+        document.addEventListener('shaka-ui-load-failed', initFailed);
 
-        // Set the valid poster
-        video.setAttribute('poster', posterURL);
-
-        // Plyr setup with HLS.js for live streaming
-        document.addEventListener("DOMContentLoaded", () => {
-            const e = document.querySelector("video"),
-                n = e.getElementsByTagName("source")[0].src,
-                o = {};
-            if (Hls.isSupported()) {
-                var config = {
-                    maxMaxBufferLength: 100,
-                };
-                const t = new Hls(config);
-                t.loadSource(n), t.on(Hls.Events.MANIFEST_PARSED, function (n, l) {
-                    const s = t.levels.map(e => e.height);
-                    o.quality = {
-                        default: s[0],
-                        options: s,
-                        forced: !0,
-                        onChange: e => {
-                            window.hls.levels.forEach((n, o) => {
-                                if (n.height === e) {
-                                    window.hls.currentLevel = o;
-                                }
-                            });
-                        }
-                    };
-                    new Plyr(e, o);
-                });
-                t.attachMedia(e);
-                window.hls = t;
-            } else {
-                new Plyr(e, o);
+        // Telegram Join Prompt
+        window.addEventListener('load', () => {
+            const message = 'JOIN OUR TELEGRAM CHANNEL FOR MORE LIVE STREAM LINKS';
+            if (confirm(message)) {
+                window.location.href = 'https://t.me/+e6G48oujQuExOTg1';
             }
         });
     </script>
-
 </body>
 </html>
