@@ -3,150 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JW Player</title>
-    <script src="https://content.jwplatform.com/libraries/SAHhwvZq.js"></script>
+    <title>Willow Live Events Player</title>
     <style>
-        html, body {
-            font-family: Arial, sans-serif;
+        body, html {
             margin: 0;
-            background-color: black;
             padding: 0;
             height: 100%;
-            width: 100%;
             overflow: hidden;
+            font-family: Arial, sans-serif;
         }
-        .jwplayer {
-            position: absolute !important;
+        #loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 1.5em;
         }
-        .jwplayer.jw-flag-aspect-mode {
-            min-height: 100%;
-            max-height: 100%;
+        #player-container {
+            height: 100%;
+            width: 100%;
         }
-        #jwplayer-container {
-            position: absolute;
-            top: 0;
-            left: 0;
+        iframe {
+            border: none;
             width: 100%;
             height: 100%;
         }
-        .loader {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-        .absolute { position: absolute; }
-        .inline-block { display: inline-block; }
-        .w-2 { width: 0.5em; }
-        .dash {
-            animation: dashArray 2s ease-in-out infinite, dashOffset 2s linear infinite;
-        }
-        .spin {
-            animation: spinDashArray 2s ease-in-out infinite,
-                       spin 8s ease-in-out infinite,
-                       dashOffset 2s linear infinite;
-            transform-origin: center;
-        }
-        @keyframes dashArray {
-            0% { stroke-dasharray: 0 1 359 0; }
-            50% { stroke-dasharray: 0 359 1 0; }
-            100% { stroke-dasharray: 359 1 0 0; }
-        }
-        @keyframes spinDashArray {
-            0% { stroke-dasharray: 270 90; }
-            50% { stroke-dasharray: 0 360; }
-            100% { stroke-dasharray: 270 90; }
-        }
-        @keyframes dashOffset {
-            0% { stroke-dashoffset: 365; }
-            100% { stroke-dashoffset: 5; }
-        }
-        @keyframes spin {
-            0% { rotate: 0deg; }
-            12.5%, 25% { rotate: 270deg; }
-            37.5%, 50% { rotate: 540deg; }
-            62.5%, 75% { rotate: 810deg; }
-            87.5%, 100% { rotate: 1080deg; }
+        #error {
+            color: red;
+            text-align: center;
+            padding: 20px;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <!-- Loader -->
-    <div class="loader">
-        <!-- SVG animation unchanged -->
-        <!-- ... (SVGs kept same as your original code) -->
-    </div>
-
-    <!-- JW Player Container -->
-    <div id="jwplayer-container"></div>
+    <div id="loading">Loading live events data...</div>
+    <div id="error"></div>
+    <div id="player-container"></div>
 
     <script>
-        function getUrlParameter(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/main/willow.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Find IPL 2025 matches
+                    const iplMatches = data.matches.filter(match => 
+                        match.title.includes('Indian Premier League 2025')
+                    );
+
+                    if (iplMatches.length === 0) {
+                        // No IPL matches found, play the alternative video
+                        playAlternativeVideo();
+                        return;
+                    }
+
+                    let selectedMatch;
+                    
+                    if (iplMatches.length === 1) {
+                        // Only one IPL match found
+                        selectedMatch = iplMatches[0];
+                    } else {
+                        // Multiple IPL matches found - select based on time
+                        const now = new Date();
+                        const currentHours = now.getHours();
+                        const currentMinutes = now.getMinutes();
+                        const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+                        
+                        // Convert all start times to minutes since midnight IST
+                        iplMatches.forEach(match => {
+                            const startTimeUTC = new Date(match.startTime);
+                            // Convert UTC to IST (UTC+5:30)
+                            const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
+                            const hours = startTimeIST.getHours();
+                            const minutes = startTimeIST.getMinutes();
+                            match.startTimeInMinutes = hours * 60 + minutes;
+                        });
+                        
+                        // Sort matches by start time
+                        iplMatches.sort((a, b) => a.startTimeInMinutes - b.startTimeInMinutes);
+                        
+                        // Before 19:20 IST, play the earliest match. After, play the latest match.
+                        if (currentTimeInMinutes < 19 * 60 + 20) {
+                            selectedMatch = iplMatches[0]; // Earliest match
+                        } else {
+                            selectedMatch = iplMatches[iplMatches.length - 1]; // Latest match
+                        }
+                    }
+
+                    if (!selectedMatch.playback_data || !selectedMatch.playback_data.urls || selectedMatch.playback_data.urls.length === 0) {
+                        showError('No playback URLs found for this match.');
+                        return;
+                    }
+
+                    if (!selectedMatch.playback_data.keys || selectedMatch.playback_data.keys.length === 0) {
+                        showError('No decryption keys found for this match.');
+                        return;
+                    }
+
+                    // Filter for CloudFront CDN URLs that are MPD files
+                    const cloudfrontMpdUrls = selectedMatch.playback_data.urls.filter(urlObj => 
+                        urlObj.url.includes('cloudfront.net') && urlObj.url.endsWith('.mpd')
+                    );
+
+                    if (cloudfrontMpdUrls.length === 0) {
+                        showError('No CloudFront MPD URLs found for this match.');
+                        return;
+                    }
+
+                    // Use the first CloudFront MPD URL found
+                    const firstUrl = cloudfrontMpdUrls[0].url;
+                    const firstKey = selectedMatch.playback_data.keys[0];
+                    
+                    // Encode the URL and key for the player
+                    const encodedUrl = encodeURIComponent(firstUrl);
+                    const encodedKey = encodeURIComponent(firstKey);
+                    
+                    // Create iframe with the player
+                    const playerUrl = `https://samarthsattani66.github.io/Teamroplry2/?url=${encodedUrl}&key=${encodedKey}`;
+                    
+                    const iframe = document.createElement('iframe');
+                    iframe.src = playerUrl;
+                    
+                    const container = document.getElementById('player-container');
+                    container.appendChild(iframe);
+                    
+                    // Hide loading message
+                    document.getElementById('loading').style.display = 'none';
+                })
+                .catch(error => {
+                    showError('Error fetching or processing live events data: ' + error.message);
+                    console.error('Error:', error);
+                });
+        });
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
         }
 
-        let jsonData = null;
-
-        async function fetchJsonData() {
-            if (jsonData) return jsonData;
-
-            const jsonUrl = 'https://binge-projects.vercel.app/API/sp2.json';
-
-            try {
-                const response = await fetch(jsonUrl);
-                jsonData = await response.json();
-                return jsonData;
-            } catch (error) {
-                console.error('Error fetching JSON data:', error);
-                return null;
-            }
+        function playAlternativeVideo() {
+            document.getElementById('loading').style.display = 'none';
+            const container = document.getElementById('player-container');
+            
+            const videoUrl = "https://media-hosting.imagekit.io/1996bce2aade4e62/Black and White Old Movie Silent Film Cinema Projector Video.mp4?Expires=1839379555&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=paPtQmaQ4l6rpstSvYNMoYCRbe3VFIUQ927kdZPUE1571y3RYJUdcIFSELWzhVMVlQlhFUpouQGU0TYDx23GQAwpeESuBnDJts-OQ1FFMM9CIUvjiDTdGxeRBns6VA9V8vXAkZBLN7zk5QkfbOq7qhF2HRWzOFgqosZJe99uhGSNp9sQ2CdBVXyOkRsZSvH~0nBUv6z0w3b0iL~fLXlCSv7YMmRptIJR6xHeoDVD~HHyYK1JBPZEruhBU3jhTdGOY~5O7Y~GvRBfGFZobAmqDgx8GBmNmh7IF7suxqwm46SPCn5P3mNiFCqCDQbgM4kWtTjyLpNkbgitIun9AVO-0g__";
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = videoUrl;
+            container.appendChild(iframe);
         }
-
-        async function playStream() {
-            const id = getUrlParameter('id');
-            if (!id) {
-                console.error('No ID parameter found in the URL.');
-                return;
-            }
-
-            const data = await fetchJsonData();
-            if (!data) {
-                console.error('Failed to fetch JSON data.');
-                return;
-            }
-
-            const stream = data.find(item => item.id === id);
-            if (!stream) {
-                console.error(`No stream found for ID: ${id}`);
-                return;
-            }
-
-            const player = jwplayer("jwplayer-container").setup({
-                file: stream.file,
-                width: "100%",
-                height: "100%",
-                autostart: true,
-                stretching: "fit",
-                primary: "html5",
-                hlshtml: true,
-            });
-
-            player.on('ready', function() {
-                document.querySelector('.loader').style.display = 'none';
-                console.log('Player is ready');
-            });
-
-            player.on('error', function(event) {
-                console.error('Player error:', event.message);
-            });
-        }
-
-        playStream();
     </script>
 </body>
 </html>
