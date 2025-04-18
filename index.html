@@ -34,29 +34,71 @@
             padding: 20px;
             display: none;
         }
+        #debug {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            max-width: 80%;
+            max-height: 80%;
+            overflow: auto;
+        }
     </style>
 </head>
 <body>
     <div id="loading">Loading live events data...</div>
     <div id="error"></div>
+    <div id="debug"></div>
     <div id="player-container"></div>
 
     <script>
+        // Enable debugging by adding ?debug=true to URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const debugMode = urlParams.get('debug') === 'true';
+        
+        if (debugMode) {
+            document.getElementById('debug').style.display = 'block';
+        }
+
+        function debugLog(message) {
+            if (debugMode) {
+                const debugDiv = document.getElementById('debug');
+                debugDiv.innerHTML += message + '<br>';
+                console.log(message);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            debugLog('Starting player initialization...');
+            
             fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/main/willow.json')
                 .then(response => {
+                    debugLog('Fetching JSON data...');
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
+                    debugLog('Successfully fetched JSON data');
+                    debugLog(`Total matches found: ${data.matches ? data.matches.length : 0}`);
+                    
+                    if (!data.matches || data.matches.length === 0) {
+                        throw new Error('No matches found in the data');
+                    }
+
                     // Find IPL 2025 matches
                     const iplMatches = data.matches.filter(match => 
                         match.title && match.title.includes('Indian Premier League 2025')
                     );
+                    debugLog(`IPL matches found: ${iplMatches.length}`);
 
                     if (iplMatches.length === 0) {
+                        debugLog('No IPL matches found, playing alternative video');
                         playAlternativeVideo();
                         return;
                     }
@@ -65,19 +107,28 @@
                     
                     if (iplMatches.length === 1) {
                         selectedMatch = iplMatches[0];
+                        debugLog('Only one IPL match found, selecting it');
                     } else {
+                        debugLog('Multiple IPL matches found, selecting based on time');
                         const now = new Date();
                         const currentHours = now.getHours();
                         const currentMinutes = now.getMinutes();
                         const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+                        debugLog(`Current time (IST): ${currentHours}:${currentMinutes}`);
                         
                         iplMatches.forEach(match => {
                             if (match.startTime) {
-                                const startTimeUTC = new Date(match.startTime);
-                                const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
-                                const hours = startTimeIST.getHours();
-                                const minutes = startTimeIST.getMinutes();
-                                match.startTimeInMinutes = hours * 60 + minutes;
+                                try {
+                                    const startTimeUTC = new Date(match.startTime);
+                                    const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
+                                    const hours = startTimeIST.getHours();
+                                    const minutes = startTimeIST.getMinutes();
+                                    match.startTimeInMinutes = hours * 60 + minutes;
+                                    debugLog(`Match: ${match.title} - Start Time: ${hours}:${minutes}`);
+                                } catch (e) {
+                                    debugLog(`Error parsing startTime for match: ${e.message}`);
+                                    match.startTimeInMinutes = 0;
+                                }
                             } else {
                                 match.startTimeInMinutes = 0;
                             }
@@ -87,70 +138,100 @@
                         
                         if (currentTimeInMinutes < 19 * 60 + 20) {
                             selectedMatch = iplMatches[0];
+                            debugLog('Selecting earliest match (before 19:20 IST)');
                         } else {
                             selectedMatch = iplMatches[iplMatches.length - 1];
+                            debugLog('Selecting latest match (after 19:20 IST)');
                         }
                     }
 
-                    if (!selectedMatch.playback_data || !selectedMatch.playback_data.urls || selectedMatch.playback_data.urls.length === 0) {
-                        showError('No playback URLs found for this match.');
-                        return;
+                    debugLog(`Selected match: ${selectedMatch.title}`);
+                    debugLog(`Match start time: ${selectedMatch.startTime}`);
+
+                    if (!selectedMatch.playback_data) {
+                        throw new Error('No playback_data found for selected match');
+                    }
+
+                    if (!selectedMatch.playback_data.urls || selectedMatch.playback_data.urls.length === 0) {
+                        throw new Error('No playback URLs found for this match');
                     }
 
                     if (!selectedMatch.playback_data.keys || selectedMatch.playback_data.keys.length === 0) {
-                        showError('No decryption keys found for this match.');
-                        return;
+                        throw new Error('No decryption keys found for this match');
                     }
 
-                    // Filter for CloudFront CDN URLs that are MPD files
-                    const cloudfrontMpdUrls = selectedMatch.playback_data.urls.filter(urlObj => 
-                        urlObj.url && 
-                        (urlObj.url.includes('cloudfront.net') || urlObj.url.includes('akamaized.net')) && 
-                        (urlObj.url.endsWith('.mpd') || urlObj.url.includes('.mpd?'))
-                    );
+                    debugLog(`Available URLs: ${selectedMatch.playback_data.urls.length}`);
+                    debugLog(`Available keys: ${selectedMatch.playback_data.keys.length}`);
 
-                    if (cloudfrontMpdUrls.length === 0) {
-                        // If no CloudFront URLs, try any MPD URL as fallback
-                        const anyMpdUrls = selectedMatch.playback_data.urls.filter(urlObj => 
-                            urlObj.url && 
-                            (urlObj.url.endsWith('.mpd') || urlObj.url.includes('.mpd?'))
-                        );
+                    // Filter for valid MPD URLs (including CloudFront and other CDNs)
+                    const mpdUrls = selectedMatch.playback_data.urls.filter(urlObj => {
+                        if (!urlObj.url) return false;
                         
-                        if (anyMpdUrls.length === 0) {
-                            showError('No valid MPD URLs found for this match.');
-                            return;
-                        }
+                        // Check for MPD extension or MPD in query string
+                        const isMpd = urlObj.url.includes('.mpd') || 
+                                      urlObj.url.includes('/mpd') ||
+                                      urlObj.url.includes('mpd?');
                         
-                        // Use first MPD URL found
-                        playStream(anyMpdUrls[0].url, selectedMatch.playback_data.keys[0]);
-                        return;
+                        // Optional: Check for specific CDNs
+                        const isPreferredCDN = urlObj.url.includes('cloudfront.net') || 
+                                              urlObj.url.includes('akamaized.net');
+                        
+                        debugLog(`URL: ${urlObj.url} | MPD: ${isMpd} | Preferred CDN: ${isPreferredCDN}`);
+                        return isMpd;
+                    });
+
+                    debugLog(`Valid MPD URLs found: ${mpdUrls.length}`);
+                    
+                    if (mpdUrls.length === 0) {
+                        throw new Error('No valid MPD URLs found for this match');
                     }
 
-                    // Use the first CloudFront MPD URL found
-                    playStream(cloudfrontMpdUrls[0].url, selectedMatch.playback_data.keys[0]);
+                    // Sort by preferred CDNs first
+                    mpdUrls.sort((a, b) => {
+                        const aScore = a.url.includes('cloudfront.net') ? 2 : 
+                                      a.url.includes('akamaized.net') ? 1 : 0;
+                        const bScore = b.url.includes('cloudfront.net') ? 2 : 
+                                      b.url.includes('akamaized.net') ? 1 : 0;
+                        return bScore - aScore;
+                    });
+
+                    const selectedUrl = mpdUrls[0].url;
+                    const selectedKey = selectedMatch.playback_data.keys[0];
+                    
+                    debugLog(`Selected URL: ${selectedUrl}`);
+                    debugLog(`Selected Key: ${selectedKey}`);
+
+                    playStream(selectedUrl, selectedKey);
                 })
                 .catch(error => {
-                    showError('Error fetching or processing live events data: ' + error.message);
+                    debugLog(`Error: ${error.message}`);
+                    showError('Error loading content: ' + error.message);
                     console.error('Error:', error);
+                    playAlternativeVideo();
                 });
         });
 
         function playStream(url, key) {
+            debugLog(`Attempting to play stream: ${url}`);
+            
             // Encode the URL and key for the player
             const encodedUrl = encodeURIComponent(url);
             const encodedKey = encodeURIComponent(key);
             
             // Create iframe with the player
             const playerUrl = `https://samarthsattani66.github.io/Teamroplry2/?url=${encodedUrl}&key=${encodedKey}`;
+            debugLog(`Player URL: ${playerUrl}`);
             
             const iframe = document.createElement('iframe');
             iframe.src = playerUrl;
             
             const container = document.getElementById('player-container');
+            container.innerHTML = ''; // Clear previous content
             container.appendChild(iframe);
             
             // Hide loading message
             document.getElementById('loading').style.display = 'none';
+            debugLog('Player iframe created and loaded');
         }
 
         function showError(message) {
@@ -158,17 +239,21 @@
             const errorDiv = document.getElementById('error');
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
+            debugLog(`Error displayed: ${message}`);
         }
 
         function playAlternativeVideo() {
+            debugLog('Playing alternative video');
             document.getElementById('loading').style.display = 'none';
             const container = document.getElementById('player-container');
+            container.innerHTML = ''; // Clear previous content
             
             const videoUrl = "https://media-hosting.imagekit.io/1996bce2aade4e62/Black and White Old Movie Silent Film Cinema Projector Video.mp4?Expires=1839379555&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=paPtQmaQ4l6rpstSvYNMoYCRbe3VFIUQ927kdZPUE1571y3RYJUdcIFSELWzhVMVlQlhFUpouQGU0TYDx23GQAwpeESuBnDJts-OQ1FFMM9CIUvjiDTdGxeRBns6VA9V8vXAkZBLN7zk5QkfbOq7qhF2HRWzOFgqosZJe99uhGSNp9sQ2CdBVXyOkRsZSvH~0nBUv6z0w3b0iL~fLXlCSv7YMmRptIJR6xHeoDVD~HHyYK1JBPZEruhBU3jhTdGOY~5O7Y~GvRBfGFZobAmqDgx8GBmNmh7IF7suxqwm46SPCn5P3mNiFCqCDQbgM4kWtTjyLpNkbgitIun9AVO-0g__";
             
             const iframe = document.createElement('iframe');
             iframe.src = videoUrl;
             container.appendChild(iframe);
+            debugLog('Alternative video iframe created and loaded');
         }
     </script>
 </body>
