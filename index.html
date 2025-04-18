@@ -53,11 +53,10 @@
                 .then(data => {
                     // Find IPL 2025 matches
                     const iplMatches = data.matches.filter(match => 
-                        match.title.includes('Indian Premier League 2025')
+                        match.title && match.title.includes('Indian Premier League 2025')
                     );
 
                     if (iplMatches.length === 0) {
-                        // No IPL matches found, play the alternative video
                         playAlternativeVideo();
                         return;
                     }
@@ -65,33 +64,31 @@
                     let selectedMatch;
                     
                     if (iplMatches.length === 1) {
-                        // Only one IPL match found
                         selectedMatch = iplMatches[0];
                     } else {
-                        // Multiple IPL matches found - select based on time
                         const now = new Date();
                         const currentHours = now.getHours();
                         const currentMinutes = now.getMinutes();
                         const currentTimeInMinutes = currentHours * 60 + currentMinutes;
                         
-                        // Convert all start times to minutes since midnight IST
                         iplMatches.forEach(match => {
-                            const startTimeUTC = new Date(match.startTime);
-                            // Convert UTC to IST (UTC+5:30)
-                            const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
-                            const hours = startTimeIST.getHours();
-                            const minutes = startTimeIST.getMinutes();
-                            match.startTimeInMinutes = hours * 60 + minutes;
+                            if (match.startTime) {
+                                const startTimeUTC = new Date(match.startTime);
+                                const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
+                                const hours = startTimeIST.getHours();
+                                const minutes = startTimeIST.getMinutes();
+                                match.startTimeInMinutes = hours * 60 + minutes;
+                            } else {
+                                match.startTimeInMinutes = 0;
+                            }
                         });
                         
-                        // Sort matches by start time
                         iplMatches.sort((a, b) => a.startTimeInMinutes - b.startTimeInMinutes);
                         
-                        // Before 19:20 IST, play the earliest match. After, play the latest match.
                         if (currentTimeInMinutes < 19 * 60 + 20) {
-                            selectedMatch = iplMatches[0]; // Earliest match
+                            selectedMatch = iplMatches[0];
                         } else {
-                            selectedMatch = iplMatches[iplMatches.length - 1]; // Latest match
+                            selectedMatch = iplMatches[iplMatches.length - 1];
                         }
                     }
 
@@ -107,39 +104,54 @@
 
                     // Filter for CloudFront CDN URLs that are MPD files
                     const cloudfrontMpdUrls = selectedMatch.playback_data.urls.filter(urlObj => 
-                        urlObj.url.includes('cloudfront.net') && urlObj.url.endsWith('.mpd')
+                        urlObj.url && 
+                        (urlObj.url.includes('cloudfront.net') || urlObj.url.includes('akamaized.net')) && 
+                        (urlObj.url.endsWith('.mpd') || urlObj.url.includes('.mpd?'))
                     );
 
                     if (cloudfrontMpdUrls.length === 0) {
-                        showError('No CloudFront MPD URLs found for this match.');
+                        // If no CloudFront URLs, try any MPD URL as fallback
+                        const anyMpdUrls = selectedMatch.playback_data.urls.filter(urlObj => 
+                            urlObj.url && 
+                            (urlObj.url.endsWith('.mpd') || urlObj.url.includes('.mpd?'))
+                        );
+                        
+                        if (anyMpdUrls.length === 0) {
+                            showError('No valid MPD URLs found for this match.');
+                            return;
+                        }
+                        
+                        // Use first MPD URL found
+                        playStream(anyMpdUrls[0].url, selectedMatch.playback_data.keys[0]);
                         return;
                     }
 
                     // Use the first CloudFront MPD URL found
-                    const firstUrl = cloudfrontMpdUrls[0].url;
-                    const firstKey = selectedMatch.playback_data.keys[0];
-                    
-                    // Encode the URL and key for the player
-                    const encodedUrl = encodeURIComponent(firstUrl);
-                    const encodedKey = encodeURIComponent(firstKey);
-                    
-                    // Create iframe with the player
-                    const playerUrl = `https://samarthsattani66.github.io/Teamroplry2/?url=${encodedUrl}&key=${encodedKey}`;
-                    
-                    const iframe = document.createElement('iframe');
-                    iframe.src = playerUrl;
-                    
-                    const container = document.getElementById('player-container');
-                    container.appendChild(iframe);
-                    
-                    // Hide loading message
-                    document.getElementById('loading').style.display = 'none';
+                    playStream(cloudfrontMpdUrls[0].url, selectedMatch.playback_data.keys[0]);
                 })
                 .catch(error => {
                     showError('Error fetching or processing live events data: ' + error.message);
                     console.error('Error:', error);
                 });
         });
+
+        function playStream(url, key) {
+            // Encode the URL and key for the player
+            const encodedUrl = encodeURIComponent(url);
+            const encodedKey = encodeURIComponent(key);
+            
+            // Create iframe with the player
+            const playerUrl = `https://samarthsattani66.github.io/Teamroplry2/?url=${encodedUrl}&key=${encodedKey}`;
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = playerUrl;
+            
+            const container = document.getElementById('player-container');
+            container.appendChild(iframe);
+            
+            // Hide loading message
+            document.getElementById('loading').style.display = 'none';
+        }
 
         function showError(message) {
             document.getElementById('loading').style.display = 'none';
