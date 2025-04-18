@@ -90,7 +90,11 @@
         const CONFIG = {
             MAX_RETRIES: 3,
             RETRY_DELAY: 3000,
-            PLAYER_URL: "https://samarthsattani66.github.io/Teamroplry2/"
+            PLAYER_URL: "https://samarthsattani66.github.io/Teamroplry2/",
+            BACKUP_STREAMS: [
+                "https://example.com/backup1.mpd",
+                "https://example.com/backup2.mpd"
+            ]
         };
 
         // State
@@ -116,9 +120,24 @@
             try {
                 const { url, key } = await getStreamData();
                 currentStream = { url, key };
+                await verifyStream(url);
                 await playStream(url, key);
             } catch (error) {
                 handleError(error);
+            }
+        }
+
+        async function verifyStream(url) {
+            updateStatus("Verifying stream...");
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                if (!response.ok) {
+                    throw new Error(`Stream verification failed with status ${response.status}`);
+                }
+                updateStatus("Stream verified");
+                return true;
+            } catch (error) {
+                throw new Error(`Stream verification error: ${error.message}`);
             }
         }
 
@@ -154,10 +173,18 @@
                     throw new Error("No stream URLs available");
                 }
 
-                // Find best MPD URL
-                const streamUrl = findBestStreamUrl(selectedMatch.playback_data.urls);
+                // Find best MPD URL with fallback
+                let streamUrl = findBestStreamUrl(selectedMatch.playback_data.urls);
                 if (!streamUrl) {
                     throw new Error("No playable streams found");
+                }
+
+                // Verify the stream exists
+                try {
+                    await verifyStream(streamUrl);
+                } catch (e) {
+                    updateStatus("Primary stream failed, trying backups...");
+                    streamUrl = await tryBackupStreams();
                 }
 
                 const streamKey = selectedMatch.playback_data.keys?.[0] || '';
@@ -166,6 +193,20 @@
                 updateStatus(`Error: ${error.message}`);
                 throw error;
             }
+        }
+
+        async function tryBackupStreams() {
+            for (const backupUrl of CONFIG.BACKUP_STREAMS) {
+                try {
+                    await verifyStream(backupUrl);
+                    updateStatus(`Using backup stream: ${backupUrl}`);
+                    return backupUrl;
+                } catch (e) {
+                    updateStatus(`Backup failed: ${backupUrl}`);
+                    continue;
+                }
+            }
+            throw new Error("All backup streams failed");
         }
 
         function selectMatchByTime(matches, now) {
@@ -194,11 +235,14 @@
 
         function findBestStreamUrl(urls) {
             const validUrls = urls
-                .filter(urlObj => urlObj.url && (
-                    urlObj.url.includes('.mpd') || 
-                    urlObj.url.includes('mpd?') ||
-                    urlObj.url.includes('/mpd')
-                ))
+                .filter(urlObj => {
+                    if (!urlObj.url) return false;
+                    const url = urlObj.url.toLowerCase();
+                    return url.includes('.mpd') || 
+                           url.includes('mpd?') ||
+                           url.includes('/mpd') ||
+                           url.endsWith('mpd');
+                })
                 .sort((a, b) => {
                     const aScore = getUrlScore(a.url);
                     const bScore = getUrlScore(b.url);
@@ -209,12 +253,14 @@
         }
 
         function getUrlScore(url) {
+            if (!url) return 0;
             let score = 0;
-            if (url.includes('cloudfront.net')) score += 2;
-            if (url.includes('akamaized.net')) score += 1;
-            if (url.includes('1080')) score += 1.5;
-            if (url.includes('720')) score += 1;
-            if (url.includes('480')) score += 0.5;
+            const lowerUrl = url.toLowerCase();
+            if (lowerUrl.includes('cloudfront.net')) score += 2;
+            if (lowerUrl.includes('akamaized.net')) score += 1;
+            if (lowerUrl.includes('1080')) score += 1.5;
+            if (lowerUrl.includes('720')) score += 1;
+            if (lowerUrl.includes('480')) score += 0.5;
             return score;
         }
 
@@ -222,8 +268,9 @@
             return new Promise((resolve, reject) => {
                 updateStatus("Loading player...");
                 
-                const encodedUrl = encodeURIComponent(url);
-                const encodedKey = encodeURIComponent(key);
+                // Encode URL and key for safer transmission
+                const encodedUrl = encodeURIComponent(btoa(url));
+                const encodedKey = encodeURIComponent(btoa(key || ''));
                 const playerUrl = `${CONFIG.PLAYER_URL}?url=${encodedUrl}&key=${encodedKey}`;
                 
                 const iframe = document.createElement('iframe');
@@ -251,7 +298,12 @@
         }
 
         function handleError(error) {
-            console.error("Stream error:", error);
+            console.error("Stream error:", {
+                error: error.message,
+                stack: error.stack,
+                currentStream,
+                retryCount
+            });
             
             if (retryCount < CONFIG.MAX_RETRIES) {
                 retryCount++;
@@ -285,7 +337,9 @@
         function playAlternativeContent() {
             const backupUrl = "https://media-hosting.imagekit.io/1996bce2aade4e62/Black_and_White_Old_Movie_Silent_Film_Cinema_Projector_Video.mp4";
             playerContainer.innerHTML = `
-                <iframe src="${backupUrl}" style="width:100%;height:100%;border:none;"></iframe>
+                <video autoplay muted loop style="width:100%;height:100%;object-fit:cover;">
+                    <source src="${backupUrl}" type="video/mp4">
+                </video>
             `;
             playerContainer.style.display = 'block';
         }
