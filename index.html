@@ -5,115 +5,298 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Willow Live Events Player</title>
     <style>
-        /* [Keep your existing CSS unchanged] */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+        }
+        #loading {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 1.5em;
+        }
+        .spinner {
+            border: 5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 5px solid #e10600;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #player-container {
+            height: 100%;
+            width: 100%;
+            display: none;
+        }
+        iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+        #error {
+            color: red;
+            text-align: center;
+            padding: 20px;
+            display: none;
+            background-color: rgba(0,0,0,0.8);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 8px;
+        }
+        #status {
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
-    <!-- [Keep your existing HTML structure unchanged] -->
+    <div id="loading">
+        <div class="spinner"></div>
+        <div>Loading IPL Live Stream</div>
+        <div id="status">Initializing...</div>
+    </div>
+    <div id="error">
+        <h3>Stream Not Available</h3>
+        <p id="error-message">We're having trouble loading the stream.</p>
+    </div>
+    <div id="player-container"></div>
 
     <script>
-        // Updated Configuration
+        // Configuration
         const CONFIG = {
-            MAX_RETRIES: 3,  // Matches their retry count
-            RETRY_DELAY: 2000, // Matches their 2s timeout
-            PLAYER_URL: "https://cdn.jsdelivr.net/gh/drmlive/willow-live-events@latest/player.html",
-            CLOUDFRONT_ENDPOINTS: [
-                "https://d2s2kf6q1n2zq5.cloudfront.net",
-                "https://d3aq8i5c6s5m69.cloudfront.net"
-            ],
-            DRM: {
-                widevine: "https://license.willow.tv/widevine",
-                playready: "https://license.willow.tv/playready",
-                clearkey: {
-                    "3d5a7b8e2c1f4a9d": "a1b2c3d4e5f6g7h8" // Sample key
-                }
-            }
+            PLAYER_URL: "https://samarthsattani66.github.io/Teamroplry2/",
+            JSON_SOURCE: "https://raw.githubusercontent.com/drmlive/willow-live-events/main/willow.json",
+            BACKUP_STREAMS: [
+                "https://d1d34n8ev8w5cz.cloudfront.net/ipl2025/match1/playlist.mpd",
+                "https://d2qohgpffhaffh.cloudfront.net/ipl2025/match2/playlist.mpd"
+            ]
         };
 
-        // [Keep your existing state variables and DOM references]
+        // DOM Elements
+        const loadingEl = document.getElementById('loading');
+        const statusEl = document.getElementById('status');
+        const errorEl = document.getElementById('error');
+        const errorMsgEl = document.getElementById('error-message');
+        const playerContainer = document.getElementById('player-container');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', init);
+
+        async function init() {
+            resetUI();
+            updateStatus("Starting player...");
+            
+            try {
+                const { url, key } = await getStreamData();
+                await verifyStream(url);
+                await playStream(url, key);
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        async function verifyStream(url) {
+            updateStatus("Verifying stream...");
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                if (!response.ok) {
+                    throw new Error(`Stream verification failed with status ${response.status}`);
+                }
+                updateStatus("Stream verified");
+                return true;
+            } catch (error) {
+                throw new Error(`Stream verification error: ${error.message}`);
+            }
+        }
 
         async function getStreamData() {
             updateStatus("Fetching stream info...");
             
             try {
-                // Their CloudFront-first selection logic
-                const cloudfrontStreams = await getCloudFrontStreams();
-                if (cloudfrontStreams.length === 0) {
-                    throw new Error("No CloudFront streams available");
+                const response = await fetch(CONFIG.JSON_SOURCE);
+                if (!response.ok) throw new Error("Network response failed");
+                
+                const data = await response.json();
+                updateStatus("Processing data...");
+                
+                if (!data.matches || data.matches.length === 0) {
+                    throw new Error("No matches available");
                 }
 
-                // Their priority sorting (bitrate > resolution)
-                const selectedStream = cloudfrontStreams
-                    .sort((a, b) => b.bitrate - a.bitrate)[0];
+                // Find IPL 2025 matches
+                const iplMatches = data.matches.filter(match => 
+                    match.title && match.title.includes('Indian Premier League 2025') &&
+                    match.playback_data && match.playback_data.urls && 
+                    match.playback_data.urls.length > 0
+                );
 
-                return { 
-                    url: selectedStream.url,
-                    key: selectedStream.keyId || ''
-                };
+                if (iplMatches.length === 0) {
+                    throw new Error("No IPL matches found");
+                }
+
+                // Select match based on time
+                const now = new Date();
+                const selectedMatch = selectMatchByTime(iplMatches, now);
+                updateStatus(`Selected: ${selectedMatch.title}`);
+
+                // Find best MPD URL with CloudFront preference
+                let streamUrl = findBestStreamUrl(selectedMatch.playback_data.urls);
+                if (!streamUrl) {
+                    throw new Error("No playable streams found");
+                }
+
+                // Get clear key if available
+                const streamKey = selectedMatch.playback_data.keys?.[0]?.key || '';
+                return { url: streamUrl, key: streamKey };
             } catch (error) {
+                updateStatus(`Error: ${error.message}`);
                 throw error;
             }
         }
 
-        async function getCloudFrontStreams() {
-            // Simulating their stream selection from multiple CloudFront endpoints
-            const availableStreams = [];
+        function selectMatchByTime(matches, now) {
+            if (matches.length === 1) return matches[0];
             
-            for (const endpoint of CONFIG.CLOUDFRONT_ENDPOINTS) {
-                try {
-                    const streams = await fetchStreamManifest(endpoint);
-                    availableStreams.push(...streams.filter(s => 
-                        s.url.includes('.mpd') && 
-                        s.cdn === 'cloudfront'
-                    ));
-                } catch (e) {
-                    console.warn(`Endpoint ${endpoint} failed: ${e.message}`);
+            // Add time data to matches
+            matches.forEach(match => {
+                if (match.startTime) {
+                    try {
+                        const startTimeUTC = new Date(match.startTime);
+                        const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
+                        match.startTimeInMinutes = startTimeIST.getHours() * 60 + startTimeIST.getMinutes();
+                    } catch (e) {
+                        match.startTimeInMinutes = 0;
+                    }
+                } else {
+                    match.startTimeInMinutes = 0;
                 }
-            }
+            });
             
-            return availableStreams;
+            matches.sort((a, b) => a.startTimeInMinutes - b.startTimeInMinutes);
+            
+            const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+            return currentTimeInMinutes < 19 * 60 + 20 ? matches[0] : matches[matches.length - 1];
         }
 
-        async function fetchStreamManifest(endpoint) {
-            // Their actual implementation would make an API call here
-            // This is a simplified version
-            const mockResponse = {
-                streams: [
-                    {
-                        url: `${endpoint}/high.mpd`,
-                        bitrate: 8000000,
-                        resolution: "1080p",
-                        cdn: "cloudfront",
-                        keyId: "3d5a7b8e2c1f4a9d"
-                    },
-                    {
-                        url: `${endpoint}/medium.mpd`,
-                        bitrate: 4000000,
-                        resolution: "720p",
-                        cdn: "cloudfront"
-                    }
-                ]
-            };
-            return mockResponse.streams;
+        function findBestStreamUrl(urls) {
+            // First try to find CloudFront MPD URLs
+            const cloudfrontUrls = urls.filter(urlObj => {
+                if (!urlObj.url) return false;
+                const url = urlObj.url.toLowerCase();
+                return (url.includes('.mpd') || url.includes('mpd?')) && 
+                       url.includes('cloudfront.net');
+            });
+
+            if (cloudfrontUrls.length > 0) {
+                // Sort by quality (assuming higher bitrate = better quality)
+                cloudfrontUrls.sort((a, b) => {
+                    const aBitrate = a.bitrate || 0;
+                    const bBitrate = b.bitrate || 0;
+                    return bBitrate - aBitrate;
+                });
+                return cloudfrontUrls[0].url;
+            }
+
+            // If no CloudFront, try any MPD URL
+            const anyMpdUrls = urls.filter(urlObj => {
+                if (!urlObj.url) return false;
+                const url = urlObj.url.toLowerCase();
+                return url.includes('.mpd') || url.includes('mpd?');
+            });
+
+            if (anyMpdUrls.length > 0) {
+                anyMpdUrls.sort((a, b) => {
+                    const aBitrate = a.bitrate || 0;
+                    const bBitrate = b.bitrate || 0;
+                    return bBitrate - aBitrate;
+                });
+                return anyMpdUrls[0].url;
+            }
+
+            return null;
         }
 
         function playStream(url, key) {
             return new Promise((resolve, reject) => {
-                // Their player initialization with DRM config
-                const playerConfig = {
-                    url: encodeURIComponent(btoa(url)),
-                    drm: JSON.stringify(CONFIG.DRM),
-                    key: encodeURIComponent(btoa(key || ''))
-                };
+                updateStatus("Loading player...");
+                
+                // Encode URL and key for safer transmission
+                const encodedUrl = encodeURIComponent(btoa(url));
+                const encodedKey = encodeURIComponent(btoa(key || ''));
+                const playerUrl = `${CONFIG.PLAYER_URL}?url=${encodedUrl}&key=${encodedKey}`;
                 
                 const iframe = document.createElement('iframe');
-                iframe.src = `${CONFIG.PLAYER_URL}?${new URLSearchParams(playerConfig)}`;
+                iframe.src = playerUrl;
+                iframe.onload = () => {
+                    updateStatus("Player loaded");
+                    loadingEl.style.display = 'none';
+                    playerContainer.style.display = 'block';
+                    resolve();
+                };
+                iframe.onerror = () => {
+                    reject(new Error("Player failed to load"));
+                };
                 
-                // [Keep your existing iframe handlers]
+                playerContainer.innerHTML = '';
+                playerContainer.appendChild(iframe);
+                
+                // Add timeout check
+                setTimeout(() => {
+                    if (loadingEl.style.display !== 'none') {
+                        reject(new Error("Player took too long to load"));
+                    }
+                }, 10000);
             });
         }
 
-        // [Keep all other existing functions unchanged]
+        function handleError(error) {
+            console.error("Stream error:", error);
+            showError(error.message || "Failed to load stream");
+            playAlternativeContent();
+        }
+
+        function resetUI() {
+            loadingEl.style.display = 'flex';
+            playerContainer.style.display = 'none';
+            playerContainer.innerHTML = '';
+            errorEl.style.display = 'none';
+        }
+
+        function updateStatus(message) {
+            statusEl.textContent = message;
+            console.log(message);
+        }
+
+        function showError(message) {
+            loadingEl.style.display = 'none';
+            errorMsgEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function playAlternativeContent() {
+            const backupUrl = "https://media-hosting.imagekit.io/1996bce2aade4e62/Black_and_White_Old_Movie_Silent_Film_Cinema_Projector_Video.mp4";
+            playerContainer.innerHTML = `
+                <video autoplay muted loop style="width:100%;height:100%;object-fit:cover;">
+                    <source src="${backupUrl}" type="video/mp4">
+                </video>
+            `;
+            playerContainer.style.display = 'block';
+        }
     </script>
 </body>
 </html>
