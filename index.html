@@ -1,192 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willow Live Events Player</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-        }
-        #loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            font-size: 1.5em;
-        }
-        #player-container {
-            height: 100%;
-            width: 100%;
-        }
-        iframe {
-            border: none;
-            width: 100%;
-            height: 100%;
-        }
-        #error {
-            color: red;
-            text-align: center;
-            padding: 20px;
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Willow Live Events Player</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      font-family: sans-serif;
+    }
+    #loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: #fff;
+      font-size: 18px;
+    }
+    #player-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    #error {
+      display: none;
+      color: red;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
 </head>
 <body>
-    <div id="loading">Loading live events data...</div>
-    <div id="error"></div>
-    <div id="player-container"></div>
+  <div id="loading">Loading live events...</div>
+  <div id="error"></div>
+  <div id="player-container"></div>
 
-    <script>
-        // CDN Priority List (ordered by preference)
-        const CDN_PRIORITY = [
-            {
-                name: "CloudFront",
-                domains: ['cloudfront.net'],
-                priority: 1
-            },
-            {
-                name: "Akamai",
-                domains: ['akamaized.net', 'edgesuite.net', 'edgekey.net'],
-                priority: 2
-            },
-            {
-                name: "Fastly",
-                domains: ['fastly.net'],
-                priority: 3
-            },
-            {
-                name: "Limelight",
-                domains: ['llnwd.net'],
-                priority: 4
-            },
-            {
-                name: "Generic",
-                domains: [],
-                priority: 5
-            }
-        ];
+  <script>
+    const CDN_PRIORITY = [
+      { name: "CloudFront", domains: ['cloudfront.net'], priority: 1 },
+      { name: "Akamai", domains: ['akamaized.net', 'edgesuite.net', 'edgekey.net'], priority: 2 },
+      { name: "Fastly", domains: ['fastly.net'], priority: 3 },
+      { name: "Limelight", domains: ['llnwd.net'], priority: 4 },
+      { name: "Generic", domains: [], priority: 5 }
+    ];
 
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/main/willow.json')
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    const iplMatches = data.matches.filter(match => match.title && match.title.includes('Indian Premier League 2025'));
-                    if (iplMatches.length === 0) return playAlternativeVideo();
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/main/willow.json')
+        .then(res => res.ok ? res.json() : Promise.reject('Fetch failed'))
+        .then(data => {
+          const matches = data.matches.filter(m => m.title?.includes('Indian Premier League 2025'));
+          if (!matches.length) return playAlternative();
 
-                    let selectedMatch;
-                    if (iplMatches.length === 1) {
-                        selectedMatch = iplMatches[0];
-                    } else {
-                        const now = new Date();
-                        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-                        iplMatches.forEach(match => {
-                            if (match.startTime) {
-                                const startTimeUTC = new Date(match.startTime);
-                                const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
-                                match.startTimeInMinutes = startTimeIST.getHours() * 60 + startTimeIST.getMinutes();
-                            } else {
-                                match.startTimeInMinutes = 0;
-                            }
-                        });
-                        iplMatches.sort((a, b) => a.startTimeInMinutes - b.startTimeInMinutes);
-                        selectedMatch = currentTimeInMinutes < 1160 ? iplMatches[0] : iplMatches[iplMatches.length - 1];
-                    }
+          const match = matches.length === 1 ? matches[0] : closestMatch(matches);
 
-                    if (!selectedMatch.playback_data || !selectedMatch.playback_data.urls || selectedMatch.playback_data.urls.length === 0) {
-                        return showError('No playback URLs found for this match.');
-                    }
+          if (!match.playback_data?.urls?.length || !match.playback_data?.keys?.length)
+            return showError('Missing playback data.');
 
-                    if (!selectedMatch.playback_data.keys || selectedMatch.playback_data.keys.length === 0) {
-                        return showError('No decryption keys found for this match.');
-                    }
+          const mpdUrls = match.playback_data.urls.filter(u => u.url?.includes('.mpd'));
+          if (!mpdUrls.length) return showError('No MPD URLs found.');
 
-                    const mpdUrls = selectedMatch.playback_data.urls.filter(urlObj => urlObj.url && (urlObj.url.endsWith('.mpd') || urlObj.url.includes('.mpd?')));
-                    if (mpdUrls.length === 0) return showError('No valid MPD URLs found for this match.');
+          const sorted = mpdUrls.map(u => {
+            const cdn = getCDNInfo(u.url);
+            const quality = getQualityScore(u.url);
+            return { url: u.url, score: (100 - cdn.priority * 10) + quality };
+          }).sort((a, b) => b.score - a.score);
 
-                    const scoredUrls = mpdUrls.map(urlObj => {
-                        const url = urlObj.url;
-                        const cdnInfo = getCDNInfo(url);
-                        const qualityScore = getQualityScore(url);
-                        return {
-                            url: url,
-                            cdn: cdnInfo,
-                            qualityScore: qualityScore,
-                            totalScore: (100 - cdnInfo.priority * 10) + qualityScore
-                        };
-                    });
+          playStream(sorted[0].url, match.playback_data.keys[0]);
+        })
+        .catch(err => showError('Error: ' + err));
+    });
 
-                    scoredUrls.sort((a, b) => b.totalScore - a.totalScore);
+    function closestMatch(matches) {
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      matches.forEach(m => {
+        const matchTime = new Date(new Date(m.startTime).getTime() + 5.5 * 60 * 60 * 1000);
+        m._mins = matchTime.getHours() * 60 + matchTime.getMinutes();
+      });
+      return matches.sort((a, b) => Math.abs(a._mins - nowMinutes) - Math.abs(b._mins - nowMinutes))[0];
+    }
 
-                    const bestUrl = scoredUrls[0].url;
-                    playStream(bestUrl, selectedMatch.playback_data.keys[0]);
-                })
-                .catch(error => {
-                    showError('Error fetching or processing live events data: ' + error.message);
-                });
-        });
+    function getCDNInfo(url) {
+      for (const cdn of CDN_PRIORITY) {
+        if (cdn.domains.some(d => url.includes(d))) return cdn;
+      }
+      return CDN_PRIORITY.find(c => c.name === "Generic");
+    }
 
-        function getCDNInfo(url) {
-            for (const cdn of CDN_PRIORITY) {
-                for (const domain of cdn.domains) {
-                    if (url.includes(domain)) return cdn;
-                }
-            }
-            return CDN_PRIORITY.find(cdn => cdn.name === "Generic");
+    function getQualityScore(url) {
+      const u = url.toLowerCase();
+      if (u.includes('2160') || u.includes('4k')) return 40;
+      if (u.includes('1080')) return 30;
+      if (u.includes('720')) return 20;
+      if (u.includes('480')) return 10;
+      return 5;
+    }
+
+    function playStream(url, key) {
+      const playerUrl = `https://samarthsattani66.github.io/Teamroplry2/?url=${encodeURIComponent(url)}&key=${encodeURIComponent(key)}`;
+      const iframe = document.createElement('iframe');
+      iframe.src = playerUrl;
+      iframe.onerror = () => {
+        showError('Player error. Showing backup...');
+        playAlternative();
+      };
+      document.getElementById('player-container').appendChild(iframe);
+      document.getElementById('loading').style.display = 'none';
+      setTimeout(() => {
+        if (!iframe.contentWindow?.document?.readyState === 'complete') {
+          showError('Player timeout. Showing backup...');
+          playAlternative();
         }
+      }, 15000);
+    }
 
-        function getQualityScore(url) {
-            url = url.toLowerCase();
-            if (url.includes('4k') || url.includes('uhd') || url.includes('2160')) return 40;
-            if (url.includes('1080') || url.includes('fullhd')) return 30;
-            if (url.includes('720') || url.includes('hd')) return 20;
-            if (url.includes('480') || url.includes('sd')) return 10;
-            return 5;
-        }
+    function showError(msg) {
+      document.getElementById('loading').style.display = 'none';
+      const err = document.getElementById('error');
+      err.textContent = msg;
+      err.style.display = 'block';
+    }
 
-        function playStream(url, key) {
-            const encodedUrl = encodeURIComponent(url);
-            const encodedKey = encodeURIComponent(key);
-            const playerUrl = `https://samarthsattani66.github.io/Teamroplry2/?url=${encodedUrl}&key=${encodedKey}`;
-            const iframe = document.createElement('iframe');
-            iframe.src = playerUrl;
-            iframe.onerror = function() {
-                showError('Failed to load player. Trying alternative...');
-                playAlternativeVideo();
-            };
-            document.getElementById('player-container').appendChild(iframe);
-            document.getElementById('loading').style.display = 'none';
-            setTimeout(() => {
-                if (!iframe.contentWindow || !iframe.contentWindow.document || iframe.contentWindow.document.readyState !== 'complete') {
-                    showError('Player is taking too long to load. Trying alternative...');
-                    playAlternativeVideo();
-                }
-            }, 15000);
-        }
-
-        function showError(message) {
-            document.getElementById('loading').style.display = 'none';
-            const errorDiv = document.getElementById('error');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            console.error(message);
-        }
-
-        function playAlternativeVideo() {
-            document.getElementById('loading').style.display = 'none';
-            const container = document.getElementById('player-container');
-            const videoUrl = "https://media-hosting.imagekit.io/1996bce2aade4e62/Black and White Old Movie Silent Film Cinema Projector Video.mp4?Expires=1839379555&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=paPtQmaQ4l6rpstSvYNMoYCRbe3VFIUQ927kdZPUE1571y3RYJUdcIFSELWzhVMVlQlhFUpouQGU0TYDx23GQAwpeESuBnDJts-OQ1FFMM9CIUvjiDTdGxeRBns6VA9V8vXAkZBLN7zk5QkfbOq7qhF2HRWzOFgqosZJe99uhGSNp9sQ2CdBVXyOkRsZSvH~0nBUv6z0w3b0iL~fLXlCSv7YMmRptIJR6xHeoDVD~HHyYK1JBPZEruhBU3jhTdGOY~5O7Y~GvRBfGFZobAmqDgx8GBmNmh7IF7suxqwm46SPCn5P3mNiFCqCDQbgM4kWtTjyLpNkbgitIun9AVO-0g__";
-            const iframe = document.createElement('iframe');
-            iframe.src = videoUrl;
-            container.appendChild(iframe);
-        }
-    </script>
+    function playAlternative() {
+      const backup = "https://media-hosting.imagekit.io/1996bce2aade4e62/Black and White Old Movie Silent Film Cinema Projector Video.mp4";
+      const iframe = document.createElement('iframe');
+      iframe.src = backup;
+      document.getElementById('player-container').appendChild(iframe);
+      document.getElementById('loading').style.display = 'none';
+    }
+  </script>
 </body>
 </html>
