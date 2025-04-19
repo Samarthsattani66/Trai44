@@ -81,10 +81,6 @@
         const CONFIG = {
             PLAYER_URL: "https://samarthsattani66.github.io/Teamroplry2/",
             JSON_SOURCE: "https://raw.githubusercontent.com/drmlive/willow-live-events/main/willow.json",
-            HEADERS: {
-                'Referer': 'https://willow.tv',
-                'Origin': 'https://willow.tv'
-            },
             TIMEOUT: 10000 // 10 seconds
         };
 
@@ -103,122 +99,80 @@
             updateStatus("Starting player...");
             
             try {
-                const { url, key } = await getStreamData();
-                await verifyStream(url);
-                await playStream(url, key);
+                const { mpdUrl, drmKey } = await fetchMPDStream();
+                await playStream(mpdUrl, drmKey);
             } catch (error) {
                 handleError(error);
             }
         }
 
-        async function verifyStream(url) {
-            updateStatus("Verifying stream...");
-            try {
-                const response = await fetch(url, { 
-                    method: 'HEAD',
-                    headers: CONFIG.HEADERS
-                });
-                
-                if (response.status === 401) {
-                    updateStatus("Stream requires authorization - attempting playback");
-                    return true;
-                }
-                
-                if (!response.ok) {
-                    throw new Error(`Stream verification failed with status ${response.status}`);
-                }
-                
-                updateStatus("Stream verified");
-                return true;
-            } catch (error) {
-                if (error.message.includes('Failed to fetch')) {
-                    updateStatus("Proceeding with playback - CORS restrictions detected");
-                    return true;
-                }
-                throw new Error(`Stream verification error: ${error.message}`);
-            }
-        }
-
-        async function getStreamData() {
-            updateStatus("Fetching stream info...");
+        async function fetchMPDStream() {
+            updateStatus("Fetching stream data...");
             
             try {
+                // 1. Fetch JSON data
                 const response = await fetch(CONFIG.JSON_SOURCE);
-                if (!response.ok) throw new Error("Network response failed");
+                if (!response.ok) throw new Error("Failed to fetch stream data");
                 
+                // 2. Parse JSON
                 const data = await response.json();
-                updateStatus("Processing data...");
+                updateStatus("Processing match data...");
                 
-                if (!data.matches || data.matches.length === 0) {
-                    throw new Error("No matches available");
-                }
-
-                // Find IPL 2025 matches
+                // 3. Filter for IPL 2025 matches with MPD URLs
                 const iplMatches = data.matches.filter(match => 
-                    match.title && match.title.includes('Indian Premier League 2025') &&
-                    match.playback_data?.urls?.length > 0
+                    match.title?.includes('Indian Premier League 2025') &&
+                    match.playback_data?.urls?.some(url => 
+                        url.url?.includes('.mpd') || url.url?.includes('mpd?')
+                    )
                 );
 
                 if (iplMatches.length === 0) {
-                    throw new Error("No IPL matches found");
+                    throw new Error("No IPL 2025 matches found");
                 }
 
-                // Select match based on time
-                const selectedMatch = selectMatchByTime(iplMatches);
-                updateStatus(`Selected: ${selectedMatch.title}`);
+                // 4. Select most relevant match
+                const selectedMatch = selectCurrentMatch(iplMatches);
+                updateStatus(`Selected match: ${selectedMatch.title}`);
 
-                // Find best MPD URL with CloudFront preference
-                const streamUrl = findBestStreamUrl(selectedMatch.playback_data.urls);
-                if (!streamUrl) {
-                    throw new Error("No playable streams found");
+                // 5. Extract all MPD URLs
+                const mpdUrls = selectedMatch.playback_data.urls
+                    .filter(urlObj => 
+                        urlObj.url && 
+                        (urlObj.url.includes('.mpd') || urlObj.url.includes('mpd?'))
+                    )
+                    .map(urlObj => urlObj.url);
+
+                if (mpdUrls.length === 0) {
+                    throw new Error("No valid MPD streams found");
                 }
 
-                // Get clear key if available
-                const streamKey = selectedMatch.playback_data.keys?.[0]?.key || '';
-                return { url: streamUrl, key: streamKey };
+                // 6. Select best MPD (CloudFront preferred)
+                const bestMPD = mpdUrls.find(url => url.includes('cloudfront.net')) || mpdUrls[0];
+                const drmKey = selectedMatch.playback_data.keys?.[0]?.key || '';
+
+                return { mpdUrl: bestMPD, drmKey };
+                
             } catch (error) {
                 updateStatus(`Error: ${error.message}`);
                 throw error;
             }
         }
 
-        function selectMatchByTime(matches) {
+        function selectCurrentMatch(matches) {
             if (matches.length === 1) return matches[0];
             
             const now = new Date();
-            const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-            
             return matches.reduce((closest, match) => {
                 if (!match.startTime) return closest;
                 
-                const startTimeUTC = new Date(match.startTime);
-                const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
-                const matchTimeInMinutes = startTimeIST.getHours() * 60 + startTimeIST.getMinutes();
+                const matchTime = new Date(match.startTime).getTime();
+                const currentTime = now.getTime();
+                const closestTime = new Date(closest.startTime).getTime();
                 
-                const currentDiff = Math.abs(currentTimeInMinutes - matchTimeInMinutes);
-                const closestDiff = Math.abs(currentTimeInMinutes - (closest.startTimeInMinutes || 0));
-                
-                return currentDiff < closestDiff ? 
-                    {...match, startTimeInMinutes: matchTimeInMinutes} : 
-                    closest;
+                return Math.abs(currentTime - matchTime) < Math.abs(currentTime - closestTime) 
+                    ? match 
+                    : closest;
             }, matches[0]);
-        }
-
-        function findBestStreamUrl(urls) {
-            // First try CloudFront MPDs, sorted by quality
-            const cloudfrontUrls = urls
-                .filter(urlObj => urlObj.url?.includes('cloudfront.net') && 
-                                (urlObj.url.includes('.mpd') || urlObj.url.includes('mpd?')))
-                .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
-            
-            if (cloudfrontUrls.length > 0) return cloudfrontUrls[0].url;
-            
-            // Then try any MPD, sorted by quality
-            const anyMpdUrls = urls
-                .filter(urlObj => urlObj.url?.includes('.mpd') || urlObj.url?.includes('mpd?'))
-                .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
-            
-            return anyMpdUrls[0]?.url;
         }
 
         function playStream(url, key) {
@@ -226,21 +180,21 @@
                 updateStatus("Loading player...");
                 
                 const encodedUrl = encodeURIComponent(btoa(url));
-                const encodedKey = encodeURIComponent(btoa(key || ''));
+                const encodedKey = encodeURIComponent(btoa(key));
                 const playerUrl = `${CONFIG.PLAYER_URL}?url=${encodedUrl}&key=${encodedKey}`;
                 
                 const iframe = document.createElement('iframe');
                 iframe.src = playerUrl;
                 
                 iframe.onload = () => {
-                    updateStatus("Player loaded");
+                    updateStatus("Player loaded successfully");
                     loadingEl.style.display = 'none';
                     playerContainer.style.display = 'block';
                     resolve();
                 };
                 
                 iframe.onerror = () => {
-                    reject(new Error("Player failed to load"));
+                    reject(new Error("Player failed to initialize"));
                 };
                 
                 playerContainer.innerHTML = '';
@@ -248,15 +202,15 @@
                 
                 setTimeout(() => {
                     if (loadingEl.style.display !== 'none') {
-                        reject(new Error("Player took too long to load"));
+                        reject(new Error("Player loading timed out"));
                     }
                 }, CONFIG.TIMEOUT);
             });
         }
 
         function handleError(error) {
-            console.error("Stream error:", error);
-            showError(error.message || "Failed to load stream");
+            console.error("Player error:", error);
+            showError(error.message);
             playAlternativeContent();
         }
 
