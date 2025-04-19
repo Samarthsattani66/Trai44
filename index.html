@@ -11,29 +11,13 @@
             height: 100%;
             overflow: hidden;
             font-family: Arial, sans-serif;
-            background-color: #000;
         }
         #loading {
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100%;
             font-size: 1.5em;
-            color: #fff;
-        }
-        .spinner {
-            border: 5px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top: 5px solid #e10600;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
         #player-container {
             height: 100%;
@@ -49,307 +33,219 @@
             text-align: center;
             padding: 20px;
             display: none;
-            background-color: rgba(0,0,0,0.8);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 8px;
-        }
-        #retry-btn {
-            margin-top: 15px;
-            padding: 8px 20px;
-            background: #e10600;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        #status {
-            margin-top: 10px;
-            font-size: 0.8em;
-            color: #aaa;
         }
     </style>
 </head>
 <body>
-    <div id="loading">
-        <div class="spinner"></div>
-        <div>Loading IPL Live Stream</div>
-        <div id="status">Initializing...</div>
-    </div>
-    <div id="error">
-        <h3>Stream Not Available</h3>
-        <p id="error-message">We're having trouble loading the stream.</p>
-        <button id="retry-btn">Retry Now</button>
-    </div>
+    <div id="loading">Loading live events data...</div>
+    <div id="error"></div>
     <div id="player-container"></div>
 
     <script>
-        // Configuration
-        const CONFIG = {
-            MAX_RETRIES: 3,
-            RETRY_DELAY: 3000,
-            PLAYER_URL: "https://cdn.jsdelivr.net/gh/drmlive/willow-live-events@latest/player.html",
-            JSON_SOURCE: "https://raw.githubusercontent.com/drmlive/willow-live-events/main/willow.json",
-            BACKUP_STREAMS: [
-                "https://d1d34n8ev8w5cz.cloudfront.net/ipl2025/match1/playlist.mpd",
-                "https://d2qohgpffhaffh.cloudfront.net/ipl2025/match2/playlist.mpd"
-            ]
-        };
-
-        // State
-        let retryCount = 0;
-        let currentStream = null;
-
-        // DOM Elements
-        const loadingEl = document.getElementById('loading');
-        const statusEl = document.getElementById('status');
-        const errorEl = document.getElementById('error');
-        const errorMsgEl = document.getElementById('error-message');
-        const retryBtn = document.getElementById('retry-btn');
-        const playerContainer = document.getElementById('player-container');
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', init);
-        retryBtn.addEventListener('click', init);
-
-        async function init() {
-            resetUI();
-            updateStatus("Starting player...");
-            
-            try {
-                const { url, key } = await getStreamData();
-                currentStream = { url, key };
-                await verifyStream(url);
-                await playStream(url, key);
-            } catch (error) {
-                handleError(error);
+        // CDN Priority List (ordered by preference)
+        const CDN_PRIORITY = [
+            {
+                name: "Akamai",
+                domains: ['akamaized.net', 'edgesuite.net', 'edgekey.net'],
+                priority: 1
+            },
+            {
+                name: "CloudFront",
+                domains: ['cloudfront.net'],
+                priority: 2
+            },
+            {
+                name: "Limelight",
+                domains: ['llnwd.net'],
+                priority: 3
+            },
+            {
+                name: "Fastly",
+                domains: ['fastly.net'],
+                priority: 4
+            },
+            {
+                name: "Generic",
+                domains: [], // Matches any domain
+                priority: 5
             }
-        }
+        ];
 
-        async function verifyStream(url) {
-            updateStatus("Verifying stream...");
-            try {
-                const response = await fetch(url, { method: 'HEAD' });
-                if (!response.ok) {
-                    throw new Error(`Stream verification failed with status ${response.status}`);
-                }
-                updateStatus("Stream verified");
-                return true;
-            } catch (error) {
-                throw new Error(`Stream verification error: ${error.message}`);
-            }
-        }
-
-        async function getStreamData() {
-            updateStatus("Fetching stream info...");
-            
-            try {
-                const response = await fetch(CONFIG.JSON_SOURCE);
-                if (!response.ok) throw new Error("Network response failed");
-                
-                const data = await response.json();
-                updateStatus("Processing data...");
-                
-                if (!data.matches || data.matches.length === 0) {
-                    throw new Error("No matches available");
-                }
-
-                // Find IPL 2025 matches
-                const iplMatches = data.matches.filter(match => 
-                    match.title && match.title.includes('Indian Premier League 2025') &&
-                    match.playback_data && match.playback_data.urls && 
-                    match.playback_data.urls.length > 0
-                );
-
-                if (iplMatches.length === 0) {
-                    throw new Error("No IPL matches found");
-                }
-
-                // Select match based on time
-                const now = new Date();
-                const selectedMatch = selectMatchByTime(iplMatches, now);
-                updateStatus(`Selected: ${selectedMatch.title}`);
-
-                // Find best MPD URL with CloudFront preference
-                let streamUrl = findBestStreamUrl(selectedMatch.playback_data.urls);
-                if (!streamUrl) {
-                    throw new Error("No playable streams found");
-                }
-
-                // Verify the stream exists
-                try {
-                    await verifyStream(streamUrl);
-                } catch (e) {
-                    updateStatus("Primary stream failed, trying backups...");
-                    streamUrl = await tryBackupStreams();
-                }
-
-                // Get clear key if available
-                const streamKey = selectedMatch.playback_data.keys?.[0]?.key || '';
-                return { url: streamUrl, key: streamKey };
-            } catch (error) {
-                updateStatus(`Error: ${error.message}`);
-                throw error;
-            }
-        }
-
-        async function tryBackupStreams() {
-            for (const backupUrl of CONFIG.BACKUP_STREAMS) {
-                try {
-                    await verifyStream(backupUrl);
-                    updateStatus(`Using backup stream: ${backupUrl}`);
-                    return backupUrl;
-                } catch (e) {
-                    updateStatus(`Backup failed: ${backupUrl}`);
-                    continue;
-                }
-            }
-            throw new Error("All backup streams failed");
-        }
-
-        function selectMatchByTime(matches, now) {
-            if (matches.length === 1) return matches[0];
-            
-            // Add time data to matches
-            matches.forEach(match => {
-                if (match.startTime) {
-                    try {
-                        const startTimeUTC = new Date(match.startTime);
-                        const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
-                        match.startTimeInMinutes = startTimeIST.getHours() * 60 + startTimeIST.getMinutes();
-                    } catch (e) {
-                        match.startTimeInMinutes = 0;
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/main/willow.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
                     }
-                } else {
-                    match.startTimeInMinutes = 0;
-                }
-            });
-            
-            matches.sort((a, b) => a.startTimeInMinutes - b.startTimeInMinutes);
-            
-            const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-            return currentTimeInMinutes < 19 * 60 + 20 ? matches[0] : matches[matches.length - 1];
-        }
-
-        function findBestStreamUrl(urls) {
-            const validUrls = urls
-                .filter(urlObj => {
-                    if (!urlObj.url) return false;
-                    const url = urlObj.url.toLowerCase();
-                    const isMPD = url.includes('.mpd') || url.includes('mpd?') || url.includes('/mpd') || url.endsWith('mpd');
-                    const isCloudFront = url.includes('cloudfront.net');
-                    return isMPD && isCloudFront;
+                    return response.json();
                 })
-                .sort((a, b) => {
-                    const aScore = getUrlScore(a.url);
-                    const bScore = getUrlScore(b.url);
-                    return bScore - aScore;
+                .then(data => {
+                    // Find IPL 2025 matches
+                    const iplMatches = data.matches.filter(match => 
+                        match.title && match.title.includes('Indian Premier League 2025')
+                    );
+
+                    if (iplMatches.length === 0) {
+                        playAlternativeVideo();
+                        return;
+                    }
+
+                    let selectedMatch;
+                    
+                    if (iplMatches.length === 1) {
+                        selectedMatch = iplMatches[0];
+                    } else {
+                        const now = new Date();
+                        const currentHours = now.getHours();
+                        const currentMinutes = now.getMinutes();
+                        const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+                        
+                        iplMatches.forEach(match => {
+                            if (match.startTime) {
+                                const startTimeUTC = new Date(match.startTime);
+                                const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
+                                const hours = startTimeIST.getHours();
+                                const minutes = startTimeIST.getMinutes();
+                                match.startTimeInMinutes = hours * 60 + minutes;
+                            } else {
+                                match.startTimeInMinutes = 0;
+                            }
+                        });
+                        
+                        iplMatches.sort((a, b) => a.startTimeInMinutes - b.startTimeInMinutes);
+                        
+                        if (currentTimeInMinutes < 19 * 60 + 20) {
+                            selectedMatch = iplMatches[0];
+                        } else {
+                            selectedMatch = iplMatches[iplMatches.length - 1];
+                        }
+                    }
+
+                    if (!selectedMatch.playback_data || !selectedMatch.playback_data.urls || selectedMatch.playback_data.urls.length === 0) {
+                        showError('No playback URLs found for this match.');
+                        return;
+                    }
+
+                    if (!selectedMatch.playback_data.keys || selectedMatch.playback_data.keys.length === 0) {
+                        showError('No decryption keys found for this match.');
+                        return;
+                    }
+
+                    // Get all MPD URLs
+                    const mpdUrls = selectedMatch.playback_data.urls.filter(urlObj => 
+                        urlObj.url && 
+                        (urlObj.url.endsWith('.mpd') || urlObj.url.includes('.mpd?'))
+                    );
+
+                    if (mpdUrls.length === 0) {
+                        showError('No valid MPD URLs found for this match.');
+                        return;
+                    }
+
+                    // Score and sort MPD URLs based on CDN priority and quality
+                    const scoredUrls = mpdUrls.map(urlObj => {
+                        const url = urlObj.url;
+                        const cdnInfo = getCDNInfo(url);
+                        const qualityScore = getQualityScore(url);
+                        
+                        return {
+                            url: url,
+                            cdn: cdnInfo,
+                            qualityScore: qualityScore,
+                            totalScore: (100 - cdnInfo.priority * 10) + qualityScore // Higher score = better
+                        };
+                    });
+
+                    // Sort by total score (descending)
+                    scoredUrls.sort((a, b) => b.totalScore - a.totalScore);
+
+                    console.log('Available MPD URLs with scores:', scoredUrls);
+
+                    // Select the best available URL
+                    const bestUrl = scoredUrls[0].url;
+                    console.log('Selected MPD URL:', bestUrl, 'from', scoredUrls[0].cdn.name);
+
+                    playStream(bestUrl, selectedMatch.playback_data.keys[0]);
+                })
+                .catch(error => {
+                    showError('Error fetching or processing live events data: ' + error.message);
+                    console.error('Error:', error);
                 });
-            
-            return validUrls[0]?.url;
+        });
+
+        // Helper function to identify CDN from URL
+        function getCDNInfo(url) {
+            for (const cdn of CDN_PRIORITY) {
+                for (const domain of cdn.domains) {
+                    if (url.includes(domain)) {
+                        return cdn;
+                    }
+                }
+            }
+            // Return generic if no match found
+            return CDN_PRIORITY.find(cdn => cdn.name === "Generic");
         }
 
-        function getUrlScore(url) {
-            if (!url) return 0;
-            let score = 0;
-            const lowerUrl = url.toLowerCase();
-            
-            // CDN preference
-            if (lowerUrl.includes('cloudfront.net')) score += 3;
-            if (lowerUrl.includes('akamaized.net')) score += 2;
-            
-            // Resolution preference
-            if (lowerUrl.includes('1080')) score += 2;
-            if (lowerUrl.includes('720')) score += 1.5;
-            if (lowerUrl.includes('480')) score += 1;
-            
-            // Codec preference
-            if (lowerUrl.includes('h264')) score += 1.5;
-            if (lowerUrl.includes('h265')) score += 1;
-            
-            return score;
+        // Helper function to estimate quality from URL
+        function getQualityScore(url) {
+            url = url.toLowerCase();
+            if (url.includes('4k') || url.includes('uhd') || url.includes('2160')) return 40;
+            if (url.includes('1080') || url.includes('fullhd')) return 30;
+            if (url.includes('720') || url.includes('hd')) return 20;
+            if (url.includes('480') || url.includes('sd')) return 10;
+            return 5; // Default score for unknown quality
         }
 
         function playStream(url, key) {
-            return new Promise((resolve, reject) => {
-                updateStatus("Loading player...");
-                
-                // Encode URL and key for safer transmission
-                const encodedUrl = encodeURIComponent(btoa(url));
-                const encodedKey = encodeURIComponent(btoa(key || ''));
-                const playerUrl = `${CONFIG.PLAYER_URL}?url=${encodedUrl}&key=${encodedKey}`;
-                
-                const iframe = document.createElement('iframe');
-                iframe.src = playerUrl;
-                iframe.onload = () => {
-                    updateStatus("Player loaded");
-                    loadingEl.style.display = 'none';
-                    playerContainer.style.display = 'block';
-                    resolve();
-                };
-                iframe.onerror = () => {
-                    reject(new Error("Player failed to load"));
-                };
-                
-                playerContainer.innerHTML = '';
-                playerContainer.appendChild(iframe);
-                
-                // Add timeout check
-                setTimeout(() => {
-                    if (loadingEl.style.display !== 'none') {
-                        reject(new Error("Player took too long to load"));
-                    }
-                }, 10000);
-            });
-        }
-
-        function handleError(error) {
-            console.error("Stream error:", {
-                error: error.message,
-                stack: error.stack,
-                currentStream,
-                retryCount
-            });
+            // Encode the URL and key for the player
+            const encodedUrl = encodeURIComponent(url);
+            const encodedKey = encodeURIComponent(key);
             
-            if (retryCount < CONFIG.MAX_RETRIES) {
-                retryCount++;
-                updateStatus(`Retrying... (${retryCount}/${CONFIG.MAX_RETRIES})`);
-                setTimeout(init, CONFIG.RETRY_DELAY);
-            } else {
-                showError(error.message || "Failed to load stream after multiple attempts");
-                playAlternativeContent();
-            }
-        }
-
-        function resetUI() {
-            loadingEl.style.display = 'flex';
-            playerContainer.style.display = 'none';
-            playerContainer.innerHTML = '';
-            errorEl.style.display = 'none';
-            retryCount = 0;
-        }
-
-        function updateStatus(message) {
-            statusEl.textContent = message;
-            console.log(message);
+            // Create iframe with the player
+            const playerUrl = `https://samarthsattani66.github.io/Teamroplry2/?url=${encodedUrl}&key=${encodedKey}`;
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = playerUrl;
+            
+            // Add error handling
+            iframe.onerror = function() {
+                showError('Failed to load player. Trying alternative...');
+                playAlternativeVideo();
+            };
+            
+            const container = document.getElementById('player-container');
+            container.appendChild(iframe);
+            
+            // Hide loading message
+            document.getElementById('loading').style.display = 'none';
+            
+            // Set timeout in case player gets stuck
+            setTimeout(() => {
+                if (!iframe.contentWindow || !iframe.contentWindow.document || 
+                    iframe.contentWindow.document.readyState !== 'complete') {
+                    showError('Player is taking too long to load. Trying alternative...');
+                    playAlternativeVideo();
+                }
+            }, 15000);
         }
 
         function showError(message) {
-            loadingEl.style.display = 'none';
-            errorMsgEl.textContent = message;
-            errorEl.style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            console.error(message);
         }
 
-        function playAlternativeContent() {
-            const backupUrl = "https://media-hosting.imagekit.io/1996bce2aade4e62/Black_and_White_Old_Movie_Silent_Film_Cinema_Projector_Video.mp4";
-            playerContainer.innerHTML = `
-                <video autoplay muted loop style="width:100%;height:100%;object-fit:cover;">
-                    <source src="${backupUrl}" type="video/mp4">
-                </video>
-            `;
-            playerContainer.style.display = 'block';
+        function playAlternativeVideo() {
+            document.getElementById('loading').style.display = 'none';
+            const container = document.getElementById('player-container');
+            
+            const videoUrl = "https://media-hosting.imagekit.io/1996bce2aade4e62/Black and White Old Movie Silent Film Cinema Projector Video.mp4?Expires=1839379555&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=paPtQmaQ4l6rpstSvYNMoYCRbe3VFIUQ927kdZPUE1571y3RYJUdcIFSELWzhVMVlQlhFUpouQGU0TYDx23GQAwpeESuBnDJts-OQ1FFMM9CIUvjiDTdGxeRBns6VA9V8vXAkZBLN7zk5QkfbOq7qhF2HRWzOFgqosZJe99uhGSNp9sQ2CdBVXyOkRsZSvH~0nBUv6z0w3b0iL~fLXlCSv7YMmRptIJR6xHeoDVD~HHyYK1JBPZEruhBU3jhTdGOY~5O7Y~GvRBfGFZobAmqDgx8GBmNmh7IF7suxqwm46SPCn5P3mNiFCqCDQbgM4kWtTjyLpNkbgitIun9AVO-0g__";
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = videoUrl;
+            container.appendChild(iframe);
         }
     </script>
 </body>
