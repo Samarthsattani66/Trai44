@@ -3,257 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willow Live Events Player</title>
+    <title>TEAMROHITOFFICAL45</title>
     <style>
-        body, html {
+        /* General Page Styling */
+        body {
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-        }
-        #loading {
+            background: linear-gradient(135deg, #242424, #3b5998);
+            color: #fff;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100%;
-            font-size: 1.5em;
-        }
-        #player-container {
-            height: 100%;
-            width: 100%;
-        }
-        iframe {
-            border: none;
-            width: 100%;
-            height: 100%;
-        }
-        #error {
-            color: red;
+            justify-content: center;
+            min-height: 100vh;
             text-align: center;
-            padding: 20px;
-            display: none;
         }
-        #refresh-container {
+
+        /* Glowing Effect for Message */
+        .loading-message {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffcc00;
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             text-align: center;
-            padding: 10px;
-            display: none;
+            box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+            animation: glow 1.5s infinite alternate;
         }
-        #refresh-btn {
-            padding: 8px 16px;
-            background-color: #4CAF50;
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00; }
+            100% { box-shadow: 0 0 15px #ffcc00, 0 0 25px #ffcc00, 0 0 35px #ffcc00; }
+        }
+
+        /* Video Player Styling */
+        .player-container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 20px auto;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .player-container iframe {
+            border-radius: 15px;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Join Telegram Button */
+        .join-telegram-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .join-telegram-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
             color: white;
+            background-color: #008fd6;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
-        #refresh-btn:hover {
-            background-color: #45a049;
+
+        .join-telegram-btn:hover {
+            background-color: #006bb3;
         }
     </style>
 </head>
 <body>
-    <div id="loading">Loading live events data...</div>
-    <div id="error"></div>
-    <div id="refresh-container">
-        <p>Stream encountered an error (1001). Attempting to refresh...</p>
-        <button id="refresh-btn">Refresh Now</button>
+
+    <!-- Loading Message -->
+    <div class="loading-message">Share The Link With Your Friends</div>
+
+    <!-- Video Player Section -->
+    <div class="player-container">
+        <div style="padding:56.25% 0 0 0;position:relative;">
+            <iframe id="contentFrame" sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation" 
+            frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen="true" scrolling="no" 
+            src="https://live.ugreen.autos/live/channel.php?ch=es28" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+        </div>
     </div>
-    <div id="player-container"></div>
 
-    <script>
-        let currentUrl = null;
-        let currentKey = null;
-        let refreshAttempts = 0;
-        const maxRefreshAttempts = 5;
-        const refreshDelay = 10000; // 10 seconds
-
-        document.addEventListener('DOMContentLoaded', function() {
-            loadStream();
-            
-            // Manual refresh button
-            document.getElementById('refresh-btn').addEventListener('click', function() {
-                refreshStream();
-            });
-        });
-
-        function loadStream() {
-            fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/main/willow.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Find IPL 2025 matches
-                    const iplMatches = data.matches.filter(match => 
-                        match.title && match.title.includes('Indian Premier League 2025')
-                    );
-
-                    if (iplMatches.length === 0) {
-                        playAlternativeVideo();
-                        return;
-                    }
-
-                    let selectedMatch;
-                    
-                    if (iplMatches.length === 1) {
-                        selectedMatch = iplMatches[0];
-                    } else {
-                        const now = new Date();
-                        const currentHours = now.getHours();
-                        const currentMinutes = now.getMinutes();
-                        const currentTimeInMinutes = currentHours * 60 + currentMinutes;
-                        
-                        iplMatches.forEach(match => {
-                            if (match.startTime) {
-                                const startTimeUTC = new Date(match.startTime);
-                                const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
-                                const hours = startTimeIST.getHours();
-                                const minutes = startTimeIST.getMinutes();
-                                match.startTimeInMinutes = hours * 60 + minutes;
-                            } else {
-                                match.startTimeInMinutes = 0;
-                            }
-                        });
-                        
-                        iplMatches.sort((a, b) => a.startTimeInMinutes - b.startTimeInMinutes);
-                        
-                        if (currentTimeInMinutes < 19 * 60 + 20) {
-                            selectedMatch = iplMatches[0];
-                        } else {
-                            selectedMatch = iplMatches[iplMatches.length - 1];
-                        }
-                    }
-
-                    if (!selectedMatch.playback_data || !selectedMatch.playback_data.urls || selectedMatch.playback_data.urls.length === 0) {
-                        showError('No playback URLs found for this match.');
-                        return;
-                    }
-
-                    if (!selectedMatch.playback_data.keys || selectedMatch.playback_data.keys.length === 0) {
-                        showError('No decryption keys found for this match.');
-                        return;
-                    }
-
-                    // Find the first CloudFront MPD URL
-                    const cloudfrontMpdUrlObj = selectedMatch.playback_data.urls.find(urlObj => 
-                        urlObj.url && 
-                        (urlObj.url.includes('cloudfront.net') || urlObj.url.includes('akamaized.net')) && 
-                        (urlObj.url.endsWith('.mpd') || urlObj.url.includes('.mpd?'))
-                    );
-
-                    if (cloudfrontMpdUrlObj) {
-                        currentUrl = cloudfrontMpdUrlObj.url;
-                        currentKey = selectedMatch.playback_data.keys[0];
-                        playStream(currentUrl, currentKey);
-                        return;
-                    }
-
-                    // If no CloudFront URL, try any MPD URL as fallback
-                    const anyMpdUrlObj = selectedMatch.playback_data.urls.find(urlObj => 
-                        urlObj.url && 
-                        (urlObj.url.endsWith('.mpd') || urlObj.url.includes('.mpd?'))
-                    );
-                    
-                    if (anyMpdUrlObj) {
-                        currentUrl = anyMpdUrlObj.url;
-                        currentKey = selectedMatch.playback_data.keys[0];
-                        playStream(currentUrl, currentKey);
-                        return;
-                    }
-                    
-                    showError('No valid MPD URLs found for this match.');
-                })
-                .catch(error => {
-                    showError('Error fetching or processing live events data: ' + error.message);
-                    console.error('Error:', error);
-                });
-        }
-
-        function playStream(url, key) {
-            refreshAttempts = 0; // Reset refresh attempts counter
-            document.getElementById('refresh-container').style.display = 'none';
-            
-            // Clear previous player if exists
-            const container = document.getElementById('player-container');
-            container.innerHTML = '';
-            
-            // Encode the URL and key for the player
-            const encodedUrl = encodeURIComponent(url);
-            const encodedKey = encodeURIComponent(key);
-            
-            // Create iframe with the player
-            const playerUrl = `https://samarthsattani66.github.io/Teamroplry2/?url=${encodedUrl}&key=${encodedKey}`;
-            
-            const iframe = document.createElement('iframe');
-            iframe.src = playerUrl;
-            iframe.id = 'player-iframe';
-            
-            // Add event listener for messages from the iframe
-            window.addEventListener('message', handlePlayerMessage);
-            
-            container.appendChild(iframe);
-            
-            // Hide loading message
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        function handlePlayerMessage(event) {
-            // Check if the message is from our player and contains error 1001
-            if (event.data && event.data.error && event.data.error.code === 1001) {
-                console.log('Stream error 1001 detected, attempting to refresh...');
-                showRefreshUI();
-                scheduleRefresh();
-            }
-        }
-
-        function showRefreshUI() {
-            document.getElementById('refresh-container').style.display = 'block';
-        }
-
-        function scheduleRefresh() {
-            if (refreshAttempts >= maxRefreshAttempts) {
-                showError('Maximum refresh attempts reached. Please try again later.');
-                return;
-            }
-            
-            refreshAttempts++;
-            console.log(`Refresh attempt ${refreshAttempts} of ${maxRefreshAttempts}`);
-            
-            setTimeout(function() {
-                refreshStream();
-            }, refreshDelay);
-        }
-
-        function refreshStream() {
-            if (currentUrl && currentKey) {
-                console.log('Refreshing stream...');
-                playStream(currentUrl, currentKey);
-            } else {
-                console.log('No current stream to refresh, loading new stream...');
-                loadStream();
-            }
-        }
-
-        function showError(message) {
-            document.getElementById('loading').style.display = 'none';
-            const errorDiv = document.getElementById('error');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-        }
-
-        function playAlternativeVideo() {
-            document.getElementById('loading').style.display = 'none';
-            const container = document.getElementById('player-container');
-            
-            const videoUrl = "https://media-hosting.imagekit.io/1996bce2aade4e62/Black and White Old Movie Silent Film Cinema Projector Video.mp4?Expires=1839379555&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=paPtQmaQ4l6rpstSvYNMoYCRbe3VFIUQ927kdZPUE1571y3RYJUdcIFSELWzhVMVlQlhFUpouQGU0TYDx23GQAwpeESuBnDJts-OQ1FFMM9CIUvjiDTdGxeRBns6VA9V8vXAkZBLN7zk5QkfbOq7qhF2HRWzOFgqosZJe99uhGSNp9sQ2CdBVXyOkRsZSvH~0nBUv6z0w3b0iL~fLXlCSv7YMmRptIJR6xHeoDVD~HHyYK1JBPZEruhBU3jhTdGOY~5O7Y~GvRBfGFZobAmqDgx8GBmNmh7IF7suxqwm46SPCn5P3mNiFCqCDQbgM4kWtTjyLpNkbgitIun9AVO-0g__";
-            
-            const iframe = document.createElement('iframe');
-            iframe.src = videoUrl;
-            container.appendChild(iframe);
-        }
-    </script>
+    <!-- Join Telegram Button -->
+    <div class="join-telegram-container">
+        <button class="join-telegram-btn" onclick="window.open('https://t.me/+Abr6OELq5KZkZjNl', '_blank')">Join Telegram Channel</button>
+    </div>
+<script>
+// alert('Join Our Telegram For Latest update')
+         if (confirm("Join Our Telegram Channel @teamrohitoffical45") == true) {
+         window.open("https://t.me/+Abr6OELq5KZkZjNl", '_blank');
+     }
+</script>
 </body>
 </html>
