@@ -34,15 +34,50 @@
             padding: 20px;
             display: none;
         }
+        #refresh-container {
+            text-align: center;
+            padding: 10px;
+            display: none;
+        }
+        #refresh-btn {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #refresh-btn:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <div id="loading">Loading live events data...</div>
     <div id="error"></div>
+    <div id="refresh-container">
+        <p>Stream encountered an error (1001). Attempting to refresh...</p>
+        <button id="refresh-btn">Refresh Now</button>
+    </div>
     <div id="player-container"></div>
 
     <script>
+        let currentUrl = null;
+        let currentKey = null;
+        let refreshAttempts = 0;
+        const maxRefreshAttempts = 5;
+        const refreshDelay = 10000; // 10 seconds
+
         document.addEventListener('DOMContentLoaded', function() {
+            loadStream();
+            
+            // Manual refresh button
+            document.getElementById('refresh-btn').addEventListener('click', function() {
+                refreshStream();
+            });
+        });
+
+        function loadStream() {
             fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/main/willow.json')
                 .then(response => {
                     if (!response.ok) {
@@ -110,8 +145,9 @@
                     );
 
                     if (cloudfrontMpdUrlObj) {
-                        // Play the first CloudFront MPD URL found
-                        playStream(cloudfrontMpdUrlObj.url, selectedMatch.playback_data.keys[0]);
+                        currentUrl = cloudfrontMpdUrlObj.url;
+                        currentKey = selectedMatch.playback_data.keys[0];
+                        playStream(currentUrl, currentKey);
                         return;
                     }
 
@@ -122,7 +158,9 @@
                     );
                     
                     if (anyMpdUrlObj) {
-                        playStream(anyMpdUrlObj.url, selectedMatch.playback_data.keys[0]);
+                        currentUrl = anyMpdUrlObj.url;
+                        currentKey = selectedMatch.playback_data.keys[0];
+                        playStream(currentUrl, currentKey);
                         return;
                     }
                     
@@ -132,9 +170,16 @@
                     showError('Error fetching or processing live events data: ' + error.message);
                     console.error('Error:', error);
                 });
-        });
+        }
 
         function playStream(url, key) {
+            refreshAttempts = 0; // Reset refresh attempts counter
+            document.getElementById('refresh-container').style.display = 'none';
+            
+            // Clear previous player if exists
+            const container = document.getElementById('player-container');
+            container.innerHTML = '';
+            
             // Encode the URL and key for the player
             const encodedUrl = encodeURIComponent(url);
             const encodedKey = encodeURIComponent(key);
@@ -144,12 +189,52 @@
             
             const iframe = document.createElement('iframe');
             iframe.src = playerUrl;
+            iframe.id = 'player-iframe';
             
-            const container = document.getElementById('player-container');
+            // Add event listener for messages from the iframe
+            window.addEventListener('message', handlePlayerMessage);
+            
             container.appendChild(iframe);
             
             // Hide loading message
             document.getElementById('loading').style.display = 'none';
+        }
+
+        function handlePlayerMessage(event) {
+            // Check if the message is from our player and contains error 1001
+            if (event.data && event.data.error && event.data.error.code === 1001) {
+                console.log('Stream error 1001 detected, attempting to refresh...');
+                showRefreshUI();
+                scheduleRefresh();
+            }
+        }
+
+        function showRefreshUI() {
+            document.getElementById('refresh-container').style.display = 'block';
+        }
+
+        function scheduleRefresh() {
+            if (refreshAttempts >= maxRefreshAttempts) {
+                showError('Maximum refresh attempts reached. Please try again later.');
+                return;
+            }
+            
+            refreshAttempts++;
+            console.log(`Refresh attempt ${refreshAttempts} of ${maxRefreshAttempts}`);
+            
+            setTimeout(function() {
+                refreshStream();
+            }, refreshDelay);
+        }
+
+        function refreshStream() {
+            if (currentUrl && currentKey) {
+                console.log('Refreshing stream...');
+                playStream(currentUrl, currentKey);
+            } else {
+                console.log('No current stream to refresh, loading new stream...');
+                loadStream();
+            }
         }
 
         function showError(message) {
