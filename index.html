@@ -3,47 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willow Live Events Player</title>
+    <title>Willow Live Events</title>
     <style>
-        body, html {
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
         }
-        #loading {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .events-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .event-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .event-card:hover {
+            transform: translateY(-5px);
+        }
+        .event-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+        }
+        .event-content {
+            padding: 15px;
+        }
+        .event-teams {
             display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .event-vs {
+            margin: 0 10px;
+            color: #7f8c8d;
+        }
+        .event-details {
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .watch-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .watch-btn:hover {
+            background-color: #2980b9;
+        }
+        .player-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
             justify-content: center;
             align-items: center;
-            height: 100%;
-            font-size: 1.5em;
+            z-index: 1000;
         }
-        #player-container {
-            height: 100%;
-            width: 100%;
+        .player-wrapper {
+            width: 90%;
+            max-width: 1200px;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
         }
         iframe {
-            border: none;
             width: 100%;
-            height: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 8px;
         }
-        #error {
-            color: red;
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #7f8c8d;
+        }
+        .error {
+            color: #e74c3c;
             text-align: center;
             padding: 20px;
-            display: none;
         }
     </style>
 </head>
 <body>
-    <div id="loading">Loading live events data...</div>
-    <div id="error"></div>
-    <div id="player-container"></div>
+    <div class="container">
+        <h1>Willow Live Events</h1>
+        <div id="events" class="events-container">
+            <!-- Events will be loaded here -->
+        </div>
+        <div id="loading" class="loading">Loading events...</div>
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <div id="player-container" class="player-container">
+        <div class="player-wrapper">
+            <span class="close-btn" id="close-btn">&times;</span>
+            <iframe id="player-iframe" allowfullscreen></iframe>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/main/willow.json')
+            const eventsContainer = document.getElementById('events');
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('error');
+            const playerContainer = document.getElementById('player-container');
+            const playerIframe = document.getElementById('player-iframe');
+            const closeBtn = document.getElementById('close-btn');
+            
+            // Close player when close button is clicked
+            closeBtn.addEventListener('click', function() {
+                playerContainer.style.display = 'none';
+                playerIframe.src = '';
+            });
+            
+            // Close player when clicking outside the iframe
+            playerContainer.addEventListener('click', function(e) {
+                if (e.target === playerContainer) {
+                    playerContainer.style.display = 'none';
+                    playerIframe.src = '';
+                }
+            });
+
+            // Fetch events from JSON
+            fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/refs/heads/main/willow.json')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -51,124 +171,87 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Find IPL 2025 matches
-                    const iplMatches = data.matches.filter(match => 
-                        match.title && match.title.includes('Indian Premier League 2025')
-                    );
-
-                    if (iplMatches.length === 0) {
-                        playAlternativeVideo();
-                        return;
-                    }
-
-                    let selectedMatch;
+                    loadingElement.style.display = 'none';
                     
-                    if (iplMatches.length === 1) {
-                        selectedMatch = iplMatches[0];
+                    if (data && data.events && data.events.length > 0) {
+                        renderEvents(data.events);
                     } else {
-                        const now = new Date();
-                        const currentHours = now.getHours();
-                        const currentMinutes = now.getMinutes();
-                        const currentTimeInMinutes = currentHours * 60 + currentMinutes;
-                        
-                        iplMatches.forEach(match => {
-                            if (match.startTime) {
-                                const startTimeUTC = new Date(match.startTime);
-                                const startTimeIST = new Date(startTimeUTC.getTime() + 5.5 * 60 * 60 * 1000);
-                                const hours = startTimeIST.getHours();
-                                const minutes = startTimeIST.getMinutes();
-                                match.startTimeInMinutes = hours * 60 + minutes;
-                            } else {
-                                match.startTimeInMinutes = 0;
-                            }
-                        });
-                        
-                        iplMatches.sort((a, b) => a.startTimeInMinutes - b.startTimeInMinutes);
-                        
-                        if (currentTimeInMinutes < 19 * 60 + 20) {
-                            selectedMatch = iplMatches[0];
-                        } else {
-                            selectedMatch = iplMatches[iplMatches.length - 1];
-                        }
+                        errorElement.textContent = 'No live events available.';
+                        errorElement.style.display = 'block';
                     }
-
-                    if (!selectedMatch.playback_data || !selectedMatch.playback_data.urls || selectedMatch.playback_data.urls.length === 0) {
-                        showError('No playback URLs found for this match.');
-                        return;
-                    }
-
-                    if (!selectedMatch.playback_data.keys || selectedMatch.playback_data.keys.length === 0) {
-                        showError('No decryption keys found for this match.');
-                        return;
-                    }
-
-                    // Find all CloudFront MPD URLs
-                    const cloudfrontMpdUrls = selectedMatch.playback_data.urls.filter(urlObj => 
-                        urlObj.url && 
-                        (urlObj.url.includes('cloudfront.net') || urlObj.url.includes('akamaized.net')) && 
-                        (urlObj.url.endsWith('.mpd') || urlObj.url.includes('.mpd?'))
-                    );
-
-                    // If we have CloudFront URLs, use the first one
-                    if (cloudfrontMpdUrls.length > 0) {
-                        playStream(cloudfrontMpdUrls[0].url, selectedMatch.playback_data.keys[0]);
-                        return;
-                    }
-
-                    // If no CloudFront URL, try any MPD URL as fallback
-                    const anyMpdUrlObj = selectedMatch.playback_data.urls.find(urlObj => 
-                        urlObj.url && 
-                        (urlObj.url.endsWith('.mpd') || urlObj.url.includes('.mpd?'))
-                    );
-                    
-                    if (anyMpdUrlObj) {
-                        playStream(anyMpdUrlObj.url, selectedMatch.playback_data.keys[0]);
-                        return;
-                    }
-                    
-                    showError('No valid MPD URLs found for this match.');
                 })
                 .catch(error => {
-                    showError('Error fetching or processing live events data: ' + error.message);
-                    console.error('Error:', error);
+                    loadingElement.style.display = 'none';
+                    errorElement.textContent = 'Failed to load events. Please try again later.';
+                    errorElement.style.display = 'block';
+                    console.error('Error fetching events:', error);
                 });
+
+            function renderEvents(events) {
+                events.forEach(event => {
+                    const eventCard = document.createElement('div');
+                    eventCard.className = 'event-card';
+                    
+                    const eventHeader = document.createElement('div');
+                    eventHeader.className = 'event-header';
+                    eventHeader.textContent = event.title || 'Live Event';
+                    
+                    const eventContent = document.createElement('div');
+                    eventContent.className = 'event-content';
+                    
+                    const eventTeams = document.createElement('div');
+                    eventTeams.className = 'event-teams';
+                    
+                    const team1 = document.createElement('span');
+                    team1.textContent = event.team1 || 'Team 1';
+                    
+                    const vs = document.createElement('span');
+                    vs.className = 'event-vs';
+                    vs.textContent = 'vs';
+                    
+                    const team2 = document.createElement('span');
+                    team2.textContent = event.team2 || 'Team 2';
+                    
+                    eventTeams.appendChild(team1);
+                    eventTeams.appendChild(vs);
+                    eventTeams.appendChild(team2);
+                    
+                    const eventDetails = document.createElement('div');
+                    eventDetails.className = 'event-details';
+                    
+                    const time = document.createElement('div');
+                    time.textContent = `Time: ${event.time || 'Live Now'}`;
+                    
+                    const tournament = document.createElement('div');
+                    tournament.textContent = `Tournament: ${event.tournament || 'Not specified'}`;
+                    
+                    eventDetails.appendChild(time);
+                    eventDetails.appendChild(tournament);
+                    
+                    const watchBtn = document.createElement('a');
+                    watchBtn.className = 'watch-btn';
+                    watchBtn.textContent = 'Watch Live';
+                    watchBtn.href = '#';
+                    watchBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (event.url) {
+                            const playerUrl = `https://teamroplry2.pages.dev/?url=${encodeURIComponent(event.url)}`;
+                            playerIframe.src = playerUrl;
+                            playerContainer.style.display = 'flex';
+                        }
+                    });
+                    
+                    eventContent.appendChild(eventTeams);
+                    eventContent.appendChild(eventDetails);
+                    eventContent.appendChild(watchBtn);
+                    
+                    eventCard.appendChild(eventHeader);
+                    eventCard.appendChild(eventContent);
+                    
+                    eventsContainer.appendChild(eventCard);
+                });
+            }
         });
-
-        function playStream(url, key) {
-            // Encode the URL and key for the player
-            const encodedUrl = encodeURIComponent(url);
-            const encodedKey = encodeURIComponent(key);
-            
-            // Create iframe with the player
-            const playerUrl = `https://samarthsattani66.github.io/Teamroplry2/?url=${encodedUrl}&key=${encodedKey}`;
-            
-            const iframe = document.createElement('iframe');
-            iframe.src = playerUrl;
-            
-            const container = document.getElementById('player-container');
-            container.appendChild(iframe);
-            
-            // Hide loading message
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        function showError(message) {
-            document.getElementById('loading').style.display = 'none';
-            const errorDiv = document.getElementById('error');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-        }
-
-        function playAlternativeVideo() {
-            document.getElementById('loading').style.display = 'none';
-            const container = document.getElementById('player-container');
-            
-            const videoUrl = "https://media-hosting.imagekit.io/1996bce2aade4e62/Black and White Old Movie Silent Film Cinema Projector Video.mp4?Expires=1839379555&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=paPtQmaQ4l6rpstSvYNMoYCRbe3VFIUQ927kdZPUE1571y3RYJUdcIFSELWzhVMVlQlhFUpouQGU0TYDx23GQAwpeESuBnDJts-OQ1FFMM9CIUvjiDTdGxeRBns6VA9V8vXAkZBLN7zk5QkfbOq7qhF2HRWzOFgqosZJe99uhGSNp9sQ2CdBVXyOkRsZSvH~0nBUv6z0w3b0iL~fLXlCSv7YMmRptIJR6xHeoDVD~HHyYK1JBPZEruhBU3jhTdGOY~5O7Y~GvRBfGFZobAmqDgx8GBmNmh7IF7suxqwm46SPCn5P3mNiFCqCDQbgM4kWtTjyLpNkbgitIun9AVO-0g__";
-            
-            const iframe = document.createElement('iframe');
-            iframe.src = videoUrl;
-            container.appendChild(iframe);
-        }
     </script>
 </body>
 </html>
