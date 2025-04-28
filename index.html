@@ -120,15 +120,85 @@
             text-align: center;
             padding: 20px;
         }
+        .no-events {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .no-events img {
+            max-width: 200px;
+            margin-bottom: 20px;
+        }
+        .no-events h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .no-events p {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .refresh-btn {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .refresh-btn:hover {
+            background-color: #2980b9;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            background-color: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tab-btn:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+        .tab-btn:last-child {
+            border-radius: 0 4px 4px 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Willow Live Events</h1>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="live">Live Events</button>
+            <button class="tab-btn" data-tab="upcoming">Upcoming Events</button>
+            <button class="tab-btn" data-tab="completed">Completed Events</button>
+        </div>
+        
         <div id="events" class="events-container">
             <!-- Events will be loaded here -->
         </div>
         <div id="loading" class="loading">Loading events...</div>
+        <div id="no-events" class="no-events" style="display: none;">
+            <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No events">
+            <h2>No Events Available</h2>
+            <p id="no-events-message">There are currently no events in this category.</p>
+            <button class="refresh-btn" id="refresh-btn">Refresh Page</button>
+        </div>
         <div id="error" class="error" style="display: none;"></div>
     </div>
 
@@ -143,10 +213,17 @@
         document.addEventListener('DOMContentLoaded', function() {
             const eventsContainer = document.getElementById('events');
             const loadingElement = document.getElementById('loading');
+            const noEventsElement = document.getElementById('no-events');
+            const noEventsMessage = document.getElementById('no-events-message');
             const errorElement = document.getElementById('error');
+            const refreshBtn = document.getElementById('refresh-btn');
             const playerContainer = document.getElementById('player-container');
             const playerIframe = document.getElementById('player-iframe');
             const closeBtn = document.getElementById('close-btn');
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            
+            let allEvents = [];
+            let currentTab = 'live';
             
             // Close player when close button is clicked
             closeBtn.addEventListener('click', function() {
@@ -162,39 +239,116 @@
                 }
             });
 
-            // Fetch events from JSON
-            fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/refs/heads/main/willow.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    loadingElement.style.display = 'none';
-                    
-                    if (data && data.events && data.events.length > 0) {
-                        renderEvents(data.events);
-                    } else {
-                        errorElement.textContent = 'No live events available.';
-                        errorElement.style.display = 'block';
-                    }
-                })
-                .catch(error => {
-                    loadingElement.style.display = 'none';
-                    errorElement.textContent = 'Failed to load events. Please try again later.';
-                    errorElement.style.display = 'block';
-                    console.error('Error fetching events:', error);
+            // Refresh button handler
+            refreshBtn.addEventListener('click', function() {
+                window.location.reload();
+            });
+
+            // Tab switching
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    currentTab = this.dataset.tab;
+                    filterEvents();
                 });
+            });
+
+            // Fetch events from JSON
+            function loadEvents() {
+                fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/refs/heads/main/willow.json')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        loadingElement.style.display = 'none';
+                        
+                        if (data && data.events && data.events.length > 0) {
+                            allEvents = data.events;
+                            filterEvents();
+                        } else {
+                            showNoEvents('There are currently no events available.');
+                        }
+                    })
+                    .catch(error => {
+                        loadingElement.style.display = 'none';
+                        errorElement.textContent = 'Failed to load events. Please try again later.';
+                        errorElement.style.display = 'block';
+                        console.error('Error fetching events:', error);
+                    });
+            }
+
+            function filterEvents() {
+                let filteredEvents = [];
+                let message = '';
+                
+                switch(currentTab) {
+                    case 'live':
+                        filteredEvents = allEvents.filter(event => event.status === 'live');
+                        message = 'There are currently no live events.';
+                        break;
+                    case 'upcoming':
+                        filteredEvents = allEvents.filter(event => event.status === 'upcoming');
+                        message = 'There are currently no upcoming events.';
+                        break;
+                    case 'completed':
+                        filteredEvents = allEvents.filter(event => event.status === 'completed');
+                        message = 'There are no completed events to show.';
+                        break;
+                    default:
+                        filteredEvents = allEvents;
+                        message = 'There are currently no events available.';
+                }
+                
+                if (filteredEvents.length > 0) {
+                    renderEvents(filteredEvents);
+                } else {
+                    showNoEvents(message);
+                }
+            }
+
+            function showNoEvents(message) {
+                eventsContainer.innerHTML = '';
+                noEventsMessage.textContent = message;
+                noEventsElement.style.display = 'block';
+            }
 
             function renderEvents(events) {
+                eventsContainer.innerHTML = ''; // Clear previous content
+                noEventsElement.style.display = 'none';
+                
                 events.forEach(event => {
                     const eventCard = document.createElement('div');
                     eventCard.className = 'event-card';
                     
                     const eventHeader = document.createElement('div');
                     eventHeader.className = 'event-header';
-                    eventHeader.textContent = event.title || 'Live Event';
+                    eventHeader.textContent = event.title || 'Cricket Match';
+                    
+                    // Add status indicator
+                    if (event.status) {
+                        const statusIndicator = document.createElement('span');
+                        statusIndicator.style.float = 'right';
+                        statusIndicator.style.fontSize = '0.8em';
+                        statusIndicator.style.padding = '2px 6px';
+                        statusIndicator.style.borderRadius = '3px';
+                        
+                        if (event.status === 'live') {
+                            statusIndicator.textContent = 'LIVE';
+                            statusIndicator.style.backgroundColor = '#e74c3c';
+                        } else if (event.status === 'upcoming') {
+                            statusIndicator.textContent = 'UPCOMING';
+                            statusIndicator.style.backgroundColor = '#f39c12';
+                        } else {
+                            statusIndicator.textContent = 'COMPLETED';
+                            statusIndicator.style.backgroundColor = '#2ecc71';
+                        }
+                        
+                        eventHeader.appendChild(statusIndicator);
+                    }
                     
                     const eventContent = document.createElement('div');
                     eventContent.className = 'event-content';
@@ -220,17 +374,23 @@
                     eventDetails.className = 'event-details';
                     
                     const time = document.createElement('div');
-                    time.textContent = `Time: ${event.time || 'Live Now'}`;
+                    time.textContent = `Time: ${event.time || (event.date || 'Not specified')}`;
                     
                     const tournament = document.createElement('div');
                     tournament.textContent = `Tournament: ${event.tournament || 'Not specified'}`;
+                    
+                    if (event.venue) {
+                        const venue = document.createElement('div');
+                        venue.textContent = `Venue: ${event.venue}`;
+                        eventDetails.appendChild(venue);
+                    }
                     
                     eventDetails.appendChild(time);
                     eventDetails.appendChild(tournament);
                     
                     const watchBtn = document.createElement('a');
                     watchBtn.className = 'watch-btn';
-                    watchBtn.textContent = 'Watch Live';
+                    watchBtn.textContent = event.status === 'live' ? 'Watch Live' : 'View Details';
                     watchBtn.href = '#';
                     watchBtn.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -251,6 +411,9 @@
                     eventsContainer.appendChild(eventCard);
                 });
             }
+
+            // Initial load
+            loadEvents();
         });
     </script>
 </body>
