@@ -3,418 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willow Live Events</title>
+    <title>TEAMROHITOFFICAL45_LIVE</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+        @keyframes heartbeat {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+
+        @keyframes livePulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #121212;
+            color: white;
+            padding: 20px;
         }
         h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
+            font-size: 26px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
         }
-        .events-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        .event-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 20px;
         }
-        .event-card {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        .event {
+            width: 400px;
+            background: #222;
+            border-radius: 12px;
             overflow: hidden;
-            transition: transform 0.3s ease;
+            position: relative;
+            padding-bottom: 15px;
+            animation: heartbeat 3s infinite;
+            transition: transform 0.3s;
         }
-        .event-card:hover {
-            transform: translateY(-5px);
+        .event:hover {
+            transform: scale(1.03);
         }
-        .event-header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 15px;
-            font-weight: bold;
+        .event img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
         }
         .event-content {
             padding: 15px;
         }
-        .event-teams {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
+        .title {
+            font-size: 18px;
             font-weight: bold;
+            color: white;
+            margin-bottom: 5px;
         }
-        .event-vs {
-            margin: 0 10px;
-            color: #7f8c8d;
-        }
-        .event-details {
-            color: #7f8c8d;
-            margin-bottom: 10px;
+        .league {
             font-size: 14px;
+            color: #bbb;
+            margin-bottom: 10px;
+        }
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
         }
         .watch-btn {
             display: block;
-            width: 100%;
-            padding: 10px;
-            background-color: #3498db;
+            width: 90%;
+            padding: 12px;
+            background: transparent;
             color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            text-align: center;
             text-decoration: none;
-            transition: background-color 0.3s;
+            border: 2px solid gold;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0 auto;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
         }
         .watch-btn:hover {
-            background-color: #2980b9;
+            background: gold;
+            color: black;
+            transform: scale(1.1);
+            box-shadow: 0 0 25px gold;
         }
-        .player-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .player-wrapper {
-            width: 90%;
-            max-width: 1200px;
-            position: relative;
-        }
-        .close-btn {
+        .live-badge {
             position: absolute;
-            top: -40px;
-            right: 0;
+            top: 10px;
+            left: 10px;
+            background: red;
             color: white;
-            font-size: 30px;
-            cursor: pointer;
-        }
-        iframe {
-            width: 100%;
-            height: 600px;
-            border: none;
-            border-radius: 8px;
-        }
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
-            color: #7f8c8d;
-        }
-        .error {
-            color: #e74c3c;
-            text-align: center;
-            padding: 20px;
-        }
-        .no-events {
-            text-align: center;
-            padding: 40px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .no-events img {
-            max-width: 200px;
-            margin-bottom: 20px;
-        }
-        .no-events h2 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .no-events p {
-            color: #7f8c8d;
-            margin-bottom: 20px;
-        }
-        .refresh-btn {
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            font-size: 12px;
             font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .refresh-btn:hover {
-            background-color: #2980b9;
-        }
-        .tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        .tab-btn {
-            padding: 10px 20px;
-            background-color: #ecf0f1;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        .tab-btn.active {
-            background-color: #3498db;
-            color: white;
-        }
-        .tab-btn:first-child {
-            border-radius: 4px 0 0 4px;
-        }
-        .tab-btn:last-child {
-            border-radius: 0 4px 4px 0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            animation: livePulse 1.5s infinite;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Willow Live Events</h1>
-        
-        <div class="tabs">
-            <button class="tab-btn active" data-tab="live">Live Events</button>
-            <button class="tab-btn" data-tab="upcoming">Upcoming Events</button>
-            <button class="tab-btn" data-tab="completed">Completed Events</button>
-        </div>
-        
-        <div id="events" class="events-container">
-            <!-- Events will be loaded here -->
-        </div>
-        <div id="loading" class="loading">Loading events...</div>
-        <div id="no-events" class="no-events" style="display: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No events">
-            <h2>No Events Available</h2>
-            <p id="no-events-message">There are currently no events in this category.</p>
-            <button class="refresh-btn" id="refresh-btn">Refresh Page</button>
-        </div>
-        <div id="error" class="error" style="display: none;"></div>
-    </div>
 
-    <div id="player-container" class="player-container">
-        <div class="player-wrapper">
-            <span class="close-btn" id="close-btn">&times;</span>
-            <iframe id="player-iframe" allowfullscreen></iframe>
-        </div>
-    </div>
+    <h1>Live Events</h1>
+    <div class="event-container" id="events"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const eventsContainer = document.getElementById('events');
-            const loadingElement = document.getElementById('loading');
-            const noEventsElement = document.getElementById('no-events');
-            const noEventsMessage = document.getElementById('no-events-message');
-            const errorElement = document.getElementById('error');
-            const refreshBtn = document.getElementById('refresh-btn');
-            const playerContainer = document.getElementById('player-container');
-            const playerIframe = document.getElementById('player-iframe');
-            const closeBtn = document.getElementById('close-btn');
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            
-            let allEvents = [];
-            let currentTab = 'live';
-            
-            // Close player when close button is clicked
-            closeBtn.addEventListener('click', function() {
-                playerContainer.style.display = 'none';
-                playerIframe.src = '';
-            });
-            
-            // Close player when clicking outside the iframe
-            playerContainer.addEventListener('click', function(e) {
-                if (e.target === playerContainer) {
-                    playerContainer.style.display = 'none';
-                    playerIframe.src = '';
-                }
-            });
+        async function fetchEvents() {
+            try {
+                const response = await fetch("https://raw.githubusercontent.com/drmlive/fancode-live-events/refs/heads/main/fancode.json");
+                const data = await response.json();
+                
+                // Debugging line to check the structure of the fetched data
+                console.log(data);
 
-            // Refresh button handler
-            refreshBtn.addEventListener('click', function() {
-                window.location.reload();
-            });
+                const container = document.getElementById("events");
+                container.innerHTML = ""; // Clear the container before adding new events
+            // Check if matches data exists
+                if (data.matches && Array.isArray(data.matches)) {
+                    data.matches.forEach(event => {
+                        const eventDiv = document.createElement("div");
+                        eventDiv.classList.add("event");
 
-            // Tab switching
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    currentTab = this.dataset.tab;
-                    filterEvents();
-                });
-            });
+                        let eventDate = new Date(event.startTime);
+                        let formattedDate = eventDate.toLocaleDateString();
+                        let formattedTime = eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        let isLive = event.status === "LIVE"; // Check if match is live
+                        let videoLink = event.dai_url ? https://p.apeiria.net/~Teamrom3u8plyr.html?id=${event.dai_url} : "#";
 
-            // Fetch events from JSON
-            function loadEvents() {
-                fetch('https://raw.githubusercontent.com/drmlive/willow-live-events/refs/heads/main/willow.json')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        loadingElement.style.display = 'none';
-                        
-                        if (data && data.events && data.events.length > 0) {
-                            allEvents = data.events;
-                            filterEvents();
-                        } else {
-                            showNoEvents('There are currently no events available.');
-                        }
-                    })
-                    .catch(error => {
-                        loadingElement.style.display = 'none';
-                        errorElement.textContent = 'Failed to load events. Please try again later.';
-                        errorElement.style.display = 'block';
-                        console.error('Error fetching events:', error);
+                        // Log the current event data to debug
+                        console.log(event);
+
+                        eventDiv.innerHTML = 
+                            <img src="${event.src}" alt="${event.title}">
+                            ${isLive ? <div class="live-badge">LIVE</div> : ""}
+                            <div class="event-content">
+                                <div class="title">${event.title}</div>
+                                <div class="league">${event.event_name}</div>
+                                <div class="buttons">
+                                    ${event.dai_url ? <a href="${videoLink}" target="_blank" class="watch-btn">Watch Now</a> : ''}
+                                    ${event.dai_url ? <a href="${videoLink}" target="_blank" class="watch-btn">Ad-Free</a> : ''}
+                                </div>
+                            </div>
+                        ;
+                        container.appendChild(eventDiv);
                     });
-            }
-
-            function filterEvents() {
-                let filteredEvents = [];
-                let message = '';
-                
-                switch(currentTab) {
-                    case 'live':
-                        filteredEvents = allEvents.filter(event => event.status === 'live');
-                        message = 'There are currently no live events.';
-                        break;
-                    case 'upcoming':
-                        filteredEvents = allEvents.filter(event => event.status === 'upcoming');
-                        message = 'There are currently no upcoming events.';
-                        break;
-                    case 'completed':
-                        filteredEvents = allEvents.filter(event => event.status === 'completed');
-                        message = 'There are no completed events to show.';
-                        break;
-                    default:
-                        filteredEvents = allEvents;
-                        message = 'There are currently no events available.';
-                }
-                
-                if (filteredEvents.length > 0) {
-                    renderEvents(filteredEvents);
                 } else {
-                    showNoEvents(message);
+                    console.error("No 'matches' found in the data.");
                 }
-            }
 
-            function showNoEvents(message) {
-                eventsContainer.innerHTML = '';
-                noEventsMessage.textContent = message;
-                noEventsElement.style.display = 'block';
+            } catch (error) {
+                console.error("Error fetching events:", error);
             }
+        }
 
-            function renderEvents(events) {
-                eventsContainer.innerHTML = ''; // Clear previous content
-                noEventsElement.style.display = 'none';
-                
-                events.forEach(event => {
-                    const eventCard = document.createElement('div');
-                    eventCard.className = 'event-card';
-                    
-                    const eventHeader = document.createElement('div');
-                    eventHeader.className = 'event-header';
-                    eventHeader.textContent = event.title || 'Cricket Match';
-                    
-                    // Add status indicator
-                    if (event.status) {
-                        const statusIndicator = document.createElement('span');
-                        statusIndicator.style.float = 'right';
-                        statusIndicator.style.fontSize = '0.8em';
-                        statusIndicator.style.padding = '2px 6px';
-                        statusIndicator.style.borderRadius = '3px';
-                        
-                        if (event.status === 'live') {
-                            statusIndicator.textContent = 'LIVE';
-                            statusIndicator.style.backgroundColor = '#e74c3c';
-                        } else if (event.status === 'upcoming') {
-                            statusIndicator.textContent = 'UPCOMING';
-                            statusIndicator.style.backgroundColor = '#f39c12';
-                        } else {
-                            statusIndicator.textContent = 'COMPLETED';
-                            statusIndicator.style.backgroundColor = '#2ecc71';
-                        }
-                        
-                        eventHeader.appendChild(statusIndicator);
-                    }
-                    
-                    const eventContent = document.createElement('div');
-                    eventContent.className = 'event-content';
-                    
-                    const eventTeams = document.createElement('div');
-                    eventTeams.className = 'event-teams';
-                    
-                    const team1 = document.createElement('span');
-                    team1.textContent = event.team1 || 'Team 1';
-                    
-                    const vs = document.createElement('span');
-                    vs.className = 'event-vs';
-                    vs.textContent = 'vs';
-                    
-                    const team2 = document.createElement('span');
-                    team2.textContent = event.team2 || 'Team 2';
-                    
-                    eventTeams.appendChild(team1);
-                    eventTeams.appendChild(vs);
-                    eventTeams.appendChild(team2);
-                    
-                    const eventDetails = document.createElement('div');
-                    eventDetails.className = 'event-details';
-                    
-                    const time = document.createElement('div');
-                    time.textContent = `Time: ${event.time || (event.date || 'Not specified')}`;
-                    
-                    const tournament = document.createElement('div');
-                    tournament.textContent = `Tournament: ${event.tournament || 'Not specified'}`;
-                    
-                    if (event.venue) {
-                        const venue = document.createElement('div');
-                        venue.textContent = `Venue: ${event.venue}`;
-                        eventDetails.appendChild(venue);
-                    }
-                    
-                    eventDetails.appendChild(time);
-                    eventDetails.appendChild(tournament);
-                    
-                    const watchBtn = document.createElement('a');
-                    watchBtn.className = 'watch-btn';
-                    watchBtn.textContent = event.status === 'live' ? 'Watch Live' : 'View Details';
-                    watchBtn.href = '#';
-                    watchBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        if (event.url) {
-                            const playerUrl = `https://teamroplry2.pages.dev/?url=${encodeURIComponent(event.url)}`;
-                            playerIframe.src = playerUrl;
-                            playerContainer.style.display = 'flex';
-                        }
-                    });
-                    
-                    eventContent.appendChild(eventTeams);
-                    eventContent.appendChild(eventDetails);
-                    eventContent.appendChild(watchBtn);
-                    
-                    eventCard.appendChild(eventHeader);
-                    eventCard.appendChild(eventContent);
-                    
-                    eventsContainer.appendChild(eventCard);
-                });
-            }
-
-            // Initial load
-            loadEvents();
-        });
+        fetchEvents();
     </script>
+
 </body>
 </html>
