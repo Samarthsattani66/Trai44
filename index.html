@@ -1,97 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Clappr Player with DRM and Quality Selector</title>
-  <style>
-    #player {
-      width: 100%;
-      height: 500px;
-    }
-    .quality-selector {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 1000;
-      padding: 5px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEAMROHITOFFICAL45_LIVE</title>
+    <style>
+        /* General Page Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #242424, #3b5998);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        /* Glowing Effect for Message */
+        .loading-message {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffcc00;
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+            animation: glow 1.5s infinite alternate;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00; }
+            100% { box-shadow: 0 0 15px #ffcc00, 0 0 25px #ffcc00, 0 0 35px #ffcc00; }
+        }
+
+        /* Video Player Styling */
+        .player-container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 20px auto;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .player-container iframe {
+            border-radius: 15px;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Join Telegram Button */
+        .join-telegram-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .join-telegram-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #008fd6;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .join-telegram-btn:hover {
+            background-color: #006bb3;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Player Container -->
-  <div id="player"></div>
+    <!-- Loading Message -->
+    <div class="loading-message">Wait For 10-15 Sec For Loading The Stream </div>
 
-  <!-- Clappr & Shaka Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/clappr-shaka-playback@latest/dist/clappr-shaka-playback.min.js"></script>
+    <!-- Video Player Section -->
+    <div class="player-container">
+        <div style="padding:56.25% 0 0 0;position:relative;">
+            <iframe id="contentFrame" sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation" 
+            frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen="true" scrolling="no" 
+            src="https://live4wap.neocities.org/APPTV/crichd?id=starhindi" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+        </div>
+    </div>
 
-  <script>
-    let shakaInstance = null;
+    <!-- Join Telegram Button -->
+    <div class="join-telegram-container">
+        <button class="join-telegram-btn" onclick="window.open('https://t.me/+e6G48oujQuExOTg1', '_blank')">Join Telegram Channel</button>
+    </div>
+<script>
+// alert('Join Our Telegram For Latest update')
+         if (confirm("Join Our Telegram Channel @teamrohitoffical45") == true) {
+         window.open("https://t.me/+e6G48oujQuExOTg1", '_blank');
+     }
+</script>
 
-    // Quality Selector Plugin
-    const QualitySelectorPlugin = Clappr.UIContainerPlugin.extend({
-      name: 'quality_selector',
-      bindEvents() {
-        this.listenTo(this.container, Clappr.Events.CONTAINER_PLAY, this.addSelector);
-      },
-      addSelector() {
-        if (!shakaInstance || this.added) return;
-
-        const select = document.createElement('select');
-        select.className = 'quality-selector';
-        select.title = 'Select Quality';
-
-        const autoOption = document.createElement('option');
-        autoOption.value = 'auto';
-        autoOption.text = 'Auto';
-        select.appendChild(autoOption);
-
-        const tracks = shakaInstance.getVariantTracks();
-        tracks.forEach(track => {
-          const option = document.createElement('option');
-          option.value = track.id;
-          option.text = `${track.height}p (${Math.round(track.bandwidth / 1000)} kbps)`;
-          select.appendChild(option);
-        });
-
-        select.onchange = function () {
-          if (select.value === 'auto') {
-            shakaInstance.configure({ abr: { enabled: true } });
-          } else {
-            const track = tracks.find(t => t.id == select.value);
-            if (track) {
-              shakaInstance.configure({ abr: { enabled: false } });
-              shakaInstance.selectVariantTrack(track, true);
-            }
-          }
-        };
-
-        document.body.appendChild(select);
-        this.added = true;
-      }
-    });
-
-    // Initialize Player
-    const player = new Clappr.Player({
-      parentId: '#player',
-      source: 'https://streamdog.site/proxy/noob/stream.php/linearjitp-playback.astro.com.my/dash-wv/linear/2504/default_ott.mpd',
-      autoPlay: true,
-      mute: false,
-      plugins: [DashShakaPlayback, QualitySelectorPlugin],
-      shakaConfiguration: {
-        drm: {
-          clearKeys: {
-            '03c2e0af2f8159f9f0ce9b5dbc865f10': 'cd84ed136b0cc71f8ab8cd4d4f6a2e4c'
-          }
-        }
-      },
-      events: {
-        onReady: function () {
-          shakaInstance = player.getPlayback().shakaPlayer;
-        }
-      }
-    });
-  </script>
 </body>
 </html>
