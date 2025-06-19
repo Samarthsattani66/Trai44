@@ -1,128 +1,176 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEAMROHITOFFICAL45_LIVE</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #242424, #3b5998);
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            text-align: center;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>TG-SAMARTH</title>
 
-        .loading-message {
-            font-size: 18px;
-            font-weight: bold;
-            color: #ffcc00;
-            margin-bottom: 10px;
-            padding: 10px 20px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
-            box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
-            animation: glow 1.5s infinite alternate;
-        }
+  <!-- Plyr and HLS.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css" />
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
 
-        @keyframes glow {
-            0% { box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00; }
-            100% { box-shadow: 0 0 15px #ffcc00, 0 0 25px #ffcc00, 0 0 35px #ffcc00; }
-        }
+  <style>
+    html { font-family: sans-serif; background: #000; margin: 0; padding: 0; }
+    body { margin: 0; padding: 0; background: #000; }
 
-        .dns-message {
-            font-size: 14px;
-            margin-top: 10px;
-            color: #00ccff;
-        }
+    .plyr {
+      height: 100%;
+      width: 100%;
+    }
 
-        .dns-message a {
-            color: #00ccff;
-            text-decoration: underline;
-        }
+    :root {
+      --plyr-color-main: #d9230f;
+    }
 
-        .player-container {
-            width: 95%;
-            max-width: 1200px;
-            margin: 20px auto;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            overflow: hidden;
-            background: #000;
-        }
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 9999;
+    }
 
-        .player-container iframe {
-            border-radius: 15px;
-            width: 100%;
-            height: 100%;
-        }
+    .loading-text {
+      position: absolute;
+      top: 0; bottom: 0; left: 0; right: 0;
+      margin: auto;
+      text-align: center;
+      width: 100%;
+      height: 100px;
+      line-height: 100px;
+    }
 
-        .join-telegram-container {
-            margin-top: 20px;
-            text-align: center;
-        }
+    .loading-text span {
+      display: inline-block;
+      margin: 0 5px;
+      color: #d9230f;
+      font-family: 'Quattrocento Sans', sans-serif;
+      animation: blur-text 1.5s infinite linear alternate;
+    }
 
-        .join-telegram-btn {
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            color: white;
-            background-color: #008fd6;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
+    .loading-text span:nth-child(n) {
+      animation-delay: calc(0.2s * var(--i));
+    }
 
-        .join-telegram-btn:hover {
-            background-color: #006bb3;
-        }
-    </style>
+    @keyframes blur-text {
+      0% { filter: blur(0px); }
+      100% { filter: blur(4px); }
+    }
+
+    .iframe-wrapper {
+      display: none;
+      width: 100%;
+      height: 100vh;
+      position: relative;
+    }
+
+    .iframe-wrapper iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
 </head>
+
 <body>
 
-    <!-- Loading Message -->
-    <div class="loading-message">Wait For 10-15 Sec For Loading The Stream</div>
+  <!-- Loading screen -->
+  <div id="loading" class="loading">
+    <div class="loading-text">
+      <span style="--i:0;">T</span>
+      <span style="--i:1;">G</span>
+      <span style="--i:2;">-</span>
+      <span style="--i:3;">S</span>
+      <span style="--i:4;">A</span>
+      <span style="--i:5;">M</span>
+      <span style="--i:6;">A</span>
+      <span style="--i:7;">R</span>
+      <span style="--i:8;">T</span>
+      <span style="--i:9;">H</span>
+    </div>
+  </div>
 
-    <!-- DNS Info -->
-    <div class="dns-message">
-        For better streaming performance, use <strong>Cloudflare DNS (1.1.1.1)</strong>.<br>
-        <a href="https://1.1.1.1" target="_blank">Click here to learn how to set it up</a>
-    </div>
+  <!-- Video Player -->
+  <div id="video-container">
+    <video id="player" autoplay controls crossorigin playsinline style="width: 100%; display: none;">
+      <source id="video-source" type="application/vnd.apple.mpegurl" src="">
+    </video>
+  </div>
 
-    <!-- Video Player Section -->
-    <div class="player-container">
-        <div style="padding:56.25% 0 0 0;position:relative;">
-            <iframe id="contentFrame"
-                sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
-                frameborder="0"
-                gesture="media"
-                allow="encrypted-media"
-                allowfullscreen="true"
-                scrolling="no"
-                src="https://eamintalukdar.netlify.app/play/player.html?id=skyscric"
-                style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
-        </div>
-    </div>
+  <!-- Iframe Fallback -->
+  <div class="iframe-wrapper" id="iframe-wrapper">
+    <iframe id="iframe-player" allowfullscreen sandbox="allow-same-origin allow-scripts allow-top-navigation allow-presentation"></iframe>
+  </div>
 
-    <!-- Join Telegram Button -->
-    <div class="join-telegram-container">
-        <button class="join-telegram-btn" onclick="window.open('https://t.me/+e6G48oujQuExOTg1', '_blank')">Join Telegram Channel</button>
-    </div>
+  <!-- Telegram alert -->
+  <script>
+    alert("JOIN MY TELEGRAM CHANNEL: LIVE LINKS BY TEAMROHITOFFICAL45");
+  </script>
 
-    <!-- Telegram Alert -->
-    <script>
-        if (confirm("Join Our Telegram Channel @teamrohitoffical45") == true) {
-            window.open("https://t.me/+e6G48oujQuExOTg1", '_blank');
-        }
-    </script>
+  <!-- Load stream -->
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const streamUrl = urlParams.get("id");
+
+    const videoEl = document.getElementById("player");
+    const sourceEl = document.getElementById("video-source");
+    const iframeWrapper = document.getElementById("iframe-wrapper");
+    const iframeEl = document.getElementById("iframe-player");
+
+    setTimeout(() => {
+      document.getElementById("loading").style.display = "none";
+    }, 1000);
+
+    if (streamUrl && streamUrl.trim() !== "") {
+      if (streamUrl.endsWith(".m3u8")) {
+        sourceEl.src = streamUrl;
+        videoEl.style.display = "block";
+
+        document.addEventListener("DOMContentLoaded", () => {
+          const config = { maxMaxBufferLength: 100 };
+          const options = {};
+
+          if (Hls.isSupported()) {
+            const hls = new Hls(config);
+            hls.loadSource(streamUrl);
+            hls.attachMedia(videoEl);
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+              const levels = hls.levels.map(level => level.height);
+              options.quality = {
+                default: levels[0],
+                options: levels,
+                forced: true,
+                onChange: (level) => {
+                  hls.levels.forEach((lvl, index) => {
+                    if (lvl.height === level) {
+                      hls.currentLevel = index;
+                    }
+                  });
+                }
+              };
+              new Plyr(videoEl, options);
+            });
+            window.hls = hls;
+          } else {
+            new Plyr(videoEl, options);
+          }
+        });
+
+      } else {
+        // Fallback to iframe
+        iframeWrapper.style.display = "block";
+        iframeEl.src = streamUrl;
+      }
+    } else {
+      alert("Missing or invalid stream URL. Use ?id=YOUR_STREAM_URL");
+    }
+  </script>
 
 </body>
 </html>
