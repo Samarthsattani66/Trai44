@@ -123,7 +123,7 @@
 
     <!-- Iframe Player -->
     <div class="iframe-wrapper" id="iframe-wrapper" style="display:none;">
-      <iframe id="iframe-player" sandbox="allow-scripts allow-same-origin allow-presentation allow-top-navigation" allowfullscreen></iframe>
+      <iframe id="iframe-player" allowfullscreen></iframe>
     </div>
 
     <!-- Watermark -->
@@ -147,7 +147,7 @@
     const iframeEl = document.getElementById("iframe-player");
     const iframeWrapper = document.getElementById("iframe-wrapper");
 
-    // Hide loading screen
+    // Hide loading screen after 1s
     setTimeout(() => {
       document.getElementById("loading").style.display = "none";
     }, 1000);
@@ -156,7 +156,7 @@
       streamUrl = decodeURIComponent(streamUrl);
 
       if (streamUrl.endsWith(".m3u8")) {
-        // ✅ HLS Player
+        // ✅ Play with HLS
         sourceEl.src = streamUrl;
         videoEl.style.display = "block";
 
@@ -171,7 +171,7 @@
           new Plyr(videoEl);
         }
       } else {
-        // ✅ Any other → Iframe
+        // ✅ Force load inside iframe (logic from Code 1)
         iframeEl.src = streamUrl;
         iframeWrapper.style.display = "block";
       }
