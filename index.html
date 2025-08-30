@@ -2,11 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="description" content="ENJOY FREE LIVE">
-  <meta name="keywords" content="JIOTV, LIVETV, SPORTS, MOVIES, MUSIC">
-  <meta name="author" content="unknown">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>TEAMROHITOFFICAL45_LIVE</title>
 
   <!-- Plyr & HLS -->
@@ -15,170 +11,75 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
 
   <style>
-    html {
-      font-family: Poppins, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      background: #000;
-      color: #fff;
-      position: relative;
-    }
-    .loading {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      z-index: 9999;
-    }
-    .loading-text {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      margin: auto;
-      text-align: center;
-      width: 100%;
-      height: 100px;
-      line-height: 100px;
-    }
-    .loading-text span {
-      display: inline-block;
-      margin: 0 5px;
-      color: #00b3ff;
-      font-family: 'Quattrocento Sans', sans-serif;
-    }
-    .watermark {
-      position: absolute;
-      bottom: 2px;
-      right: 2px;
-      font-size: 8px;
-      color: rgba(255, 255, 255, 0.2);
-      font-style: italic;
-      pointer-events: none;
-      z-index: 10;
-      font-family: "Courier New", Courier, monospace;
-    }
-    .telegram-button {
-      display: block;
-      margin: 20px auto;
-      padding: 6px 10px;
-      background-color: #0088cc;
-      color: #fff;
-      text-align: center;
-      font-size: 14px;
-      text-decoration: none;
-      border-radius: 5px;
-      width: 180px;
-      transition: background-color 0.3s ease;
-    }
-    .telegram-button:hover {
-      background-color: #006a99;
-    }
-    iframe {
-      border: none;
-    }
-    .iframe-wrapper {
-      position: relative;
-      padding-top: 56.25%;
-      height: 0;
-      overflow: hidden;
-    }
-    .iframe-wrapper iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-    video {
-      width: 100%;
-      height: auto;
-      background: #000;
-    }
+    body {margin:0;background:#000;color:#fff;font-family:Poppins,sans-serif;}
+    .loading {position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:9999;}
+    .loading-text {position:absolute;top:0;bottom:0;left:0;right:0;margin:auto;text-align:center;height:100px;line-height:100px;}
+    .loading-text span {display:inline-block;margin:0 5px;color:#00b3ff;font-family:'Quattrocento Sans',sans-serif;}
+    .iframe-wrapper {position:relative;padding-top:56.25%;height:0;overflow:hidden;}
+    .iframe-wrapper iframe {position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
+    video {width:100%;background:#000;display:none;}
+    .watermark {position:absolute;bottom:2px;right:2px;font-size:10px;color:rgba(255,255,255,0.3);pointer-events:none;font-family:"Courier New",monospace;}
   </style>
 </head>
 <body>
 
-  <!-- Loading Screen -->
-  <div class="loading" id="loading">
-    <div class="loading-text">
-      <span>T</span><span>E</span><span>A</span><span>M</span>
-      <span>R</span><span>O</span><span>H</span><span>I</span><span>T</span>
-      <span>O</span><span>F</span><span>F</span><span>I</span><span>C</span>
-      <span>I</span><span>A</span><span>L</span><span>4</span><span>5</span>
-    </div>
+<div class="loading" id="loading">
+  <div class="loading-text">
+    <span>T</span><span>E</span><span>A</span><span>M</span>
+    <span>R</span><span>O</span><span>H</span><span>I</span><span>T</span>
+    <span>O</span><span>F</span><span>F</span><span>I</span><span>C</span>
+    <span>I</span><span>A</span><span>L</span><span>4</span><span>5</span>
+  </div>
+</div>
+
+<div style="position:relative;width:100%;height:auto;">
+  <video id="player" controls autoplay playsinline>
+    <source id="m3u8-url" src="" type="application/x-mpegURL">
+  </video>
+
+  <div class="iframe-wrapper" id="iframe-wrapper" style="display:none;">
+    <iframe id="iframe-player" allowfullscreen></iframe>
   </div>
 
-  <!-- Media Container -->
-  <div id="media-container" style="position: relative; width: 100%; height: auto;">
-    <!-- HLS Video Player -->
-    <video id="player" autoplay controls crossorigin playsinline style="--plyr-color-main:#15b4ff; display:none;">
-      <source id="m3u8-url" src="" type="application/x-mpegURL">
-    </video>
+  <div class="watermark">TEAMROHITOFFICAL45</div>
+</div>
 
-    <!-- Iframe Player -->
-    <div class="iframe-wrapper" id="iframe-wrapper" style="display:none;">
-      <iframe id="iframe-player" allowfullscreen></iframe>
-    </div>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  let streamUrl = urlParams.get("id");
 
-    <!-- Watermark -->
-    <div class="watermark">
-      𝙏𝙀𝘼𝙈𝙍𝙊𝙃𝙄𝙏𝙊𝙁𝙁𝙄𝘾𝙄𝘼𝙇𝟰𝟱
-    </div>
-  </div>
+  // Hide loading after 1 sec
+  setTimeout(()=>{document.getElementById("loading").style.display="none";},1000);
 
-  <!-- Telegram Button -->
-  <a href="https://t.me/+lkbpBqFd0FljNzJl" class="telegram-button" target="_blank">
-    Join Our Telegram Channel
-  </a>
-
-  <!-- Script -->
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    let streamUrl = urlParams.get("id");
+  if(streamUrl){
+    // decode twice (handles both raw & encoded URLs)
+    try {streamUrl = decodeURIComponent(decodeURIComponent(streamUrl));} catch(e){}
 
     const videoEl = document.getElementById("player");
     const sourceEl = document.getElementById("m3u8-url");
     const iframeEl = document.getElementById("iframe-player");
     const iframeWrapper = document.getElementById("iframe-wrapper");
 
-    // Hide loading screen after 1s
-    setTimeout(() => {
-      document.getElementById("loading").style.display = "none";
-    }, 1000);
+    if(streamUrl.endsWith(".m3u8")){
+      sourceEl.src = streamUrl;
+      videoEl.style.display="block";
 
-    if (streamUrl) {
-      streamUrl = decodeURIComponent(streamUrl);
-
-      if (streamUrl.endsWith(".m3u8")) {
-        // ✅ Play with HLS
-        sourceEl.src = streamUrl;
-        videoEl.style.display = "block";
-
-        if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(streamUrl);
-          hls.attachMedia(videoEl);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            new Plyr(videoEl);
-          });
-        } else {
-          new Plyr(videoEl);
-        }
+      if(Hls.isSupported()){
+        const hls = new Hls();
+        hls.loadSource(streamUrl);
+        hls.attachMedia(videoEl);
+        hls.on(Hls.Events.MANIFEST_PARSED,()=>{new Plyr(videoEl);});
       } else {
-        // ✅ Force load inside iframe (logic from Code 1)
-        iframeEl.src = streamUrl;
-        iframeWrapper.style.display = "block";
+        new Plyr(videoEl);
       }
     } else {
-      alert("⚠ No stream URL provided!");
+      iframeEl.src = streamUrl;
+      iframeWrapper.style.display="block";
     }
-  </script>
+  } else {
+    document.body.innerHTML="<h3 style='text-align:center;color:red;'>⚠ No stream URL provided!</h3>";
+  }
+</script>
 
 </body>
 </html>
