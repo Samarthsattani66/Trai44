@@ -1,85 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-  <title>TEAMROHITOFFICAL45_LIVE</title>
-
-  <!-- Plyr & HLS -->
-  <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teamrohitoffical45_live</title>
   <style>
-    body {margin:0;background:#000;color:#fff;font-family:Poppins,sans-serif;}
-    .loading {position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:9999;}
-    .loading-text {position:absolute;top:0;bottom:0;left:0;right:0;margin:auto;text-align:center;height:100px;line-height:100px;}
-    .loading-text span {display:inline-block;margin:0 5px;color:#00b3ff;font-family:'Quattrocento Sans',sans-serif;}
-    .iframe-wrapper {position:relative;padding-top:56.25%;height:0;overflow:hidden;}
-    .iframe-wrapper iframe {position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
-    video {width:100%;background:#000;display:none;}
-    .watermark {position:absolute;bottom:2px;right:2px;font-size:10px;color:rgba(255,255,255,0.3);pointer-events:none;font-family:"Courier New",monospace;}
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #242424, #3b5998);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    .loading-message {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ffcc00;
+      margin-bottom: 10px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+      animation: glow 1.5s infinite alternate;
+    }
+
+    @keyframes glow {
+      0% { box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00; }
+      100% { box-shadow: 0 0 15px #ffcc00, 0 0 25px #ffcc00, 0 0 35px #ffcc00; }
+    }
+
+    .player-container {
+      width: 95%;
+      max-width: 1200px;
+      margin: 20px auto;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+      border-radius: 15px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .player-container iframe {
+      border-radius: 15px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .join-telegram-container {
+      margin-top: 20px;
+    }
+
+    .join-telegram-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background-color: #008fd6;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .join-telegram-btn:hover {
+      background-color: #006bb3;
+    }
   </style>
 </head>
 <body>
 
-<div class="loading" id="loading">
-  <div class="loading-text">
-    <span>T</span><span>E</span><span>A</span><span>M</span>
-    <span>R</span><span>O</span><span>H</span><span>I</span><span>T</span>
-    <span>O</span><span>F</span><span>F</span><span>I</span><span>C</span>
-    <span>I</span><span>A</span><span>L</span><span>4</span><span>5</span>
-  </div>
-</div>
+  <div class="loading-message">Share The Links With Your Friends</div>
 
-<div style="position:relative;width:100%;height:auto;">
-  <video id="player" controls autoplay playsinline>
-    <source id="m3u8-url" src="" type="application/x-mpegURL">
-  </video>
-
-  <div class="iframe-wrapper" id="iframe-wrapper" style="display:none;">
-    <iframe id="iframe-player" allowfullscreen></iframe>
+  <div class="player-container">
+    <div style="padding:56.25% 0 0 0;position:relative;">
+      <iframe id="contentFrame"
+              sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
+              frameborder="0"
+              allow="encrypted-media"
+              allowfullscreen
+              scrolling="no"
+              style="position:absolute;top:0;left:0;width:100%;height:100%;">
+      </iframe>
+    </div>
   </div>
 
-  <div class="watermark">TEAMROHITOFFICAL45</div>
-</div>
+  <div class="join-telegram-container">
+    <button class="join-telegram-btn" onclick="window.open('https://t.me/+lkbpBqFd0FljNzJl', '_blank')">
+      Join Telegram Channel
+    </button>
+  </div>
 
-<script>
-  const urlParams = new URLSearchParams(window.location.search);
-  let streamUrl = urlParams.get("id");
+  <script>
+    // Get the "id" query parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoId = urlParams.get('id');
 
-  // Hide loading after 1 sec
-  setTimeout(()=>{document.getElementById("loading").style.display="none";},1000);
+    // Optional fallback if no id is provided
+    const fallbackId = "235";
 
-  if(streamUrl){
-    // decode twice (handles both raw & encoded URLs)
-    try {streamUrl = decodeURIComponent(decodeURIComponent(streamUrl));} catch(e){}
+    // Build the iframe src dynamically
+    const iframeSrc = `https://tvgo.neocities.org/APPTV/tata?id=${videoId || fallbackId}&key=aphjjjsjij&name=DW`;
 
-    const videoEl = document.getElementById("player");
-    const sourceEl = document.getElementById("m3u8-url");
-    const iframeEl = document.getElementById("iframe-player");
-    const iframeWrapper = document.getElementById("iframe-wrapper");
+    // Set the iframe source
+    document.getElementById('contentFrame').src = iframeSrc;
+  </script>
 
-    if(streamUrl.endsWith(".m3u8")){
-      sourceEl.src = streamUrl;
-      videoEl.style.display="block";
-
-      if(Hls.isSupported()){
-        const hls = new Hls();
-        hls.loadSource(streamUrl);
-        hls.attachMedia(videoEl);
-        hls.on(Hls.Events.MANIFEST_PARSED,()=>{new Plyr(videoEl);});
-      } else {
-        new Plyr(videoEl);
-      }
-    } else {
-      iframeEl.src = streamUrl;
-      iframeWrapper.style.display="block";
+  <script>
+    if (confirm("Join Our Telegram Channel @teamrohitofficial45")) {
+      window.open("https://t.me/+IhSW51QysxU3NzY1", '_blank');
     }
-  } else {
-    document.body.innerHTML="<h3 style='text-align:center;color:red;'>⚠ No stream URL provided!</h3>";
-  }
-</script>
+  </script>
 
 </body>
 </html>
