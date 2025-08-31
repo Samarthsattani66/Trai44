@@ -103,8 +103,8 @@
     // Optional fallback if no id is provided
     const fallbackId = "235";
 
-    // Build the iframe src dynamically
-    const iframeSrc = `https://tvgo.neocities.org/APPTV/tata?id=${videoId || fallbackId}&key=aphjjjsjij&name=DW`;
+    // ✅ USE YOUR OWN URL PATTERN HERE
+    const iframeSrc = `https://yourdomain.com/yourplayerpage?id=${videoId || fallbackId}`;
 
     // Set the iframe source
     document.getElementById('contentFrame').src = iframeSrc;
