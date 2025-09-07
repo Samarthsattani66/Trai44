@@ -1,25 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="description" content="ENJOY FREE LIVE" />
-    <meta name="keywords" content="JIOTV, LIVETV, SPORTS, MOVIES, MUSIC" />
-    <meta name="author" content="unknown" />
+    <meta charset="UTF-8">
+    <meta name="description" content="ENJOY FREE LIVE">
+    <meta name="keywords" content="JIOTV, LIVETV, SPORTS, MOVIES, MUSIC">
+    <meta name="author" content="unknown">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>TEAMROHITOFFICAL45_LIVE</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 
     <style>
-        html, body {
-            height: 100%;
-            background: #000;
-        }
-
         html {
             font-family: Poppins, sans-serif;
             margin: 0;
@@ -27,6 +22,7 @@
         }
 
         body {
+            background: #000;
             color: #fff;
             position: relative;
         }
@@ -124,12 +120,12 @@
     <div id="media-container" style="position: relative; width: 100%; height: auto;">
         <!-- HLS Video Player -->
         <video id="player" autoplay controls crossorigin playsinline style="--plyr-color-main:#15b4ff; width: 100%; display: none;">
-            <source id="m3u8-url" src="" type="application/x-mpegURL" />
+            <source id="m3u8-url" src="" type="application/x-mpegURL">
         </video>
 
         <!-- Iframe Player -->
         <div class="iframe-wrapper" id="iframe-wrapper" style="display: none;">
-            <iframe id="iframe-player" sandbox="allow-scripts allow-same-origin allow-presentation allow-top-navigation" allowfullscreen allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+            <iframe id="iframe-player" sandbox="allow-scripts allow-same-origin allow-presentation allow-top-navigation" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
 
         <!-- Watermark -->
