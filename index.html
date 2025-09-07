@@ -1,89 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TEAMROHITOFFICIAL45_LIVE Player</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f4f4f4;
-    }
-
-    .content {
-      max-width: 800px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    .rwd-media {
-      position: relative;
-      padding-bottom: 56.25%; /* 16:9 ratio */
-      height: 0;
-      overflow: hidden;
-    }
-
-    .rwd-media iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .buttons {
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .buttons button {
-      margin: 5px;
-      padding: 10px 20px;
-      background-color: #0066cc;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    .buttons button:hover {
-      background-color: #004999;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="content">
-    <h2>TEAMROHITOFFICIAL45_LIVE Player</h2>
-
-    <div class="rwd-media">
-      <iframe
-        name="TEAMROHITOFFICIAL45_LIVE"
-        id="TEAMROHITOFFICIAL45_LIVE"
-        frameborder="0"
-        src=""
-        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-        loading="lazy"
-        allowfullscreen>
-      </iframe>
-    </div>
-
-    <div class="buttons">
-      <button onclick="loadVideo('video1')">Load Video 1</button>
-      <button onclick="loadVideo('video2')">Load Video 2</button>
-      <button onclick="loadVideo('video3')">Load Video 3</button>
-    </div>
+<div class="content">
+  <div class="rwd-media">
+    <iframe
+      id="myIframe"
+      name="frame"
+      frameborder="0"
+      src=""
+      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+      loading="lazy"
+      allowfullscreen
+      style="width: 100%; height: 500px;"
+    ></iframe>
   </div>
+</div>
 
-  <script>
-    function loadVideo(id) {
-      const iframe = document.getElementById("TEAMROHITOFFICIAL45_LIVE");
-      iframe.src = "https://yourdomain.com?ID=" + encodeURIComponent(id);
-    }
-  </script>
-
-</body>
-</html>
+<script>
+  const id = '12345';  // You can change this dynamically
+  const iframe = document.getElementById('myIframe');
+  iframe.src = `https://mydomain.com/?id=${id}`;
+</script>
