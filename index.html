@@ -127,8 +127,11 @@
         <div class="iframe-wrapper" id="iframe-wrapper" style="display: none;">
             <iframe
                 id="iframe-player"
-                sandbox="allow-scripts allow-same-origin allow-presentation allow-top-navigation"
+                name="frame"
+                frameborder="0"
+                src=""
                 allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                loading="lazy"
                 allowfullscreen
             ></iframe>
         </div>
@@ -179,7 +182,7 @@
                         const hls = new Hls(config);
                         hls.loadSource(streamUrl);
                         hls.attachMedia(videoEl);
-                        hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
                             const qualities = hls.levels.map(level => level.height);
                             plyrOptions.quality = {
                                 default: qualities[0],
