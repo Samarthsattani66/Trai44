@@ -1,207 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="description" content="ENJOY FREE LIVE">
-    <meta name="keywords" content="JIOTV, LIVETV, SPORTS, MOVIES, MUSIC">
-    <meta name="author" content="unknown">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TEAMROHITOFFICAL45_LIVE</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-
     <style>
-        html {
-            font-family: Poppins, sans-serif;
+        /* General Page Styling */
+        body {
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-        }
-
-        body {
-            background: #000;
+            background: linear-gradient(135deg, #242424, #3b5998);
             color: #fff;
-            position: relative;
-        }
-
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 9999;
-        }
-
-        .loading-text {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             text-align: center;
-            width: 100%;
-            height: 100px;
-            line-height: 100px;
         }
 
-        .loading-text span {
-            display: inline-block;
-            margin: 0 5px;
-            color: #00b3ff;
-            font-family: 'Quattrocento Sans', sans-serif;
+        /* Glowing Effect for Message */
+        .loading-message {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffcc00;
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+            animation: glow 1.5s infinite alternate;
         }
 
-        .watermark {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 8px;
-            color: rgba(255, 255, 255, 0.2);
-            font-style: italic;
-            pointer-events: none;
-            z-index: 10;
-            font-family: "Courier New", Courier, monospace;
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+            }
+            100% {
+                box-shadow: 0 0 15px #ffcc00, 0 0 25px #ffcc00, 0 0 35px #ffcc00;
+            }
         }
 
-        .telegram-button {
-            display: block;
+        /* Video Player Styling */
+        .player-container {
+            width: 95%;
+            max-width: 1200px;
             margin: 20px auto;
-            padding: 6px 10px;
-            background-color: #0088cc;
-            color: #fff;
-            text-align: center;
-            font-size: 14px;
-            text-decoration: none;
-            border-radius: 5px;
-            width: 180px;
-            transition: background-color 0.3s ease;
-        }
-
-        .telegram-button:hover {
-            background-color: #006a99;
-        }
-
-        iframe {
-            border: none;
-        }
-
-        .iframe-wrapper {
-            position: relative;
-            padding-top: 56.25%;
-            height: 0;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
             overflow: hidden;
+            background: #000;
         }
 
-        .iframe-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .player-container iframe {
+            border-radius: 15px;
             width: 100%;
             height: 100%;
+        }
+
+        /* Join Telegram Button */
+        .join-telegram-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .join-telegram-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #008fd6;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .join-telegram-btn:hover {
+            background-color: #006bb3;
         }
     </style>
 </head>
 <body>
 
-    <!-- Loading Screen -->
-    <div class="loading" id="loading">
-        <div class="loading-text">
-            <span>T</span><span>E</span><span>A</span><span>M</span><span>R</span><span>O</span><span>H</span><span>I</span><span>T</span><span>O</span><span>F</span><span>F</span><span>I</span><span>C</span><span>I</span><span>A</span><span>L</span><span>4</span><span>5</span>
+    <!-- Loading Message -->
+    <div class="loading-message">Share The Links With Your Friends</div>
+
+    <!-- Video Player Section -->
+    <div class="player-container">
+        <div style="padding:56.25% 0 0 0; position:relative;">
+            <div class="content">
+                <div class="rwd-media">
+                    <iframe
+                        id="contentFrame"
+                        name="frame"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                        loading="lazy"
+                        allowfullscreen
+                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
+                        style="position:absolute; top:0; left:0; width:100%; height:100%;"
+                    ></iframe>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Media Container -->
-    <div id="media-container" style="position: relative; width: 100%; height: auto;">
-        <!-- HLS Video Player -->
-        <video id="player" autoplay controls crossorigin playsinline style="--plyr-color-main:#15b4ff; width: 100%; display: none;">
-            <source id="m3u8-url" src="" type="application/x-mpegURL">
-        </video>
-
-        <!-- Iframe Player -->
-        <div class="iframe-wrapper" id="iframe-wrapper" style="display: none;">
-            <iframe id="iframe-player" sandbox="allow-scripts allow-same-origin allow-presentation allow-top-navigation" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-
-        <!-- Watermark -->
-        <div class="watermark">
-            𝙏𝙀𝘼𝙈𝙍𝙊𝙃𝙄𝙏𝙊𝙁𝙁𝙄𝘾𝙄𝘼𝙇𝟰𝟱
-        </div>
+    <!-- Join Telegram Button -->
+    <div class="join-telegram-container">
+        <button
+            class="join-telegram-btn"
+            onclick="window.open('https://t.me/+IhSW51QysxU3NzY1', '_blank')"
+        >
+            Join Telegram Channel
+        </button>
     </div>
 
-    <!-- Telegram Button -->
-    <a href="https://t.me/+lkbpBqFd0FljNzJl" class="telegram-button" target="_blank">
-        Join Our Telegram Channel
-    </a>
-
-    <!-- Script -->
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const streamUrl = urlParams.get("id");
+        // Get 'id' parameter from URL
+        const params = new URLSearchParams(window.location.search);
+        const streamUrl = params.get('id');
 
-        const videoEl = document.getElementById("player");
-        const sourceEl = document.getElementById("m3u8-url");
-        const iframeEl = document.getElementById("iframe-player");
-        const iframeWrapper = document.getElementById("iframe-wrapper");
-
-        // Hide loading screen
-        setTimeout(() => {
-            document.getElementById("loading").style.display = "none";
-        }, 1000);
-
-        // Check and load stream
-        if (streamUrl && streamUrl.trim() !== "") {
-            if (streamUrl.endsWith(".m3u8")) {
-                // Show video player
-                sourceEl.src = streamUrl;
-                videoEl.style.display = "block";
-
-                const posterURL = "https://i.postimg.cc/Y0918Y71/IMG-20240810-011453-139.jpg";
-                const img = new Image();
-                img.onload = () => videoEl.setAttribute("poster", posterURL);
-                img.onerror = () => videoEl.setAttribute("poster", "https://example.com/fallback-poster.jpg");
-                img.src = posterURL;
-
-                document.addEventListener("DOMContentLoaded", () => {
-                    const config = { maxMaxBufferLength: 100 };
-                    const plyrOptions = {};
-                    if (Hls.isSupported()) {
-                        const hls = new Hls(config);
-                        hls.loadSource(streamUrl);
-                        hls.attachMedia(videoEl);
-                        hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
-                            const qualities = hls.levels.map(level => level.height);
-                            plyrOptions.quality = {
-                                default: qualities[0],
-                                options: qualities,
-                                forced: true,
-                                onChange: q => {
-                                    hls.levels.forEach((level, i) => {
-                                        if (level.height === q) {
-                                            hls.currentLevel = i;
-                                        }
-                                    });
-                                }
-                            };
-                            new Plyr(videoEl, plyrOptions);
-                        });
-                        window.hls = hls;
-                    } else {
-                        new Plyr(videoEl, plyrOptions);
-                    }
-                });
-            } else {
-                // Show iframe
-                iframeEl.src = streamUrl;
-                iframeWrapper.style.display = "block";
-            }
+        if (streamUrl) {
+            document.getElementById('contentFrame').src = streamUrl;
         } else {
-            alert("Invalid or missing stream URL.");
+            // No URL param, show an alert or you can set default src
+            alert('Please provide a valid stream URL in the ?id= parameter.');
+        }
+
+        // Prompt to join Telegram once
+        if (
+            confirm('Join Our Telegram Channel TEAMROHITOFFICAL45_LIVE') === true
+        ) {
+            window.open('https://t.me/+IhSW51QysxU3NzY1', '_blank');
         }
     </script>
 
