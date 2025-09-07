@@ -7,7 +7,7 @@
     <meta name="author" content="unknown">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>TEAMROHITOFFICIAL45_LIVE</title>
+    <title>TEAMROHITOFFICAL45_LIVE</title>
 
     <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
@@ -15,13 +15,10 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 
     <style>
-        html, body {
+        html {
             font-family: Poppins, sans-serif;
             margin: 0;
             padding: 0;
-            height: auto;
-            overflow-y: auto;
-            overflow-x: hidden;
         }
 
         body {
@@ -128,7 +125,12 @@
 
         <!-- Iframe Player -->
         <div class="iframe-wrapper" id="iframe-wrapper" style="display: none;">
-            <iframe id="iframe-player" sandbox="allow-scripts allow-same-origin allow-presentation allow-top-navigation" allowfullscreen></iframe>
+            <iframe
+                id="iframe-player"
+                sandbox="allow-scripts allow-same-origin allow-presentation allow-top-navigation"
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+            ></iframe>
         </div>
 
         <!-- Watermark -->
