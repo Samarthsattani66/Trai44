@@ -27,7 +27,6 @@
             background-attachment: fixed;
         }
 
-        /* --- Match Card 3D Tilt Effect --- */
         .match-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -44,9 +43,9 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px var(--primary-glow);
             border-color: var(--primary-glow);
         }
-          .match-card img{
-    object-position:top;
-          }
+        .match-card img{
+            object-position:top;
+        }
         
         .card-glow {
             position: absolute;
@@ -73,7 +72,6 @@
             box-shadow: 0 0 25px -2px var(--primary-glow);
         }
 
-        /* --- Spotlight Card --- */
         .spotlight-card {
             border: 1px solid var(--border-color);
             background: linear-gradient(45deg, rgba(15, 23, 42, 0.5), rgba(30, 41, 59, 0.3));
@@ -91,7 +89,6 @@
             50% { transform: scale(1.05); box-shadow: 0 0 25px #ef4444; }
         }
 
-        /* --- General Animations --- */
         @keyframes fadeIn {
             to {
                 opacity: 1;
@@ -99,7 +96,6 @@
             }
         }
 
-        /* --- Telegram Popup --- */
         .popup-overlay {
             opacity: 0;
             visibility: hidden;
@@ -171,7 +167,7 @@
         const spotlightContainer = document.getElementById('spotlight-container');
         const gridContainer = document.getElementById('matches-grid');
         const DATA_URL = 'https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json';
-        const PLAY_BASE = 'fc/player.html';
+        const PLAY_BASE = 'http://Teamro0045.free.nf/teamrofemcodeplyr2.html?url='; // 🔥 changed here
 
         async function fetchAndRender() {
             try {
@@ -270,10 +266,9 @@
             const id = encodeURIComponent(String(match.match_id ?? ''));
 
             for (const [key, value] of Object.entries(streams)) {
-                // MODIFICATION: Added a check to skip 'Primary_Playback_URL'
                 if (value && value !== "Unavailable" && key.toLowerCase() !== 'language' && key !== 'Primary_Playback_URL') {
                     const label = key.replace(/_/g, ' ').replace(/(cdn|stream)/i, '').trim().toUpperCase() || 'STREAM';
-                    const href = `${PLAY_BASE}?id=${id}&cdn=${encodeURIComponent(key)}`;
+                    const href = `${PLAY_BASE}${encodeURIComponent(key)}&id=${id}`;
                     buttons += `<a href="${href}" class="watch-btn text-center text-black font-semibold ${classes}">${label}</a>`;
                 }
             }
@@ -314,7 +309,9 @@
             }
 
             setTimeout(() => {
-                popup.classList.add('show');
+         
+
+       popup.classList.add('show');
             }, 3000);
 
             function dismissPopup() {
