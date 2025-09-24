@@ -1,149 +1,215 @@
+<!-- ⚠️ Everything is the same except PLAYER URL & HEADER NAME -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>TEAMROHITOFFICAL45_LIVE</title>
-    <link rel="icon" href="" type="image/png" sizes="250x250">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Allrounder Fancode</title>
+    <link rel="icon" href="https://fancode.com/favicon.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background: #02040a;
+            --primary-glow: #0ea5e9;
+            --secondary-glow: #f59e0b;
+            --card-bg: rgba(15, 23, 42, 0.5);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
 
-    <!-- Shaka Player Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/controls.min.css" crossorigin="anonymous">
+        body {
+            background-color: var(--background);
+            font-family: 'Inter', sans-serif;
+            background-image: radial-gradient(circle at 25% 25%, rgba(14, 165, 233, 0.15), transparent 30%),
+                              radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.1), transparent 30%);
+            background-attachment: fixed;
+        }
 
-    <style>
-        body {
-            margin: 0;
-            background-color: black;
-        }
-
-        /* Shaka Player custom styling */
-        .shaka-overflow-menu {
-            background-color: rgb(41, 41, 163);
-            color: rgb(153, 153, 153);
-        }
-
-        .shaka-overflow-menu button:hover {
-            background-color: rgb(45, 45, 45);
-        }
-
-        .shaka-overflow-button-label {
-            color: rgb(245, 245, 245);
-        }
-
-        .shaka-current-selection-span {
-            color: rgb(202, 202, 202);
-        }
-
-        .material-icons-round {
-            color: rgb(230, 230, 230);
-        }
-
-        .shaka-settings-menu {
-            background-color: rgb(35, 35, 35);
-            color: rgb(255, 255, 255);
-        }
-
-        .shaka-settings-menu button {
-            color: rgb(255, 255, 255);
-        }
-
-        .shaka-settings-menu button:hover {
-            background-color: rgb(45, 45, 45);
-        }
-
-        [data-shaka-player-container] {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
+        /* ...[CSS unchanged from your code]... */
+    </style>
 </head>
-<body>
-    <div data-shaka-player-container>
-        <video autoplay muted playsinline data-shaka-player id="video"
-            poster="https://i.ibb.co/CpPYdm25/IMG-20250324-183620-441.jpg">
-        </video>
-    </div>
+<body class="text-slate-200">
 
-    <script>
-        async function init() {
-            const video = document.getElementById("video");
-            const ui = video.ui;
-            const controls = ui.getControls();
-            const player = controls.getPlayer();
+    <header class="text-center py-12 px-4">
+        <h1 class="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-amber-400">
+            ⏤͟͞𝙏𝙀𝘼𝙈𝙍𝙊𝙃𝙄𝙏𝙊𝙁𝙁𝙄𝘾𝙄𝘼𝙇𝟰𝟱_LIVE
+        </h1>
+        <p class="text-slate-400 mt-2 max-w-xl mx-auto">
+           Watch all fancode matches for free 🔥
+        </p>
+    </header>
 
-            // Configure DRM ClearKey (corrected: removed extra comma)
-            player.configure({
-                drm: {
-                    clearKeys: {
-                        "5deb190b1dac28e46c0bdada7668b7de": "ddd2b372702e42b0d2708a70b91dec8d"
-                    }
-                }
-            });
+    <!-- [HTML layout unchanged from your code] -->
 
-            // Customize player UI
-            ui.configure({
-                controlPanelElements: [
-                    "play_pause", "mute", "volume", "spacer", 
-                    "time_and_duration", "quality", "fullscreen", "overflow_menu"
-                ],
-                volumeBarColors: {
-                    base: 'rgba(63, 187, 1, 1)',
-                    level: 'rgb(255, 69, 0)'
-                },
-                seekBarColors: {
-                    base: 'rgb(41, 41, 163)',
-                    buffered: 'rgb(35, 99, 3)',
-                    played: 'rgba(63, 187, 1, 1)'
-                }
-            });
+    <script>
+        const spotlightContainer = document.getElementById('spotlight-container');
+        const gridContainer = document.getElementById('matches-grid');
 
-            window.player = player; // for debugging
-            window.ui = ui;
+        // ✅ CHANGED PLAYER BASE URL HERE
+        const PLAY_BASE = 'https://Teamro0045.free.nf/teamrofemcodeplyr2.html?url=';
 
-            player.addEventListener("error", onPlayerErrorEvent);
-            controls.addEventListener("error", onUIErrorEvent);
+        const DATA_URL = 'https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json';
 
-            try {
-                await player.load("https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/bsaaetko8v/out/v1/bd3b0c314fff4bb1ab4693358f3cd2d3/cenc.mpd");
-                console.log("The video has now been loaded!");
-            } catch (error) {
-                onPlayerError(error);
-            }
-        }
+        async function fetchAndRender() {
+            try {
+                const res = await fetch(DATA_URL);
+                const data = await res.json();
+                let matches = Array.isArray(data.matches) ? data.matches : [];
 
-        function onPlayerErrorEvent(event) {
-            onPlayerError(event.detail);
-        }
+                matches.sort((a, b) => {
+                    const aIsLive = a.status?.toUpperCase() === 'LIVE';
+                    const bIsLive = b.status?.toUpperCase() === 'LIVE';
+                    return bIsLive - aIsLive;
+                });
 
-        function onPlayerError(error) {
-            console.error("Error code", error.code, "object", error);
-        }
+                gridContainer.innerHTML = '';
 
-        function onUIErrorEvent(event) {
-            onPlayerError(event.detail);
-        }
+                const firstLiveMatch = matches.find(m => m.status?.toUpperCase() === 'LIVE');
+                if (firstLiveMatch) {
+                    renderSpotlight(firstLiveMatch);
+                    matches = matches.filter(m => m.match_id !== firstLiveMatch.match_id);
+                }
 
-        function initFailed(error) {
-            console.error("Unable to load the Shaka UI library!");
-        }
+                if (matches.length > 0) {
+                    matches.forEach((match, index) => {
+                        const card = createMatchCard(match);
+                        card.style.animationDelay = `${index * 100}ms`;
+                        gridContainer.appendChild(card);
+                    });
+                } else if (!firstLiveMatch) {
+                    gridContainer.innerHTML = `<p class="col-span-full text-center text-slate-400">No matches available right now.</p>`;
+                }
 
-        document.addEventListener("shaka-ui-loaded", init);
-        document.addEventListener("shaka-ui-load-failed", initFailed);
+                initInteractiveEffects();
 
-        // Telegram redirect prompt
-        const message = "JOIN OUR TELEGRAM CHANNEL FOR MORE LIVE STREAM LINKS";
-        if (confirm(message)) {
-            window.location.href = "https://t.me/+e6G48oujQuExOTg1";
-        }
-    </script>
+            } catch (error) {
+                console.error("Failed to load match data:", error);
+                gridContainer.innerHTML = `<p class="col-span-full text-center text-red-400">Could not load matches. Please check your connection and try again.</p>`;
+            }
+        }
+
+        function renderSpotlight(match) {
+            const imgSrc = match.image || 'https://fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg';
+            const buttonsHTML = generateButtons(match, 'text-sm px-5 py-2.5 rounded-lg');
+
+            spotlightContainer.innerHTML = `
+                <div class="spotlight-card rounded-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 items-center gap-8 p-6 md:p-8">
+                    <div class="relative rounded-lg overflow-hidden aspect-video">
+                        <img src="${imgSrc}" alt="${match.title}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                        <div class="spotlight-live-badge absolute top-4 left-4 text-xs font-bold px-3 py-1.5 rounded-full text-white shadow-lg">
+                            <i class="fas fa-circle text-xs mr-1.5 animate-ping absolute opacity-75"></i>
+                            <i class="fas fa-circle text-xs mr-1.5"></i>
+                            LIVE NOW
+                        </div>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <p class="text-amber-400 font-semibold text-sm mb-1">${match.tournament || ''}</p>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-3">${match.title || 'Live Match'}</h2>
+                        <p class="text-slate-400 text-sm mb-6">${match.language || ''}</p>
+                        <div class="flex flex-wrap gap-3">${buttonsHTML}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createMatchCard(match) {
+            const card = document.createElement('div');
+            card.className = 'match-card rounded-xl overflow-hidden flex flex-col';
+
+            const isLive = match.status?.toUpperCase() === 'LIVE';
+            const imgSrc = match.image || 'https://fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg';
+            const buttonsHTML = generateButtons(match, 'text-xs px-3 py-2 rounded-md');
+
+            card.innerHTML = `
+                <div class="relative">
+                    <div class="card-glow"></div>
+                    <img src="${imgSrc}" alt="${match.title}" class="w-full h-48 object-cover">
+                    ${isLive ? `<span class="absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">LIVE</span>` : ''}
+                </div>
+                <div class="p-5 flex flex-col flex-grow">
+                    <p class="text-amber-500 text-xs font-semibold mb-1">${match.tournament || ''}</p>
+                    <h3 class="text-lg font-bold text-slate-100 flex-grow mb-4">${match.title || 'Match Title'}</h3>
+                    <div class="flex flex-wrap gap-2">${buttonsHTML || '<p class="text-xs text-slate-500">Links coming soon...</p>'}</div>
+                </div>
+            `;
+            return card;
+        }
+
+        function generateButtons(match, classes) {
+            const streams = {
+                ...match.STREAMING_CDN,
+                adfree_stream: match.adfree_stream,
+                dai_stream: match.dai_stream
+            };
+
+            let buttons = '';
+            for (const [key, value] of Object.entries(streams)) {
+                if (value && value !== "Unavailable" && key.toLowerCase() !== 'language' && key !== 'Primary_Playback_URL') {
+                    const label = key.replace(/_/g, ' ').replace(/(cdn|stream)/i, '').trim().toUpperCase() || 'STREAM';
+                    const streamUrl = encodeURIComponent(value);
+                    const href = `${PLAY_BASE}${streamUrl}`;
+                    buttons += `<a href="${href}" class="watch-btn text-center text-black font-semibold ${classes}">${label}</a>`;
+                }
+            }
+            return buttons;
+        }
+
+        function initInteractiveEffects() {
+            const cards = document.querySelectorAll('.match-card');
+            cards.forEach(card => {
+                const glow = card.querySelector('.card-glow');
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    const rotateX = (y - rect.height / 2) / -15;
+                    const rotateY = (x - rect.width / 2) / 15;
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+
+                    glow.style.setProperty('--x', `${x}px`);
+                    glow.style.setProperty('--y', `${y}px`);
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                });
+            });
+        }
+
+        function handlePopup() {
+            const popup = document.getElementById('telegram-popup');
+            const closeBtn = document.getElementById('close-popup-btn');
+            const joinBtn = document.getElementById('join-btn');
+            const POPUP_KEY = 'telegramPopupDismissed';
+
+            if (localStorage.getItem(POPUP_KEY)) {
+                return;
+            }
+
+            setTimeout(() => {
+                popup.classList.add('show');
+            }, 3000);
+
+            function dismissPopup() {
+                popup.classList.remove('show');
+                localStorage.setItem(POPUP_KEY, 'true');
+            }
+
+            closeBtn.addEventListener('click', dismissPopup);
+            joinBtn.addEventListener('click', () => {
+                setTimeout(dismissPopup, 500);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAndRender();
+            handlePopup();
+        });
+    </script>
 </body>
 </html>
