@@ -1,546 +1,102 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Watch live streams with high quality playback">
-    <meta name="theme-color" content="#111827">
-    <title>willow by cricbuzz // Live Stream</title>
+    <meta name="description" content="ENJOY FREE LIVE">
+    <meta name="keywords" content="LIVE TV, SPORTS, STREAMING">
+    <meta name="author" content="unknown">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <title>TEAMROHITOFFICAL45_PLAYER</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script><style type="text/css">* {user-select: auto !important; -webkit-user-select: auto !important;}</style><input type="hidden" id="inject_idm_text_selection">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css" crossorigin="anonymous">
-
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 
     <style>
-        :root {
-            /* Minimalist clean theme */
-            --bg-color: #111827;
-            --surface-bg: #1f2937;
-            --panel-border: #374151;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
-            --text-primary: #f9fafb;
-            --text-secondary: #e5e7eb;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
-            --success: #10b981;
-            --shadow-sm: rgba(0, 0, 0, 0.1);
-            --shadow-md: rgba(0, 0, 0, 0.2);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 1rem;
-            line-height: 1.6;
-        }
-        @media (max-width: 768px) {
-            body { padding: 0.75rem; font-size: 14px; }
-        }
-        .container {
-            width: 100%;
-            max-width: 800px;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        @media (min-width: 1200px) {
-            .container { max-width: 1000px; }
-        }
-        @media (max-width: 480px) {
-            .container { max-width: 100%; }
-        }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
-        .stream-header {
-            background: var(--surface-bg);
-            border: 1px solid var(--panel-border);
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 1.5rem;
-            max-width: 900px;
-            box-shadow: 0 2px 8px var(--shadow-sm);
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        @media (max-width: 480px) {
-            .stream-header { padding: 0.875rem 1rem; margin-bottom: 1rem; }
-        }
-        .stream-header h1 { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); text-align: center; }
-        @media (max-width: 480px) {
-            .stream-header h1 { font-size: 1rem; }
-        }
-        .live-badge {
-            background: var(--danger);
-            color: white;
-            padding: 0.375rem 0.875rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-left: 0.75rem;
-        }
-        @media (max-width: 480px) {
-            .live-badge { padding: 0.3rem 0.7rem; font-size: 0.7rem; margin-left: 0.5rem; }
-        }
-        .live-badge i {
-            animation: pulse 2s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-        #player-container {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            max-height: 600px;
-            background-color: #000;
-            box-shadow: 0 4px 12px var(--shadow-md);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid var(--panel-border);
-            position: relative;
-        }
-        @media (max-width: 768px) {
-            #player-container { border-radius: 8px; max-height: none; }
-        }
-        @media (max-width: 480px) {
-            #player-container { border-radius: 6px; }
-        }
-        /* CSS FROM NEW FILE: Hide shaka spinner completely */
-        .shaka-spinner-container,
-        .shaka-spinner,
-        .shaka-spinner-svg {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-        }
-        .grid-panels { display: grid; gap: 1rem; grid-template-columns: 1fr; }
-        @media (min-width: 768px) { .grid-panels { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 480px) { .grid-panels { gap: 0.75rem; } }
-        .info-card {
-            background: var(--surface-bg);
-            border: 1px solid var(--panel-border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            text-align: center;
-            box-shadow: 0 2px 8px var(--shadow-sm);
-        }
-        @media (max-width: 768px) {
-            .info-card { padding: 1.25rem; margin-top: 1rem; }
-        }
-        @media (max-width: 480px) {
-            .info-card { padding: 1rem; border-radius: 8px; }
-        }
-        .info-card h2 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        @media (max-width: 480px) {
-            .info-card h2 { font-size: 0.8rem; gap: 0.4rem; }
-        }
-        .action-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            width: 100%;
-            padding: 0.875rem 1.25rem;
-            border-radius: 8px;
-            background: var(--accent);
-            color: white;
-            font-weight: 600;
-            font-size: 0.95rem;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            min-height: 44px;
-        }
-        @media (max-width: 480px) {
-            .action-button { padding: 0.95rem 1rem; font-size: 0.9rem; }
-        }
-        .action-button:hover {
-            background: var(--accent-hover);
-            transform: translateY(-1px);
-        }
-        .action-button.copied { background: var(--success); }
-        .back-link {
-            display: inline-block;
-            width: 100%;
-            text-align: center;
-            margin-top: 2rem;
-            color: var(--text-muted);
-            text-decoration: none;
-            padding: 0.75rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            transition: color 0.2s ease;
-            min-height: 44px;
-        }
-        @media (max-width: 480px) {
-            .back-link { margin-top: 1.5rem; font-size: 0.85rem; }
-        }
-        .back-link:hover { color: var(--text-secondary); }
-        .error-message {
-             text-align: center;
-             padding: 4rem 2rem;
-             background-color: var(--surface-bg);
-             border: 1px solid var(--panel-border);
-             border-radius: 12px;
-        }
-        @media (max-width: 480px) {
-            .error-message { padding: 3rem 1.5rem; border-radius: 8px; }
-        }
-        .error-message h2 { color: var(--danger); font-size: 1.5rem; margin-bottom: 1rem; }
-        @media (max-width: 480px) {
-            .error-message h2 { font-size: 1.25rem; }
-        }
-        .error-message p { color: var(--text-secondary); }
-        .telegram-popup {
-            position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--surface-bg); color: var(--text-primary);
-            padding: 2rem 1.5rem; border-radius: 12px;
-            box-shadow: 0 8px 32px var(--shadow-md);
-            z-index: 10000; text-align: center;
-            width: 90%; max-width: 380px;
-            display: none; border: 1px solid var(--panel-border);
-            animation: popIn 0.3s ease-out forwards;
-        }
-        @media (max-width: 480px) {
-            .telegram-popup { padding: 1.5rem 1.25rem; max-width: 340px; border-radius: 10px; }
-        }
-        @keyframes popIn {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-        .telegram-popup h2 { margin-top: 0; color: var(--text-primary); font-size: 1.375rem; margin-bottom: 0.75rem; }
-        @media (max-width: 480px) {
-            .telegram-popup h2 { font-size: 1.2rem; }
-        }
-        .telegram-popup p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5; }
-        @media (max-width: 480px) {
-            .telegram-popup p { font-size: 0.85rem; margin-bottom: 1.25rem; }
-        }
-        .telegram-popup .popup-button {
-            width: 100%; padding: 0.875rem;
-            margin-top: 0.75rem; font-size: 0.95rem;
-            border: none; border-radius: 8px;
-            cursor: pointer; font-weight: 600;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            text-decoration: none;
-            display: inline-block;
-            min-height: 44px;
-        }
-        @media (max-width: 480px) {
-            .telegram-popup .popup-button { padding: 0.95rem; font-size: 0.9rem; }
-        }
-        .telegram-popup .popup-button:hover { transform: translateY(-1px); }
-        .telegram-popup .join-btn { background: var(--accent); color: white; }
-        .telegram-popup .join-btn:hover { background: var(--accent-hover); }
-        .telegram-popup .joined-btn { background-color: var(--panel-border); color: var(--text-primary); }
-        .telegram-popup .joined-btn:hover { background-color: #4b5563; }
-        @media (max-width: 480px) {
-            body { padding: 0.5rem; }
-            .telegram-popup { padding: 20px 15px; }
-        }
+        body { background:#000; color:#fff; margin:0; font-family:Poppins,sans-serif }
+        .loading { position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:9999 }
+        .loading-text { position:absolute; top:0; left:0; right:0; bottom:0; margin:auto; height:100px; text-align:center; line-height:100px }
+        .loading-text span { color:#00b3ff; margin:0 3px }
+        .iframe-wrapper { position:relative; padding-top:56.25%; display:none }
+        .iframe-wrapper iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:0 }
+        #player { width:100%; display:none; --plyr-color-main:#00b0ff }
+        .watermark { position:absolute; bottom:3px; right:3px; font-size:10px; color:#ffffff22; pointer-events:none }
+        .telegram-button { display:block; margin:15px auto; padding:7px 15px; background:#0088cc; color:#fff; border-radius:6px; text-decoration:none; width:180px }
     </style>
 </head>
-<body>
-    <main class="container">
-        <div id="stream-content">
-                <div class="stream-header"><h1>willow by cricbuzz</h1><span class="live-badge" role="status" aria-live="polite"><i class="fa-solid fa-circle" aria-hidden="true"></i> LIVE</span></div>
-                
-                <div id="player-container" data-shaka-player-container="" class="shaka-mobile shaka-video-container" shaka-controls="true">
-                    <video id="video-player" style="width:100%;height:100%;" autoplay="" playsinline="" preload="auto" data-shaka-player="" src="blob:https://allroundarlive.pages.dev/14b78921-f054-40a1-b205-a86207766935" class="shaka-video"></video>
-                <div class="shaka-controls-container"><div class="shaka-scrim-container"></div><div class="shaka-play-button-container"><button type="button" class="shaka-play-button shaka-no-propagation" icon="pause" aria-label="Pause"></button></div><div class="shaka-hidden-fast-forward-container"><div class="shaka-fast-foward-container"><span>0s</span><span class="shaka-forward-rewind-container-icon">fast_forward</span></div></div><div class="shaka-hidden-rewind-container"><div class="shaka-rewind-container"><span>0s</span><span class="shaka-forward-rewind-container-icon">fast_rewind</span></div></div><div class="shaka-server-side-ad-container"></div><div class="shaka-bottom-controls shaka-no-propagation"><div class="shaka-ad-controls shaka-hidden"><div class="shaka-ad-position shaka-hidden"><span class="shaka-ad-position-span"></span></div><div class="shaka-ad-counter"><span class="shaka-ad-counter-span"></span></div></div><div class="shaka-controls-button-panel shaka-show-controls-on-mouse-over"><button type="button" class="shaka-small-play-button material-icons-round shaka-tooltip" aria-label="Pause">pause</button><button type="button" class="shaka-current-time" disabled="">0:00 / 4:59</button><button type="button" class="shaka-mute-button material-icons-round shaka-tooltip" aria-label="Unmute">volume_off</button><div class="shaka-range-container shaka-volume-bar-container" style="background: linear-gradient(to right,var(--accent)0%,rgba(255, 255, 255, 0.3)0%,rgba(255, 255, 255, 0.3)100%);"><input class="shaka-range-element shaka-volume-bar" type="range" step="any" min="0" max="100" aria-label="Volume"></div><div class="shaka-spacer" aria-hidden="true"></div><button type="button" class="shaka-overflow-button shaka-language-button shaka-tooltip-status shaka-hidden" aria-label="Language" shaka-status="English"><i class="material-icons-round">language</i><label class="shaka-overflow-button-label shaka-overflow-menu-only"><span>Language</span><span class="shaka-current-selection-span">English</span></label></button><button type="button" class="shaka-overflow-button shaka-caption-button shaka-tooltip-status shaka-hidden" aria-pressed="false" aria-label="Captions" shaka-status="Off"><i class="material-icons-round">closed_caption_disabled</i><label class="shaka-overflow-button-label shaka-overflow-menu-only"><span>Captions</span><span class="shaka-current-selection-span">Off</span></label></button><button type="button" class="shaka-pip-button shaka-tooltip shaka-hidden" aria-label="Enter Picture-in-Picture"><i class="material-icons-round">picture_in_picture_alt</i><label class="shaka-overflow-button-label shaka-overflow-menu-only"><span>Picture-in-Picture</span><span class="shaka-current-selection-span">Off</span></label></button><button type="button" class="shaka-overflow-button shaka-resolution-button shaka-tooltip-status" shaka-status="Auto" aria-label="Resolution"><i class="material-icons-round">settings</i><label class="shaka-overflow-button-label shaka-overflow-menu-only"><span>Resolution</span><span class="shaka-current-selection-span">Auto</span></label></button><button type="button" class="shaka-fullscreen-button material-icons-round shaka-tooltip" aria-label="Full screen">fullscreen</button></div><div class="shaka-range-container shaka-seek-bar-container" style="background: linear-gradient(to right,var(--accent) 0.013686740552810791%,var(--accent) 0.013686740552810791%,var(--accent) 0.013686740552810791%,rgba(255, 255, 255, 0.5) 0.013686740552810791%,rgba(255, 255, 255, 0.5) 1.3391861396715181%,rgba(255, 255, 255, 0.3) 1.3391861396715181%);"><div class="shaka-ad-markers"></div><input class="shaka-range-element shaka-seek-bar shaka-no-propagation shaka-show-controls-on-mouse-over" type="range" step="any" min="0" max="299.56" aria-label="Seek"><div id="shaka-player-ui-thumbnail-container"><img id="shaka-player-ui-thumbnail-image" draggable="false"><div id="shaka-player-ui-thumbnail-time"></div></div></div></div><div class="shaka-no-propagation shaka-show-controls-on-mouse-over shaka-settings-menu shaka-hidden shaka-audio-languages"><button type="button" class="shaka-back-to-overflow-button" aria-label="Back"><i class="material-icons-round">close</i><span>Language</span></button><button type="button" aria-selected="true"><span class="shaka-chosen-item">English</span><i class="material-icons-round shaka-chosen-item" aria-hidden="true">done</i></button></div><div class="shaka-no-propagation shaka-show-controls-on-mouse-over shaka-settings-menu shaka-hidden shaka-text-languages"><button type="button" class="shaka-back-to-overflow-button" aria-label="Back"><i class="material-icons-round">close</i><span>Captions</span></button><button type="button" class="shaka-turn-captions-off-button" aria-selected="true"><span class="shaka-auto-span shaka-chosen-item">Off</span><i class="material-icons-round shaka-chosen-item" aria-hidden="true">done</i></button></div><div class="shaka-no-propagation shaka-show-controls-on-mouse-over shaka-settings-menu shaka-hidden shaka-resolutions"><button type="button" class="shaka-back-to-overflow-button" aria-label="Resolution"><i class="material-icons-round">close</i><span>Resolution</span></button><button type="button" class="explicit-resolution"><span>1080p</span></button><button type="button" class="explicit-resolution"><span>720p</span></button><button type="button" class="explicit-resolution"><span>576p</span></button><button type="button" class="explicit-resolution"><span>540p</span></button><button type="button" class="explicit-resolution"><span>396p</span></button><button type="button" class="shaka-enable-abr-button" aria-selected="true"><span class="shaka-auto-span shaka-chosen-item">Auto</span><i class="material-icons-round shaka-chosen-item" aria-hidden="true">done</i></button></div></div><div class="shaka-client-side-ad-container shaka-hidden"></div><div class="shaka-spinner-container shaka-hidden"><div class="shaka-spinner"><svg class="shaka-spinner-svg" viewBox="0 0 30 30"><circle class="shaka-spinner-path" cx="15" cy="15" r="14.5" fill="none" stroke-width="1" stroke-miterlimit="10"></circle></svg></div></div></div>
 
-                <div class="grid-panels">
-                    <div class="info-card"><h2><i class="fa-solid fa-bell" aria-hidden="true"></i> Follow us for Updates!</h2><a href="https://t.me/+xdQNNePetGxjYjI1" target="_blank" rel="noopener noreferrer" class="action-button"><i class="fa-brands fa-telegram" aria-hidden="true"></i> Join Telegram</a></div>
-                    <div class="info-card"><h2><i class="fa-solid fa-link" aria-hidden="true"></i> Copy Link &amp; Share</h2><button class="action-button" id="shareButton" aria-label="Copy page link to clipboard"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i> Share Link</button></div>
-                </div>
-                <a href="./" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to All Streams</a>
-            </div>
-    </main>
-    <div class="telegram-popup" id="telegramPopup" role="dialog" aria-labelledby="popup-title" aria-modal="true" style="display: block;">
-        <h2 id="popup-title"><i class="fa-brands fa-telegram" aria-hidden="true"></i> Support Us!</h2>
-        <p>Join our Telegram channel <strong>ALLROUNDER</strong> for instant updates, highlights, and exclusive links.</p>
-        <a href="https://t.me/+xdQNNePetGxjYjI1" target="_blank" rel="noopener noreferrer" class="popup-button join-btn">Join Now</a>
-        <button class="popup-button joined-btn" onclick="document.getElementById('telegramPopup').style.display='none';" aria-label="Close popup">Already Joined</button>
+<body>
+
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        <div class="loading-text">
+            <span>T</span><span>E</span><span>A</span><span>M</span><span>R</span><span>O</span><span>H</span><span>I</span><span>T</span><span>O</span><span>F</span><span>F</span><span>I</span><span>C</span><span>I</span><span>A</span><span>L</span><span>4</span><span>5</span>
+        </div>
     </div>
 
+    <!-- Video Player -->
+    <video id="player" autoplay controls crossorigin playsinline>
+        <source id="m3u8-url" src="" type="application/x-mpegURL">
+    </video>
+
+    <!-- Iframe Player -->
+    <div class="iframe-wrapper" id="iframe-wrapper">
+        <iframe id="iframe-player"
+                allowfullscreen
+                allow="encrypted-media"
+                sandbox="allow-scripts allow-same-origin allow-presentation">
+        </iframe>
+    </div>
+
+    <div class="watermark">𝙏𝙀𝘼𝙈𝙍𝙊𝙃𝙄𝙏𝙊𝙁𝙁𝙄𝘾𝙄𝘼𝙇𝟰𝟱</div>
+
+    <!-- Telegram -->
+    <a href="https://t.me/+lkbpBqFd0FljNzJl" class="telegram-button" target="_blank">
+        Join Telegram Channel
+    </a>
+
     <script>
-        // --- SCRIPT MODIFIED WITH NEW SHAKA PLAYER (v4.7.11) ---
+        const p = new URLSearchParams(location.search);
+        let streamUrl = p.get("id");
 
-        document.addEventListener("shaka-ui-loaded", initializeApp);
-        document.addEventListener("shaka-ui-load-failed", (error) => console.error("Shaka UI failed to load.", error));
+        // Convert to Mydonai PLAYER format
+        if (streamUrl) {
+            streamUrl = "https://mydonai/.?url=" + streamUrl;
+        }
 
-        async function initializeApp() {
-            // Added from new player
-            shaka.polyfill.installAll();
-            if (!shaka.Player.isBrowserSupported()) {
-                console.error('Browser not supported');
-                renderErrorUI("Browser Not Supported", "Your browser does not support the required features for this video player.");
-                return;
-            }
+        setTimeout(() => {
+            document.getElementById("loading").style.display = "none";
+        }, 1200);
 
-            try {
-                                // Get the stream object using the id as key
-                const streamData = streams[streamId];
+        const videoEl = document.getElementById("player");
+        const srcEl = document.getElementById("m3u8-url");
+        const iframeBox = document.getElementById("iframe-wrapper");
+        const iframe = document.getElementById("iframe-player");
 
-                if (streamData) {
-                    // Add the id to streamData for compatibility
-                    streamData.id = streamId;
-                    document.title = `${streamData.name} // Live Stream`;
+        if (!streamUrl) {
+            alert("Stream URL missing!");
+        } else {
+            if (streamUrl.includes(".m3u8")) {
 
-                    if (streamData.type === 'iframe') {
-                        renderIframeUI(streamData);
-                    } else {
-                        renderPlayerUI(streamData);
-                        // Call the NEW initShakaPlayer function
-                        initShakaPlayer(streamData);
-                    }
+                srcEl.src = streamUrl;
+                videoEl.style.display = "block";
 
-                    setTimeout(() => { document.getElementById('telegramPopup').style.display = 'block'; }, 1000);
+                if (Hls.isSupported()) {
+                    const hls = new Hls();
+                    hls.loadSource(streamUrl);
+                    hls.attachMedia(videoEl);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => new Plyr(videoEl));
                 } else {
-                    renderErrorUI("Stream Not Found", "The requested stream ID is invalid, the stream is offline, or the configuration file could not be loaded.");
+                    new Plyr(videoEl);
                 }
 
-            } catch (error) {
-                console.error("Failed to fetch or process streams.json:", error);
-                renderErrorUI("Failed to Load", "Could not load the stream configuration. Please try again later.");
+            } else {
+                iframe.src = streamUrl;
+                iframeBox.style.display = "block";
             }
-        }
-
-        function renderIframeUI(data) {
-            const contentDiv = document.getElementById('stream-content');
-            contentDiv.innerHTML = `
-                <div class="stream-header"><h1>${data.name}</h1><span class="live-badge" role="status" aria-live="polite"><i class="fa-solid fa-circle" aria-hidden="true"></i> LIVE</span></div>
-                <div id="player-container">
-                    <iframe 
-                        src="${data.iframeSrc}" 
-                        style="width:100%; height:100%; border:0;" 
-                        allow="encrypted-media; autoplay" 
-                        allowfullscreen>
-                    </iframe>
-                </div>
-                <div class="grid-panels">
-                    <div class="info-card"><h2><i class="fa-solid fa-bell" aria-hidden="true"></i> Follow us for Updates!</h2><a href="https://t.me/+xdQNNePetGxjYjI1" target="_blank" rel="noopener noreferrer" class="action-button"><i class="fa-brands fa-telegram" aria-hidden="true"></i> Join Telegram</a></div>
-                    <div class="info-card"><h2><i class="fa-solid fa-link" aria-hidden="true"></i> Copy Link & Share</h2><button class="action-button" id="shareButton" aria-label="Copy page link to clipboard"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i> Share Link</button></div>
-                </div>
-                <a href="./" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to All Streams</a>
-            `;
-            document.getElementById('shareButton').addEventListener('click', copyAndShare);
-        }
-
-        // renderPlayerUI simplified to remove old custom controls
-        function renderPlayerUI(data) {
-            const contentDiv = document.getElementById('stream-content');
-            contentDiv.innerHTML = `
-                <div class="stream-header"><h1>${data.name}</h1><span class="live-badge" role="status" aria-live="polite"><i class="fa-solid fa-circle" aria-hidden="true"></i> LIVE</span></div>
-                
-                <div id="player-container" data-shaka-player-container>
-                    <video id="video-player" style="width:100%;height:100%;" autoplay playsinline preload="auto" data-shaka-player></video>
-                </div>
-
-                <div class="grid-panels">
-                    <div class="info-card"><h2><i class="fa-solid fa-bell" aria-hidden="true"></i> Follow us for Updates!</h2><a href="https://t.me/+xdQNNePetGxjYjI1" target="_blank" rel="noopener noreferrer" class="action-button"><i class="fa-brands fa-telegram" aria-hidden="true"></i> Join Telegram</a></div>
-                    <div class="info-card"><h2><i class="fa-solid fa-link" aria-hidden="true"></i> Copy Link & Share</h2><button class="action-button" id="shareButton" aria-label="Copy page link to clipboard"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i> Share Link</button></div>
-                </div>
-                <a href="./" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to All Streams</a>
-            `;
-            document.getElementById('shareButton').addEventListener('click', copyAndShare);
-        }
-
-        function renderErrorUI(title = "Stream Not Found", message = "The requested stream is unavailable.") {
-            const contentDiv = document.getElementById('stream-content');
-            document.title = `Error - ${title}`;
-            contentDiv.innerHTML = `<div class="error-message" role="alert"><h2><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> ${title}</h2><p>${message}</p><a href="./" class="back-link" style="margin-top: 2rem;"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to All Streams</a></div>`;
-        }
-
-        // ========== NEW SHAKA PLAYER (v4.7.11) LOGIC ==========
-        // This function replaces the old initShakaPlayer
-        async function initShakaPlayer(data) {
-            const video = document.getElementById('video-player');
-            const container = document.getElementById('player-container');
-            if (!video || !container) return;
-
-            const player = new shaka.Player();
-            await player.attach(video);
-
-            const ui = new shaka.ui.Overlay(player, container, video);
-
-            // UI config from new file
-            ui.configure({
-                controlPanelElements: [
-                    'play_pause', 'time_and_duration', 'mute', 'volume',
-                    'spacer', 'language', 'captions', 'picture_in_picture',
-                    'quality', 'fullscreen'
-                ],
-                // Using accent colors from this file's theme
-                volumeBarColors: { base: 'rgba(255, 255, 255, 0.3)', level: 'var(--accent)' },
-                seekBarColors:   { base: 'rgba(255, 255, 255, 0.3)', buffered: 'rgba(255, 255, 255, 0.5)', played: 'var(--accent)' }
-            });
-
-            // --- Dynamic Data Configuration ---
-            // Using the 'data' object from streams.json instead of hardcoded values
-            let drmConfig = data.keyId ? { clearKeys: { [data.keyId]: data.key } } : {};
-            let license = data.license; // { cookie, referer, userAgent }
-            let streamUrl = data.mpd;
-            // ----------------------------------
-
-            // Player config from new file
-            player.configure({
-                drm: drmConfig,
-                streaming: {
-                    lowLatencyMode: true,
-                    bufferingGoal: 15,
-                    rebufferingGoal: 2,
-                    bufferBehind: 15,
-                    retryParameters: {
-                        timeout: 10000,
-                        maxAttempts: 5,
-                        baseDelay: 300,
-                        backoffFactor: 1.2
-                    },
-                    segmentRequestTimeout: 8000,
-                    segmentPrefetchLimit: 2,
-                    useNativeHlsOnSafari: true
-                },
-                manifest: {
-                    retryParameters: {
-                        timeout: 8000,
-                        maxAttempts: 3
-                    }
-                }
-            });
-
-            // Network filter using dynamic 'license' data
-            if (license) {
-                player.getNetworkingEngine().registerRequestFilter((type, request) => {
-                    if (license.referer) request.headers['Referer'] = license.referer;
-                    if (license.userAgent) request.headers['User-Agent'] = license.userAgent;
-
-                    if (license.cookie) {
-                        request.headers['Cookie'] = license.cookie;
-                        // Appending cookie as query param (logic from both files)
-                        if (
-                            (type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
-                            type === shaka.net.NetworkingEngine.RequestType.SEGMENT) &&
-                            request.uris[0] && !request.uris[0].includes('__hdnea=') // Check from new file
-                        ) {
-                            const separator = request.uris[0].includes('?') ? '&' : '?';
-                            request.uris[0] += separator + license.cookie;
-                        }
-                    }
-                });
-            }
-
-            // --- Event Listeners & Autoplay (from new file) ---
-            const enableAutoplay = () => {
-                video.setAttribute('autoplay', '');
-                video.setAttribute('playsinline', '');
-                video.autoplay = true;
-            };
-
-            const attemptAutoplay = async () => {
-                try {
-                    video.muted = false;
-                    await video.play();
-                    return true;
-                } catch (error) {
-                    try {
-                        video.muted = true;
-                        await video.play();
-                        return true;
-                    } catch {
-                        return false;
-                    }
-                }
-            };
-
-            player.addEventListener('error', (event) => {
-                console.error('Shaka Player Error:', event.detail);
-            });
-
-            video.addEventListener('play', () => {
-                // Removed automatic fullscreen for better user experience
-            }, { once: true });
-
-            video.addEventListener('loadedmetadata', () => {
-                video.volume = 0.8;
-            });
-
-            let hasUserInteracted = false;
-            const enableSoundOnInteraction = () => {
-                if (!hasUserInteracted && video.muted) {
-                    video.muted = false;
-                    hasUserInteracted = true;
-                }
-            };
-            ['click', 'touchstart', 'keydown'].forEach(event => {
-                document.addEventListener(event, enableSoundOnInteraction, { once: true });
-            });
-
-            try {
-                enableAutoplay();
-                await player.load(streamUrl);
-                if (video.readyState >= 3) {
-                    await attemptAutoplay();
-                } else {
-                    video.addEventListener('canplay', attemptAutoplay, { once: true });
-                    setTimeout(async () => {
-                        if (video.paused) await attemptAutoplay();
-                    }, 2000);
-                }
-            } catch (error) {
-                console.error('Load error:', error);
-            }
-
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && video.paused) attemptAutoplay();
-            });
-        }
-        // ========== END OF NEW SHAKA PLAYER LOGIC ==========
-
-
-        async function copyAndShare() {
-            const shareButton = document.getElementById('shareButton');
-            const originalHTML = shareButton.innerHTML;
-            try {
-                await navigator.clipboard.writeText(window.location.href);
-                shareButton.innerHTML = `<i class="fa-solid fa-check" aria-hidden="true"></i> Link Copied!`;
-                shareButton.classList.add('copied');
-                setTimeout(() => { shareButton.innerHTML = originalHTML; shareButton.classList.remove('copied'); }, 2000);
-            } catch (err) { console.error('Failed to copy link:', err); }
         }
     </script>
 
-    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script>
 </body>
 </html>
