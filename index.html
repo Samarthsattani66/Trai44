@@ -2,140 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="ENJOY FREE LIVE">
-    <meta name="keywords" content="JIOTV, LIVETV, SPORTS, MOVIES, MUSIC">
-    <meta name="author" content="unknown">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-    <title>TEAMROHITOFFICAL45_LIVE</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/plyr@3.6.2/dist/plyr.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Hindi Stream</title>
 
     <style>
-        html, body { margin:0; padding:0; background:#000; color:#fff; font-family:Poppins,sans-serif; }
-
-        /* Loading Screen */
-        .loading {
-            position:fixed; top:0; left:0; width:100%; height:100%;
-            background:#000; z-index:9999;
-        }
-        .loading-text {
-            position:absolute; top:0; left:0; right:0; bottom:0;
-            margin:auto; height:100px; text-align:center; line-height:100px;
-        }
-        .loading-text span {
-            display:inline-block; margin:0 5px;
-            color:#00b3ff; font-family:'Quattrocento Sans',sans-serif;
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
         }
 
-        /* Video Player */
-        #player {
-            width:100%; display:none;
-            --plyr-color-main:#15b4ff;
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
-
-        /* Iframe Player */
-        .iframe-wrapper {
-            position:relative;
-            padding-top:56.25%;
-            height:0; overflow:hidden;
-            display:none;
-        }
-        .iframe-wrapper iframe {
-            position:absolute;
-            top:0; left:0; width:100%; height:100%;
-            border:0;
-        }
-
-        /* Watermark */
-        .watermark {
-            position:absolute; bottom:2px; right:2px;
-            font-size:9px; color:#ffffff22;
-            pointer-events:none; font-style:italic;
-            font-family:"Courier New",monospace;
-        }
-
-        /* Telegram Button */
-        .telegram-button {
-            display:block; margin:18px auto; padding:6px 10px;
-            background:#0088cc; color:#fff;
-            text-align:center; border-radius:5px;
-            font-size:14px; text-decoration:none; width:180px;
-        }
-        .telegram-button:hover { background:#006a99; }
     </style>
 </head>
 
 <body>
-
-    <!-- Loading -->
-    <div class="loading" id="loading">
-        <div class="loading-text">
-            <span>T</span><span>E</span><span>A</span><span>M</span><span>R</span><span>O</span>
-            <span>H</span><span>I</span><span>T</span><span>O</span><span>F</span><span>F</span>
-            <span>I</span><span>C</span><span>I</span><span>A</span><span>L</span><span>4</span><span>5</span>
-        </div>
-    </div>
-
-    <!-- Video Player -->
-    <video id="player" autoplay controls playsinline crossorigin>
-        <source id="m3u8-url" src="" type="application/x-mpegURL">
-    </video>
-
-    <!-- Iframe Player -->
-    <div class="iframe-wrapper" id="iframe-wrapper">
-        <iframe id="iframe-player"
-            allowfullscreen allow="encrypted-media"
-            sandbox="allow-scripts allow-same-origin allow-presentation">
-        </iframe>
-    </div>
-
-    <!-- Watermark -->
-    <div class="watermark">𝙏𝙀𝘼𝙈𝙍𝙊𝙃𝙄𝙏𝙊𝙁𝙁𝙄𝘾𝙄𝘼𝙇𝟰𝟱</div>
-
-    <!-- Telegram -->
-    <a href="https://t.me/+lkbpBqFd0FljNzJl" class="telegram-button" target="_blank">
-        Join Our Telegram Channel
-    </a>
-
-    <script>
-        const params = new URLSearchParams(location.search);
-        let streamUrl = params.get("id");
-
-        // Convert To Mydonai Player Format
-        if (streamUrl) {
-            streamUrl = "https://mydonai/.?url=" + streamUrl;
-        }
-
-        setTimeout(()=>{ document.getElementById("loading").style.display="none"; },1000);
-
-        const video = document.getElementById("player");
-        const iframeBox = document.getElementById("iframe-wrapper");
-        const iframe = document.getElementById("iframe-player");
-
-        if (!streamUrl) {
-            alert("Invalid or missing Stream URL");
-        } else if (streamUrl.includes(".m3u8")) {
-
-            document.getElementById("m3u8-url").src = streamUrl;
-            video.style.display = "block";
-
-            if (Hls.isSupported()) {
-                const hls = new Hls();
-                hls.loadSource(streamUrl);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, ()=> new Plyr(video));
-            } else {
-                new Plyr(video);
-            }
-
-        } else {
-            iframe.src = streamUrl;
-            iframeBox.style.display = "block";
-        }
-    </script>
-
+    <iframe 
+        src="https://bd-streams.site/crx/master.php?id=starhindi" 
+        allowfullscreen>
+    </iframe>
 </body>
 </html>
