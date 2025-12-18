@@ -38,10 +38,10 @@
 </head>
 
 <body>
-  <div class="shaka-video-container" data-shaka-player>
-    <video playsinline preload="auto"
-      poster="https://i.ibb.co/d0yXW75V/108693714.jpg"></video>
-  </div>
+<div class="shaka-video-container" data-shaka-player>
+  <video playsinline preload="auto"
+    poster="https://i.ibb.co/d0yXW75V/108693714.jpg"></video>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
@@ -55,21 +55,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   /* =====================
      URL PARAMS
   ===================== */
-  const params = new URLSearchParams(window.location.search);
-  const streamUrl = params.get('url');
-  const keyParam  = params.get('key');
+  const p = new URLSearchParams(location.search);
+  const streamUrl = p.get('url');
+  const keyParam  = p.get('key');
+  const license   = p.get('license');
 
   if (!streamUrl) {
-    alert('Use: ?url=mpd&key=keyid:key');
+    alert('Use: ?url=mpd&key=KID:KEY OR ?url=mpd&license=URL');
     return;
   }
 
+  /* =====================
+     DRM CONFIG
+  ===================== */
   let drmConfig = {};
+
+  // 🔐 ClearKey
   if (keyParam) {
     const [kid, key] = keyParam.split(':');
     drmConfig = {
       clearKeys: {
         [kid]: key
+      }
+    };
+  }
+
+  // 🔐 Widevine
+  if (license) {
+    drmConfig = {
+      servers: {
+        'com.widevine.alpha': license
       }
     };
   }
@@ -81,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const ui = new shaka.ui.Overlay(player, container, video);
 
   /* =====================
-     UI (SAME THEME)
+     UI (OLD THEME)
   ===================== */
   ui.configure({
     controlPanelElements: [
@@ -109,39 +124,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   /* =====================
-     PLAYER (BEST SETTINGS)
+     PLAYER SETTINGS
   ===================== */
   player.configure({
-    abr: {
-      enabled: true,
-      defaultBandwidthEstimate: 5e6
-    },
     drm: drmConfig,
+    abr: { enabled: true },
     streaming: {
       bufferingGoal: 20,
       rebufferingGoal: 3,
-      bufferBehind: 20,
-      lowLatencyMode: false
+      bufferBehind: 20
     }
   });
 
   player.addEventListener('error', e => {
-    console.error('Shaka Error', e.detail);
+    console.error('Shaka DRM Error:', e.detail);
   });
 
   try {
     await player.load(streamUrl);
 
-    /* 🔥 GUARANTEED PLAY FIX */
+    // 🔥 autoplay guaranteed
     video.muted = true;
     await video.play();
-
-    setTimeout(() => {
-      video.muted = false;
-    }, 500);
+    setTimeout(() => video.muted = false, 500);
 
   } catch (e) {
-    console.error('Load Error', e);
+    console.error('Load Error:', e);
   }
 });
 </script>
