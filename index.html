@@ -33,16 +33,13 @@
     .shaka-spinner,
     .shaka-spinner-svg {
       display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
     }
   </style>
 </head>
 
 <body>
   <div class="shaka-video-container" data-shaka-player>
-    <!-- autoplay fix -->
-    <video autoplay muted playsinline preload="metadata"
+    <video playsinline preload="auto"
       poster="https://i.ibb.co/d0yXW75V/108693714.jpg"></video>
   </div>
 
@@ -55,15 +52,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  /* ===============================
-     READ URL PARAMETERS
-  =============================== */
+  /* =====================
+     URL PARAMS
+  ===================== */
   const params = new URLSearchParams(window.location.search);
   const streamUrl = params.get('url');
   const keyParam  = params.get('key');
 
   if (!streamUrl) {
-    alert('Usage: ?url=mpd&key=keyid:key');
+    alert('Use: ?url=mpd&key=keyid:key');
     return;
   }
 
@@ -78,15 +75,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const video = document.querySelector('video');
-  const player = new shaka.Player();
-  await player.attach(video);
+  const player = new shaka.Player(video);
 
   const container = document.querySelector('.shaka-video-container');
   const ui = new shaka.ui.Overlay(player, container, video);
 
-  /* ===============================
-     UI CONFIG (UNCHANGED THEME)
-  =============================== */
+  /* =====================
+     UI (SAME THEME)
+  ===================== */
   ui.configure({
     controlPanelElements: [
       'play_pause',
@@ -102,46 +98,50 @@ document.addEventListener('DOMContentLoaded', async () => {
       'fullscreen'
     ],
     volumeBarColors: {
-      base: 'rgba(255, 192, 203, 0.3)',
-      level: 'rgb(255, 105, 180)'
+      base: 'rgba(255,192,203,0.3)',
+      level: 'rgb(255,105,180)'
     },
     seekBarColors: {
-      base: 'rgba(255, 255, 0, 0.3)',
-      buffered: 'rgba(255, 255, 0, 0.6)',
-      played: 'rgb(255, 255, 0)'
+      base: 'rgba(255,255,0,0.3)',
+      buffered: 'rgba(255,255,0,0.6)',
+      played: 'rgb(255,255,0)'
     }
   });
 
-  /* ===============================
-     PLAYER CONFIG
-  =============================== */
+  /* =====================
+     PLAYER (BEST SETTINGS)
+  ===================== */
   player.configure({
-    abr: { enabled: true },
+    abr: {
+      enabled: true,
+      defaultBandwidthEstimate: 5e6
+    },
     drm: drmConfig,
     streaming: {
-      lowLatencyMode: true,
-      bufferingGoal: 15,
-      rebufferingGoal: 2,
-      bufferBehind: 15,
-      retryParameters: {
-        timeout: 10000,
-        maxAttempts: 5,
-        baseDelay: 300,
-        backoffFactor: 1.2
-      }
+      bufferingGoal: 20,
+      rebufferingGoal: 3,
+      bufferBehind: 20,
+      lowLatencyMode: false
     }
   });
 
   player.addEventListener('error', e => {
-    console.error('Shaka Error:', e.detail);
+    console.error('Shaka Error', e.detail);
   });
 
   try {
     await player.load(streamUrl);
-    console.log('Stream loaded');
-    video.muted = false; // optional auto-unmute
+
+    /* 🔥 GUARANTEED PLAY FIX */
+    video.muted = true;
+    await video.play();
+
+    setTimeout(() => {
+      video.muted = false;
+    }, 500);
+
   } catch (e) {
-    console.error('Load error:', e);
+    console.error('Load Error', e);
   }
 });
 </script>
