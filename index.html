@@ -41,7 +41,8 @@
 
 <body>
   <div class="shaka-video-container" data-shaka-player>
-    <video autoplay playsinline preload="metadata"
+    <!-- autoplay fix -->
+    <video autoplay muted playsinline preload="metadata"
       poster="https://i.ibb.co/d0yXW75V/108693714.jpg"></video>
   </div>
 
@@ -49,14 +50,20 @@
 document.addEventListener('DOMContentLoaded', async () => {
   shaka.polyfill.installAll();
 
-  if (!shaka.Player.isBrowserSupported()) return;
+  if (!shaka.Player.isBrowserSupported()) {
+    alert('Browser not supported');
+    return;
+  }
 
+  /* ===============================
+     READ URL PARAMETERS
+  =============================== */
   const params = new URLSearchParams(window.location.search);
   const streamUrl = params.get('url');
   const keyParam  = params.get('key');
 
   if (!streamUrl) {
-    alert('Use: ?url=mpd&key=keyid:key');
+    alert('Usage: ?url=mpd&key=keyid:key');
     return;
   }
 
@@ -77,11 +84,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   const container = document.querySelector('.shaka-video-container');
   const ui = new shaka.ui.Overlay(player, container, video);
 
+  /* ===============================
+     UI CONFIG (UNCHANGED THEME)
+  =============================== */
   ui.configure({
     controlPanelElements: [
-      'play_pause', 'time_and_duration', 'mute', 'volume',
-      'spacer', 'language', 'captions', 'picture_in_picture',
-      'quality', 'fullscreen'
+      'play_pause',
+      'time_and_duration',
+      'mute',
+      'volume',
+      'playback_rate',
+      'spacer',
+      'language',
+      'captions',
+      'picture_in_picture',
+      'quality',
+      'fullscreen'
     ],
     volumeBarColors: {
       base: 'rgba(255, 192, 203, 0.3)',
@@ -94,20 +112,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  /* ===============================
+     PLAYER CONFIG
+  =============================== */
   player.configure({
+    abr: { enabled: true },
     drm: drmConfig,
     streaming: {
       lowLatencyMode: true,
       bufferingGoal: 15,
       rebufferingGoal: 2,
-      bufferBehind: 15
+      bufferBehind: 15,
+      retryParameters: {
+        timeout: 10000,
+        maxAttempts: 5,
+        baseDelay: 300,
+        backoffFactor: 1.2
+      }
     }
+  });
+
+  player.addEventListener('error', e => {
+    console.error('Shaka Error:', e.detail);
   });
 
   try {
     await player.load(streamUrl);
+    console.log('Stream loaded');
+    video.muted = false; // optional auto-unmute
   } catch (e) {
-    console.error(e);
+    console.error('Load error:', e);
   }
 });
 </script>
