@@ -43,14 +43,8 @@ video{
 <body>
 
 <div class="shaka-video-container" data-shaka-player>
-  <!-- muted is REQUIRED for autoplay -->
-  <video
-    playsinline
-    controls
-    preload="auto"
-    muted
-    poster="https://i.ibb.co/q38kYFYf/IMG-20250328-125315-238.jpg">
-  </video>
+  <!-- ❌ NO controls / ❌ NO poster -->
+  <video playsinline preload="auto" muted></video>
 </div>
 
 <script>
@@ -69,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return btoa(String.fromCharCode(...bytes));
   }
 
-  const params   = new URLSearchParams(location.search);
+  const params    = new URLSearchParams(location.search);
   const streamUrl = params.get('url');
   const keyParam  = params.get('key');
   const license   = params.get('license');
@@ -81,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let drmConfig = {};
 
-  // ClearKey (HEX:HEX)
+  // ClearKey
   if (keyParam) {
     const [kidHex, keyHex] = keyParam.split(':');
     if (kidHex && keyHex) {
@@ -144,7 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Load failed:', e);
   }
 
-  // 🔊 UNMUTE ON USER INTERACTION
+  // 🔊 UNMUTE AFTER USER TAP
   const unmute = () => {
     video.muted = false;
     document.removeEventListener('click', unmute);
