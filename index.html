@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live TV – Professional M3U Web Player</title>
+<title>Live TV • Premium IPTV Web</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
 body {
-  background:#0b1220;
+  background: #0b1220;
   font-family: Inter, system-ui, Arial, sans-serif;
 }
 .card img {
@@ -17,11 +17,16 @@ body {
 .card:hover img {
   transform: scale(1.08);
 }
+.card {
+  transition: transform .25s ease;
+}
 .card:hover {
   transform: translateY(-4px);
 }
-.card {
-  transition: transform .3s ease;
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #e5e7eb;
 }
 ::-webkit-scrollbar {
   height: 6px;
@@ -36,40 +41,30 @@ body {
 <body>
 
 <!-- HEADER -->
-<header class="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+<header class="px-6 py-4 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
   <h1 class="text-2xl font-semibold text-white tracking-wide">
     Live TV
   </h1>
 
-  <!-- SEARCH -->
   <input
     id="search"
     type="text"
     placeholder="Search channels..."
-    class="w-full sm:w-72 bg-slate-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+    class="w-full sm:w-80 bg-slate-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   />
 </header>
 
-<!-- CATEGORY BAR -->
-<div id="categories"
-  class="px-6 pb-3 flex gap-3 overflow-x-auto text-sm">
-</div>
-
-<!-- CHANNEL GRID -->
-<main id="grid"
-  class="px-6 pb-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-</main>
+<!-- CONTENT -->
+<main id="content" class="space-y-12 pb-10"></main>
 
 <script>
 const M3U_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
 const EXTERNAL_PLAYER = "https://teamrom3u8plyr2.pages.dev/?url=";
 
-const grid = document.getElementById("grid");
-const categoriesDiv = document.getElementById("categories");
+const content = document.getElementById("content");
 const searchInput = document.getElementById("search");
 
 let channels = [];
-let currentCategory = "All";
 
 /* FETCH M3U */
 fetch(M3U_URL)
@@ -97,101 +92,110 @@ function parseM3U(data) {
 
     if (line && !line.startsWith("#")) {
       ch.url = line;
-      ch.category = detectCategory(ch.group);
+      ch.section = detectSection(ch.group, ch.title);
       if (ch.logo) channels.push(ch);
     }
   });
 
-  renderCategories();
-  renderChannels();
+  renderSections();
 }
 
-/* CATEGORY LOGIC (OPEN & CLEAR) */
-function detectCategory(group) {
-  if (group.includes("sport")) return "Sports";
-  if (group.includes("movie") || group.includes("cinema")) return "Movies";
-  if (group.includes("news")) return "News";
-  if (group.includes("music")) return "Music";
-  if (group.includes("kids") || group.includes("cartoon")) return "Kids";
-  if (group.includes("entertain")) return "Entertainment";
+/* SECTION LOGIC (CLEAR & EDITABLE) */
+function detectSection(group, title) {
+  title = title.toLowerCase();
+
+  if (group.includes("cricket") || title.includes("cricket"))
+    return "Cricket";
+
+  if (group.includes("sport"))
+    return "Sports";
+
+  if (group.includes("india") || title.includes("india"))
+    return "Indian TV";
+
+  if (group.includes("movie"))
+    return "Movies";
+
+  if (group.includes("news"))
+    return "News";
+
+  if (group.includes("kids") || title.includes("cartoon"))
+    return "Kids";
+
+  if (group.includes("music"))
+    return "Music";
+
+  if (group.includes("uk") || group.includes("usa") || group.includes("international"))
+    return "International";
+
   return "Other";
 }
 
-/* RENDER CATEGORY BUTTONS */
-function renderCategories() {
-  const cats = [
-    "All","Sports","Entertainment","Movies","News","Music","Kids","Other"
+/* RENDER ALL SECTIONS */
+function renderSections() {
+  const sections = [
+    "Cricket",
+    "Sports",
+    "Indian TV",
+    "Movies",
+    "News",
+    "Kids",
+    "Music",
+    "International",
+    "Other"
   ];
 
-  categoriesDiv.innerHTML = "";
+  content.innerHTML = "";
 
-  cats.forEach(cat => {
-    const btn = document.createElement("button");
-    btn.textContent = cat;
-    btn.className =
-      "px-4 py-1.5 rounded-full whitespace-nowrap " +
-      (cat === "All"
-        ? "bg-blue-600 text-white"
-        : "bg-slate-700 text-slate-200 hover:bg-slate-600");
+  sections.forEach(sec => {
+    const sectionChannels = channels.filter(ch => ch.section === sec);
+    if (!sectionChannels.length) return;
 
-    btn.onclick = () => {
-      currentCategory = cat;
-      highlightCategory(cat);
-      renderChannels();
-    };
+    const section = document.createElement("section");
+    section.innerHTML = `
+      <div class="px-6 mb-3 section-title">${sec}</div>
+      <div class="px-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        ${sectionChannels.map(createCardHTML).join("")}
+      </div>
+    `;
 
-    categoriesDiv.appendChild(btn);
+    content.appendChild(section);
   });
-}
-
-/* HIGHLIGHT ACTIVE CATEGORY */
-function highlightCategory(active) {
-  [...categoriesDiv.children].forEach(btn => {
-    btn.className = btn.textContent === active
-      ? "px-4 py-1.5 rounded-full bg-blue-600 text-white"
-      : "px-4 py-1.5 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600";
-  });
-}
-
-/* RENDER CHANNELS */
-function renderChannels() {
-  const query = searchInput.value.toLowerCase();
-  grid.innerHTML = "";
-
-  channels
-    .filter(ch =>
-      (currentCategory === "All" || ch.category === currentCategory) &&
-      ch.title.toLowerCase().includes(query)
-    )
-    .forEach(createCard);
 }
 
 /* SEARCH */
-searchInput.addEventListener("input", renderChannels);
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.toLowerCase();
+  content.innerHTML = "";
 
-/* CHANNEL CARD – EXTERNAL PLAYER ONLY */
-function createCard(ch) {
-  const a = document.createElement("a");
-  a.href = EXTERNAL_PLAYER + encodeURIComponent(ch.url);
-  a.target = "_blank";
-  a.className = "card block";
+  const filtered = channels.filter(ch =>
+    ch.title.toLowerCase().includes(q)
+  );
 
-  a.innerHTML = `
-    <div class="rounded-xl overflow-hidden bg-slate-800 shadow-lg">
-      <img src="${ch.logo}"
-        class="w-full h-40 object-cover bg-black">
+  const section = document.createElement("section");
+  section.innerHTML = `
+    <div class="px-6 mb-3 section-title">Search Results</div>
+    <div class="px-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+      ${filtered.map(createCardHTML).join("")}
     </div>
-
-    <p class="mt-2 text-sm text-slate-100 truncate">
-      ${ch.title}
-    </p>
-
-    <p class="text-xs text-slate-400">
-      ${ch.category}
-    </p>
   `;
+  content.appendChild(section);
+});
 
-  grid.appendChild(a);
+/* CARD HTML */
+function createCardHTML(ch) {
+  return `
+    <a href="${EXTERNAL_PLAYER + encodeURIComponent(ch.url)}"
+       target="_blank"
+       class="card block">
+      <div class="rounded-xl overflow-hidden bg-slate-800 shadow-lg">
+        <img src="${ch.logo}"
+             class="w-full h-40 object-cover bg-black">
+      </div>
+      <p class="mt-2 text-sm text-slate-100 truncate">${ch.title}</p>
+      <p class="text-xs text-slate-400">${ch.section}</p>
+    </a>
+  `;
 }
 </script>
 
