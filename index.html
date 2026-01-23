@@ -2,13 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Hotstar Style M3U Player</title>
+<title>M3U External Player Grid</title>
 
 <!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- HLS -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
 body {
@@ -39,32 +36,14 @@ body {
 class="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
 </div>
 
-<!-- PLAYER MODAL -->
-<div id="modal"
-class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-  <div class="bg-black w-full max-w-4xl p-3 rounded">
-    <video id="player" controls
-      class="w-full h-[420px] bg-black"></video>
-
-    <button onclick="closePlayer()"
-      class="mt-2 bg-red-600 px-4 py-1 text-white rounded">
-      Close
-    </button>
-  </div>
-</div>
-
 <script>
 const M3U_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
 const EXTERNAL_PLAYER = "https://teamrom3u8plyr2.pages.dev/?url=";
 
 const grid = document.getElementById("grid");
-const modal = document.getElementById("modal");
-const video = document.getElementById("player");
 const categoriesDiv = document.getElementById("categories");
 
-let hls;
 let channels = [];
-let categories = new Set();
 
 /* FETCH M3U */
 fetch(M3U_URL)
@@ -88,13 +67,19 @@ function parseM3U(data) {
       channel.logo = logoMatch ? logoMatch[1] : "";
 
       const groupMatch = line.match(/group-title="(.*?)"/);
-      channel.category = groupMatch ? groupMatch[1] : "Other";
-
-      categories.add(channel.category);
+      channel.group = groupMatch ? groupMatch[1].toLowerCase() : "";
     }
 
     if (line && !line.startsWith("#")) {
       channel.url = line;
+
+      // CATEGORY LOGIC (OPENLY WRITTEN)
+      if (channel.group.includes("jio")) {
+        channel.category = "Jio TV+";
+      } else {
+        channel.category = "App";
+      }
+
       if (channel.logo) channels.push(channel);
     }
   });
@@ -103,26 +88,23 @@ function parseM3U(data) {
   renderChannels("All");
 }
 
-/* RENDER CATEGORY BUTTONS */
+/* CATEGORY BUTTONS */
 function renderCategories() {
-  categoriesDiv.innerHTML = `
-    <button onclick="renderChannels('All')"
-      class="bg-blue-600 text-white px-3 py-1 rounded text-sm">
-      All
-    </button>
-  `;
+  const cats = ["All", "Jio TV+", "App"];
 
-  categories.forEach(cat => {
+  categoriesDiv.innerHTML = "";
+
+  cats.forEach(cat => {
     const btn = document.createElement("button");
-    btn.className =
-      "bg-gray-700 text-white px-3 py-1 rounded text-sm";
     btn.innerText = cat;
+    btn.className =
+      "bg-gray-700 text-white px-3 py-1 rounded text-sm hover:bg-blue-600";
     btn.onclick = () => renderChannels(cat);
     categoriesDiv.appendChild(btn);
   });
 }
 
-/* RENDER CHANNEL GRID */
+/* RENDER GRID */
 function renderChannels(filter) {
   grid.innerHTML = "";
 
@@ -131,14 +113,15 @@ function renderChannels(filter) {
     .forEach(createCard);
 }
 
-/* CREATE CHANNEL CARD */
+/* CHANNEL CARD (CLICK = EXTERNAL PLAYER) */
 function createCard(ch) {
-  const card = document.createElement("div");
-  card.className = "card";
+  const card = document.createElement("a");
+  card.href = EXTERNAL_PLAYER + encodeURIComponent(ch.url);
+  card.target = "_blank";
+  card.className = "card block";
 
   card.innerHTML = `
-    <div class="overflow-hidden rounded-lg bg-gray-800 cursor-pointer"
-      onclick="playStream('${ch.url}')">
+    <div class="overflow-hidden rounded-lg bg-gray-800">
       <img src="${ch.logo}"
         class="w-full h-40 object-cover">
     </div>
@@ -146,49 +129,9 @@ function createCard(ch) {
     <p class="text-white text-sm mt-1 truncate">
       ${ch.title}
     </p>
-
-    <div class="flex gap-2 mt-1">
-      <button
-        onclick="playStream('${ch.url}')"
-        class="bg-green-600 text-xs px-2 py-1 rounded">
-        Play
-      </button>
-
-      <a href="${EXTERNAL_PLAYER + encodeURIComponent(ch.url)}"
-        target="_blank"
-        class="bg-purple-600 text-xs px-2 py-1 rounded text-white">
-        External
-      </a>
-    </div>
   `;
 
   grid.appendChild(card);
-}
-
-/* PLAY INTERNAL */
-function playStream(url) {
-  modal.classList.remove("hidden");
-
-  if (hls) hls.destroy();
-
-  if (Hls.isSupported()) {
-    hls = new Hls();
-    hls.loadSource(url);
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED,
-      () => video.play());
-  } else {
-    video.src = url;
-    video.play();
-  }
-}
-
-/* CLOSE PLAYER */
-function closePlayer() {
-  modal.classList.add("hidden");
-  video.pause();
-  video.src = "";
-  if (hls) hls.destroy();
 }
 </script>
 
