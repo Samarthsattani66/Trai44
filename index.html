@@ -1,206 +1,114 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Live Channels</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Channels</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
-    body { background:#0b1220; }
-    .glass { backdrop-filter: blur(10px); background: rgba(15, 23, 42, 0.65); }
-    .ring-soft { box-shadow: 0 0 0 1px rgba(148,163,184,.18) inset; }
-    .thumb { transition: transform 220ms ease; }
-    .card:hover .thumb { transform: scale(1.06); }
-  </style>
+<style>
+body { background:#0b1220; }
+.thumb { transition: transform .2s ease; }
+.card:hover .thumb { transform: scale(1.05); }
+</style>
 </head>
 
 <body class="text-slate-100">
 
-<header class="sticky top-0 z-40 glass border-b border-white/10">
-  <div class="mx-auto max-w-7xl px-4 py-3 flex flex-col sm:flex-row gap-3">
-    <div>
-      <div class="text-lg font-bold">Live Channels</div>
-      <div class="text-xs text-slate-300">VIP Playlist • External Player</div>
-    </div>
-
-    <div class="sm:ml-auto flex gap-2 w-full sm:w-auto">
-      <input id="search"
-        class="w-full sm:w-80 rounded-xl bg-slate-900/60 ring-soft border border-white/10 px-4 py-2 text-sm"
-        placeholder="Search channels..." />
-
-      <select id="sort"
-        class="rounded-xl bg-slate-900/60 ring-soft border border-white/10 px-3 py-2 text-sm">
-        <option value="group">Group then A–Z</option>
-        <option value="az">A–Z</option>
-        <option value="za">Z–A</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="mx-auto max-w-7xl px-4 pb-3">
-    <div id="tabs" class="flex flex-wrap gap-2"></div>
-  </div>
+<header class="p-4 border-b border-white/10">
+  <h1 class="text-xl font-bold">Live Channels</h1>
+  <p class="text-xs text-slate-400">VIP Playlist • External Player</p>
 </header>
 
-<main class="mx-auto max-w-7xl px-4 py-6">
-  <div class="mb-4">
-    <div id="sectionTitle" class="text-lg font-semibold">Loading…</div>
-    <div id="sectionMeta" class="text-xs text-slate-400"></div>
-  </div>
-
+<main class="p-4">
+  <div id="status" class="text-sm text-slate-400 mb-4">Loading playlist…</div>
   <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
-
-  <div id="emptyState" class="hidden mt-10 text-center text-slate-400">
-    <div class="text-lg font-semibold text-slate-200">No channels found</div>
-  </div>
 </main>
-
-<!-- Modal -->
-<div id="modal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-  <div class="w-full max-w-xl rounded-2xl bg-slate-950 border border-white/10">
-    <div class="p-4 border-b border-white/10 flex justify-between">
-      <div>
-        <div id="modalTitle" class="font-semibold"></div>
-        <div id="modalSub" class="text-xs text-slate-400"></div>
-      </div>
-      <button id="closeModal">✕</button>
-    </div>
-
-    <div class="p-4 space-y-3">
-      <div class="text-sm break-all" id="streamUrl"></div>
-
-      <button id="playExternal"
-        class="w-full rounded-xl bg-cyan-500/20 border border-cyan-400/30 px-4 py-2 text-sm">
-        Play in external player
-      </button>
-    </div>
-  </div>
-</div>
 
 <script>
 /* ================= CONFIG ================= */
-const M3U_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
+const PLAYLIST_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
 const CORS_PROXY = "https://cors.isomorphic-git.org/";
-const EXTERNAL_PLAYER = "https://teamrom3u8plyr2.pages.dev/?url=";
-
-/* ================= STATE ================= */
-let channels = [];
-let sections = ["All"];
-let activeSection = "All";
-let activeQuery = "";
-let activeSort = "group";
-let currentUrl = "";
+const PLAYER_URL = "https://teamrom3u8plyr2.pages.dev/?url=";
 
 /* ================= HELPERS ================= */
-const normalize = s => (s || "").toLowerCase();
-
-function attr(line, key) {
+function getAttr(line, key) {
   const m = line.match(new RegExp(key + '="([^"]*)"', "i"));
   return m ? m[1] : "";
 }
 
+/* ================= PARSER ================= */
 function parseM3U(text) {
   const lines = text.split(/\r?\n/);
-  const out = [];
-  let cur = null;
+  const channels = [];
+  let current = null;
 
-  for (const l of lines) {
-    if (l.startsWith("#EXTINF")) {
-      cur = {
-        title: l.split(",").pop().trim(),
-        logo: attr(l, "tvg-logo"),
-        group: attr(l, "group-title"),
-        country: attr(l, "tvg-country"),
-        language: attr(l, "tvg-language")
+  for (const line of lines) {
+    if (line.startsWith("#EXTINF")) {
+      current = {
+        name: line.split(",").pop().trim(),
+        logo: getAttr(line, "tvg-logo"),
+        group: getAttr(line, "group-title")
       };
-      cur.section = cur.group || cur.country || cur.language || "Other";
-    } else if (l && !l.startsWith("#") && cur) {
-      cur.url = l.trim();
-      out.push(cur);
-      cur = null;
+    } 
+    else if (line && !line.startsWith("#") && current) {
+      current.url = line.trim();
+      channels.push(current);
+      current = null;
     }
   }
-  return out;
+  return channels;
 }
 
 /* ================= LOAD PLAYLIST ================= */
 async function loadPlaylist() {
   try {
-    const res = await fetch(CORS_PROXY + M3U_URL);
+    const res = await fetch(CORS_PROXY + PLAYLIST_URL);
     const text = await res.text();
+    const channels = parseM3U(text);
 
-    channels = parseM3U(text);
-    sections = ["All", ...new Set(channels.map(c => c.section))];
+    document.getElementById("status").textContent =
+      `Loaded ${channels.length} channels`;
 
-    renderTabs();
-    renderGrid();
-  } catch {
-    document.getElementById("sectionTitle").textContent = "Failed to load playlist";
+    renderChannels(channels);
+  } catch (err) {
+    document.getElementById("status").textContent =
+      "Failed to load playlist (CORS or network error)";
+    console.error(err);
   }
 }
 
 /* ================= RENDER ================= */
-function renderTabs() {
-  const t = document.getElementById("tabs");
-  t.innerHTML = "";
+function renderChannels(channels) {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
 
-  sections.forEach(s => {
-    const b = document.createElement("button");
-    b.textContent = s;
-    b.className = "px-3 py-1 rounded-xl text-sm border " +
-      (s === activeSection ? "bg-cyan-500/20 border-cyan-400/30" : "border-white/10");
-    b.onclick = () => { activeSection = s; renderGrid(); };
-    t.appendChild(b);
-  });
-}
+  channels.forEach(ch => {
+    const card = document.createElement("div");
+    card.className = "card cursor-pointer";
 
-function renderGrid() {
-  const g = document.getElementById("grid");
-  g.innerHTML = "";
-
-  const list = channels.filter(c =>
-    (activeSection === "All" || c.section === activeSection) &&
-    normalize(c.title).includes(normalize(activeQuery))
-  );
-
-  document.getElementById("sectionTitle").textContent = activeSection;
-  document.getElementById("sectionMeta").textContent = `${list.length} channels`;
-
-  list.forEach(c => {
-    const d = document.createElement("div");
-    d.className = "card cursor-pointer";
-    d.innerHTML = `
-      <img class="thumb h-32 w-full object-cover rounded-xl"
-        src="${c.logo || 'https://dummyimage.com/400x225/111827/ffffff&text=LIVE'}">
-      <div class="mt-1 text-sm truncate">${c.title}</div>
+    card.innerHTML = `
+      <div class="rounded-xl overflow-hidden bg-slate-900 border border-white/10">
+        <img class="thumb w-full h-32 object-cover"
+          src="${ch.logo || "https://dummyimage.com/400x225/111827/ffffff&text=LIVE"}"
+          alt="${ch.name}">
+      </div>
+      <div class="mt-1 text-sm truncate">${ch.name}</div>
+      <div class="text-xs text-slate-400 truncate">${ch.group || ""}</div>
     `;
-    d.onclick = () => openModal(c);
-    g.appendChild(d);
+
+    card.onclick = () => {
+      window.open(
+        PLAYER_URL + encodeURIComponent(ch.url),
+        "_blank",
+        "noopener,noreferrer"
+      );
+    };
+
+    grid.appendChild(card);
   });
 }
-
-/* ================= MODAL ================= */
-function openModal(c) {
-  currentUrl = c.url;
-  document.getElementById("modalTitle").textContent = c.title;
-  document.getElementById("modalSub").textContent = c.section;
-  document.getElementById("streamUrl").textContent = c.url;
-  document.getElementById("modal").classList.remove("hidden");
-}
-
-document.getElementById("closeModal").onclick = () =>
-  document.getElementById("modal").classList.add("hidden");
-
-document.getElementById("playExternal").onclick = () =>
-  window.open(EXTERNAL_PLAYER + encodeURIComponent(currentUrl), "_blank");
-
-/* ================= EVENTS ================= */
-document.getElementById("search").oninput = e => {
-  activeQuery = e.target.value;
-  renderGrid();
-};
 
 /* ================= INIT ================= */
 loadPlaylist();
