@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Live TV • Premium IPTV</title>
+<title>Live TV • OTT Style</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -12,31 +12,39 @@ body {
   background:#0b1220;
   font-family: Inter, system-ui, Arial, sans-serif;
 }
+
+/* Card */
+.card {
+  width: 130px;
+  flex-shrink: 0;
+}
 .card img {
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: #000;
   transition: transform .3s ease;
 }
 .card:hover img {
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
-.section-title {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #e5e7eb;
-}
-.scroll-row {
+
+/* Section row */
+.row {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  padding-bottom: 6px;
 }
-.scroll-row::-webkit-scrollbar {
+.row::-webkit-scrollbar {
   display: none;
 }
-.card {
-  scroll-snap-align: start;
-}
+
+/* Desktop */
 @media (min-width: 768px) {
-  .scroll-row {
+  .card {
+    width: auto;
+  }
+  .row {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     overflow: visible;
@@ -49,7 +57,7 @@ body {
 
 <!-- HEADER -->
 <header class="sticky top-0 z-50 bg-[#0b1220] px-4 py-3 border-b border-slate-800">
-  <h1 class="text-xl font-semibold text-white mb-2">
+  <h1 class="text-lg font-semibold text-white mb-2">
     Live TV
   </h1>
 
@@ -62,18 +70,18 @@ body {
 </header>
 
 <!-- CONTENT -->
-<main id="content" class="space-y-10 py-6"></main>
+<main id="content" class="space-y-8 py-6"></main>
 
 <script>
 const M3U_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
-const EXTERNAL_PLAYER = "https://teamrom3u8plyr2.pages.dev/?url=";
+const PLAYER = "https://teamrom3u8plyr2.pages.dev/?url=";
 
 const content = document.getElementById("content");
 const searchInput = document.getElementById("search");
 
 let channels = [];
 
-/* FETCH */
+/* LOAD M3U */
 fetch(M3U_URL)
   .then(r => r.text())
   .then(parseM3U);
@@ -99,16 +107,16 @@ function parseM3U(data) {
 
     if (line && !line.startsWith("#")) {
       ch.url = line;
-      ch.section = detectSection(ch.group, ch.title);
+      ch.section = getSection(ch.group, ch.title);
       if (ch.logo) channels.push(ch);
     }
   });
 
-  renderSections(channels);
+  renderAll(channels);
 }
 
 /* SECTION RULES */
-function detectSection(group, title) {
+function getSection(group, title) {
   title = title.toLowerCase();
 
   if (group.includes("cricket") || title.includes("cricket")) return "Cricket";
@@ -123,51 +131,67 @@ function detectSection(group, title) {
   return "Other";
 }
 
-/* RENDER SECTIONS */
-function renderSections(list) {
+/* RENDER ALL SECTIONS (NEVER REMOVES) */
+function renderAll(list) {
   const sections = [
-    "Cricket","Sports","Indian TV","Movies",
-    "News","Kids","Music","International","Other"
+    "Cricket",
+    "Sports",
+    "Indian TV",
+    "Movies",
+    "News",
+    "Kids",
+    "Music",
+    "International",
+    "Other"
   ];
 
   content.innerHTML = "";
 
   sections.forEach(sec => {
-    const items = list.filter(ch => ch.section === sec);
+    const items = list.filter(c => c.section === sec);
     if (!items.length) return;
 
     const section = document.createElement("section");
     section.innerHTML = `
-      <div class="px-4 mb-3 section-title">${sec}</div>
-      <div class="px-4 scroll-row">
-        ${items.map(cardHTML).join("")}
+      <h2 class="px-4 mb-3 text-base font-semibold text-slate-200">
+        ${sec}
+      </h2>
+      <div class="row px-4">
+        ${items.map(card).join("")}
       </div>
     `;
     content.appendChild(section);
   });
 }
 
-/* SEARCH */
+/* SEARCH (SAFE – DOES NOT BREAK SECTIONS) */
 searchInput.addEventListener("input", () => {
   const q = searchInput.value.toLowerCase();
-  if (!q) return renderSections(channels);
 
-  renderSections(
-    channels.filter(ch => ch.title.toLowerCase().includes(q))
+  if (!q) {
+    renderAll(channels);
+    return;
+  }
+
+  renderAll(
+    channels.filter(c =>
+      c.title.toLowerCase().includes(q)
+    )
   );
 });
 
 /* CARD */
-function cardHTML(ch) {
+function card(ch) {
   return `
-    <a href="${EXTERNAL_PLAYER + encodeURIComponent(ch.url)}"
+    <a href="${PLAYER + encodeURIComponent(ch.url)}"
        target="_blank"
-       class="card min-w-[140px] md:min-w-0 block">
-      <div class="rounded-xl overflow-hidden bg-slate-800 shadow-md">
-        <img src="${ch.logo}"
-          class="w-full h-36 object-cover bg-black">
+       class="card">
+      <div class="rounded-lg overflow-hidden bg-slate-800 shadow">
+        <img src="${ch.logo}">
       </div>
-      <p class="mt-2 text-sm text-slate-100 truncate">${ch.title}</p>
+      <p class="mt-1 text-xs text-slate-100 truncate">
+        ${ch.title}
+      </p>
     </a>
   `;
 }
