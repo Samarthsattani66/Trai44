@@ -3,17 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Live TV • OTT Style</title>
+<title>teamrohitofficial45 web</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
+/* ---------- THEME ---------- */
 body {
-  background:#0b1220;
+  background: #000;
   font-family: Inter, system-ui, Arial, sans-serif;
+  color: #e5e7eb;
 }
 
-/* Card */
+/* Neon text */
+.neon {
+  color: #00ffff;
+  text-shadow: 0 0 8px #00ffff, 0 0 20px #00ffff;
+}
+
+/* Cards */
 .card {
   width: 130px;
   flex-shrink: 0;
@@ -22,18 +30,19 @@ body {
   aspect-ratio: 16 / 9;
   object-fit: contain;
   background: #000;
-  transition: transform .3s ease;
 }
 .card:hover img {
   transform: scale(1.05);
 }
+.card img {
+  transition: transform .3s ease;
+}
 
-/* Section row */
+/* Rows */
 .row {
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding-bottom: 6px;
 }
 .row::-webkit-scrollbar {
   display: none;
@@ -47,78 +56,90 @@ body {
   .row {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    overflow: visible;
   }
+}
+
+/* ---------- SPLASH ---------- */
+#splash {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeOut 1s ease forwards;
+  animation-delay: 2.8s;
+}
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-<header class="sticky top-0 z-50 bg-[#0b1220] px-4 py-3 border-b border-slate-800">
-  <h1 class="text-lg font-semibold text-white mb-2">
-    Live TV
-  </h1>
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="text-center animate-pulse">
+    <p class="text-sm text-slate-400 mb-2">welcome to</p>
+    <p class="text-xl neon font-semibold tracking-wide">
+      teamrohitofficial45 web
+    </p>
+  </div>
+</div>
 
-  <input
-    id="search"
-    type="text"
+<!-- HEADER -->
+<header class="sticky top-0 z-40 bg-black px-4 py-3 border-b border-cyan-500/30">
+  <h1 class="text-lg neon font-semibold mb-2">Live TV</h1>
+  <input id="search"
     placeholder="Search channels..."
-    class="w-full bg-slate-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-  />
+    class="w-full bg-zinc-900 text-white px-4 py-2 rounded-lg outline-none
+           focus:ring-2 focus:ring-cyan-400">
 </header>
 
 <!-- CONTENT -->
-<main id="content" class="space-y-8 py-6"></main>
+<main id="content" class="space-y-10 py-6"></main>
 
 <script>
 const M3U_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
 const PLAYER = "https://teamrom3u8plyr2.pages.dev/?url=";
 
 const content = document.getElementById("content");
-const searchInput = document.getElementById("search");
+const search = document.getElementById("search");
 
 let channels = [];
+let activeCategory = null;
 
-/* LOAD M3U */
-fetch(M3U_URL)
-  .then(r => r.text())
-  .then(parseM3U);
+/* LOAD */
+fetch(M3U_URL).then(r=>r.text()).then(parseM3U);
 
 /* PARSE */
 function parseM3U(data) {
-  const lines = data.split("\n");
   let ch = {};
-
-  lines.forEach(line => {
+  data.split("\n").forEach(line => {
     line = line.trim();
 
     if (line.startsWith("#EXTINF")) {
       ch = {};
       ch.title = line.split(",").pop();
-
-      const logo = line.match(/tvg-logo="(.*?)"/);
-      ch.logo = logo ? logo[1] : "";
-
-      const group = line.match(/group-title="(.*?)"/);
-      ch.group = group ? group[1].toLowerCase() : "";
+      ch.logo = (line.match(/tvg-logo="(.*?)"/)||[])[1] || "";
+      ch.group = ((line.match(/group-title="(.*?)"/)||[])[1]||"").toLowerCase();
     }
 
     if (line && !line.startsWith("#")) {
       ch.url = line;
-      ch.section = getSection(ch.group, ch.title);
+      ch.section = sectionLogic(ch.group, ch.title);
       if (ch.logo) channels.push(ch);
     }
   });
 
-  renderAll(channels);
+  renderSections(channels);
 }
 
-/* SECTION RULES */
-function getSection(group, title) {
+/* SECTION LOGIC */
+function sectionLogic(group, title) {
   title = title.toLowerCase();
-
   if (group.includes("cricket") || title.includes("cricket")) return "Cricket";
   if (group.includes("sport")) return "Sports";
   if (group.includes("india")) return "Indian TV";
@@ -127,22 +148,14 @@ function getSection(group, title) {
   if (group.includes("kids")) return "Kids";
   if (group.includes("music")) return "Music";
   if (group.includes("uk") || group.includes("usa")) return "International";
-
   return "Other";
 }
 
-/* RENDER ALL SECTIONS (NEVER REMOVES) */
-function renderAll(list) {
+/* RENDER */
+function renderSections(list) {
   const sections = [
-    "Cricket",
-    "Sports",
-    "Indian TV",
-    "Movies",
-    "News",
-    "Kids",
-    "Music",
-    "International",
-    "Other"
+    "Cricket","Sports","Indian TV","Movies",
+    "News","Kids","Music","International","Other"
   ];
 
   content.innerHTML = "";
@@ -151,32 +164,42 @@ function renderAll(list) {
     const items = list.filter(c => c.section === sec);
     if (!items.length) return;
 
-    const section = document.createElement("section");
-    section.innerHTML = `
-      <h2 class="px-4 mb-3 text-base font-semibold text-slate-200">
-        ${sec}
-      </h2>
-      <div class="row px-4">
-        ${items.map(card).join("")}
-      </div>
+    const show = activeCategory === sec ? items : items.slice(0, 12);
+
+    content.innerHTML += `
+      <section>
+        <div class="px-4 mb-3 flex justify-between items-center">
+          <h2 class="text-base font-semibold text-cyan-300">${sec}</h2>
+          ${items.length > 12 ? `
+            <button onclick="seeAll('${sec}')"
+              class="text-xs text-fuchsia-400 hover:underline">
+              see all
+            </button>` : ""}
+        </div>
+        <div class="row px-4">
+          ${show.map(card).join("")}
+        </div>
+      </section>
     `;
-    content.appendChild(section);
   });
 }
 
-/* SEARCH (SAFE – DOES NOT BREAK SECTIONS) */
-searchInput.addEventListener("input", () => {
-  const q = searchInput.value.toLowerCase();
+/* SEE ALL */
+function seeAll(cat) {
+  activeCategory = cat;
+  renderSections(channels);
+}
 
+/* SEARCH */
+search.addEventListener("input", () => {
+  const q = search.value.toLowerCase();
   if (!q) {
-    renderAll(channels);
+    activeCategory = null;
+    renderSections(channels);
     return;
   }
-
-  renderAll(
-    channels.filter(c =>
-      c.title.toLowerCase().includes(q)
-    )
+  renderSections(
+    channels.filter(c => c.title.toLowerCase().includes(q))
   );
 });
 
@@ -186,12 +209,11 @@ function card(ch) {
     <a href="${PLAYER + encodeURIComponent(ch.url)}"
        target="_blank"
        class="card">
-      <div class="rounded-lg overflow-hidden bg-slate-800 shadow">
+      <div class="rounded-lg overflow-hidden bg-zinc-900 border
+                  border-cyan-500/20">
         <img src="${ch.logo}">
       </div>
-      <p class="mt-1 text-xs text-slate-100 truncate">
-        ${ch.title}
-      </p>
+      <p class="mt-1 text-xs truncate text-slate-200">${ch.title}</p>
     </a>
   `;
 }
