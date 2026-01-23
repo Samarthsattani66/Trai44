@@ -3,43 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Live Channels — VIP Playlist</title>
+<title>VIP Live Channels</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-body { background:#0b1220; }
+body { background:#0b1220; color:#e2e8f0; }
 .thumb { transition: transform .2s ease; }
 .card:hover .thumb { transform: scale(1.05); }
 </style>
 </head>
-<body class="text-slate-100">
+<body class="p-4">
 
-<header class="p-4 border-b border-white/10">
-  <h1 class="text-xl font-bold">Live Channels</h1>
-  <p class="text-xs text-slate-400">VIP Playlist • External Player</p>
+<header class="mb-4">
+  <h1 class="text-xl font-bold">VIP Live Channels</h1>
+  <p class="text-sm text-slate-400">Click a channel to open in external player</p>
 </header>
 
-<main class="p-4">
-  <div id="status" class="text-sm text-slate-400 mb-4">Loading playlist…</div>
-  <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
-</main>
+<div id="status" class="mb-4 text-sm text-slate-400">Loading playlist…</div>
+<div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
 
 <script>
 const PLAYER_URL = "https://teamrom3u8plyr2.pages.dev/?url=";
+const PLAYLIST_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
+const CORS_PROXY = "https://api.allorigins.win/raw?url="; // CORS proxy
 
-/* ====== HARDCODED PLAYLIST ====== */
-const playlistM3U = `
-#EXTM3U
-#EXTINF:-1 tvg-logo="https://example.com/logo1.png" group-title="Sports",Channel 1
-https://stream.example.com/channel1.m3u8
-#EXTINF:-1 tvg-logo="https://example.com/logo2.png" group-title="News",Channel 2
-https://stream.example.com/channel2.m3u8
-#EXTINF:-1 tvg-logo="https://example.com/logo3.png" group-title="Entertainment",Channel 3
-https://stream.example.com/channel3.m3u8
-#EXTINF:-1 tvg-logo="https://example.com/logo4.png" group-title="Music",Channel 4
-https://stream.example.com/channel4.m3u8
-`;
-
-/* ====== PARSE M3U ====== */
+/* ====== UTIL ====== */
 function getAttr(line, key) {
   const m = line.match(new RegExp(key + '="([^"]*)"', "i"));
   return m ? m[1] : "";
@@ -54,7 +41,8 @@ function parseM3U(text) {
       current = {
         name: line.split(",").pop().trim(),
         logo: getAttr(line, "tvg-logo"),
-        group: getAttr(line, "group-title")
+        group: getAttr(line, "group-title"),
+        url: ""
       };
     } else if (line && !line.startsWith("#") && current) {
       current.url = line.trim();
@@ -65,7 +53,7 @@ function parseM3U(text) {
   return channels;
 }
 
-/* ====== RENDER CHANNELS ====== */
+/* ====== RENDER ====== */
 function renderChannels(channels) {
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
@@ -88,10 +76,25 @@ function renderChannels(channels) {
   });
 }
 
-/* ====== INIT ====== */
-const channels = parseM3U(playlistM3U);
-document.getElementById("status").textContent = `Loaded ${channels.length} channels`;
-renderChannels(channels);
+/* ====== FETCH & INIT ====== */
+async function loadPlaylist() {
+  const status = document.getElementById("status");
+  try {
+    status.textContent = "Fetching playlist…";
+    const res = await fetch(CORS_PROXY + encodeURIComponent(PLAYLIST_URL));
+    if (!res.ok) throw new Error("Failed to fetch playlist");
+    const text = await res.text();
+    status.textContent = "Parsing playlist…";
+    const channels = parseM3U(text);
+    status.textContent = `Loaded ${channels.length} channels`;
+    renderChannels(channels);
+  } catch (err) {
+    console.error(err);
+    status.textContent = "Failed to load playlist. Try again later.";
+  }
+}
+
+loadPlaylist();
 </script>
 
 </body>
