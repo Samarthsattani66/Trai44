@@ -4,16 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Live Channels</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
-
 <style>
 body { background:#0b1220; }
 .thumb { transition: transform .2s ease; }
 .card:hover .thumb { transform: scale(1.05); }
 </style>
 </head>
-
 <body class="text-slate-100">
 
 <header class="p-4 border-b border-white/10">
@@ -27,23 +24,20 @@ body { background:#0b1220; }
 </main>
 
 <script>
-/* ================= CONFIG ================= */
-const PLAYLIST_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
-const CORS_PROXY = "https://api.allorigins.win/raw?url="; // Free CORS proxy
 const PLAYER_URL = "https://teamrom3u8plyr2.pages.dev/?url=";
+const PLAYLIST_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";
 
-/* ================= HELPERS ================= */
+/* ====== HELPERS ====== */
 function getAttr(line, key) {
   const m = line.match(new RegExp(key + '="([^"]*)"', "i"));
   return m ? m[1] : "";
 }
 
-/* ================= PARSER ================= */
 function parseM3U(text) {
   const lines = text.split(/\r?\n/);
   const channels = [];
   let current = null;
-
   for (const line of lines) {
     if (line.startsWith("#EXTINF")) {
       current = {
@@ -60,33 +54,12 @@ function parseM3U(text) {
   return channels;
 }
 
-/* ================= LOAD PLAYLIST ================= */
-async function loadPlaylist() {
-  try {
-    const res = await fetch(CORS_PROXY + encodeURIComponent(PLAYLIST_URL));
-    const text = await res.text();
-    const channels = parseM3U(text);
-
-    document.getElementById("status").textContent =
-      `Loaded ${channels.length} channels`;
-
-    renderChannels(channels);
-  } catch (err) {
-    document.getElementById("status").textContent =
-      "Failed to load playlist. Proxy may be down.";
-    console.error(err);
-  }
-}
-
-/* ================= RENDER ================= */
 function renderChannels(channels) {
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
-
   channels.forEach(ch => {
     const card = document.createElement("div");
     card.className = "card cursor-pointer";
-
     card.innerHTML = `
       <div class="rounded-xl overflow-hidden bg-slate-900 border border-white/10">
         <img class="thumb w-full h-32 object-cover"
@@ -96,22 +69,28 @@ function renderChannels(channels) {
       <div class="mt-1 text-sm truncate">${ch.name}</div>
       <div class="text-xs text-slate-400 truncate">${ch.group || ""}</div>
     `;
-
     card.onclick = () => {
-      window.open(
-        PLAYER_URL + encodeURIComponent(ch.url),
-        "_blank",
-        "noopener,noreferrer"
-      );
+      if (ch.url) window.open(PLAYER_URL + encodeURIComponent(ch.url), "_blank", "noopener,noreferrer");
     };
-
     grid.appendChild(card);
   });
 }
 
-/* ================= INIT ================= */
+/* ====== LOAD PLAYLIST ====== */
+async function loadPlaylist() {
+  try {
+    const res = await fetch(CORS_PROXY + encodeURIComponent(PLAYLIST_URL));
+    const text = await res.text();
+    const channels = parseM3U(text);
+    document.getElementById("status").textContent = `Loaded ${channels.length} channels`;
+    renderChannels(channels);
+  } catch (err) {
+    document.getElementById("status").textContent = "Failed to load playlist. Proxy may be down.";
+    console.error(err);
+  }
+}
+
 loadPlaylist();
 </script>
-
 </body>
 </html>
