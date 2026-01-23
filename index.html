@@ -2,21 +2,33 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>M3U External Player Grid</title>
+<title>Live TV – Professional M3U Web Player</title>
 
-<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
 body {
-  background:#0f172a;
-  font-family: Arial, sans-serif;
+  background:#0b1220;
+  font-family: Inter, system-ui, Arial, sans-serif;
+}
+.card img {
+  transition: transform .35s ease;
 }
 .card:hover img {
   transform: scale(1.08);
 }
-.card img {
-  transition: 0.3s;
+.card:hover {
+  transform: translateY(-4px);
+}
+.card {
+  transition: transform .3s ease;
+}
+::-webkit-scrollbar {
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
 }
 </style>
 </head>
@@ -24,17 +36,29 @@ body {
 <body>
 
 <!-- HEADER -->
-<div class="p-4 text-white text-2xl font-bold">
-  Live Channels
-</div>
+<header class="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+  <h1 class="text-2xl font-semibold text-white tracking-wide">
+    Live TV
+  </h1>
 
-<!-- CATEGORY FILTER -->
-<div id="categories" class="px-4 pb-2 flex gap-2 flex-wrap"></div>
+  <!-- SEARCH -->
+  <input
+    id="search"
+    type="text"
+    placeholder="Search channels..."
+    class="w-full sm:w-72 bg-slate-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  />
+</header>
+
+<!-- CATEGORY BAR -->
+<div id="categories"
+  class="px-6 pb-3 flex gap-3 overflow-x-auto text-sm">
+</div>
 
 <!-- CHANNEL GRID -->
-<div id="grid"
-class="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-</div>
+<main id="grid"
+  class="px-6 pb-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+</main>
 
 <script>
 const M3U_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
@@ -42,96 +66,132 @@ const EXTERNAL_PLAYER = "https://teamrom3u8plyr2.pages.dev/?url=";
 
 const grid = document.getElementById("grid");
 const categoriesDiv = document.getElementById("categories");
+const searchInput = document.getElementById("search");
 
 let channels = [];
+let currentCategory = "All";
 
 /* FETCH M3U */
 fetch(M3U_URL)
-  .then(res => res.text())
-  .then(parseM3U)
-  .catch(err => console.error("M3U Error:", err));
+  .then(r => r.text())
+  .then(parseM3U);
 
 /* PARSE M3U */
 function parseM3U(data) {
   const lines = data.split("\n");
-  let channel = {};
+  let ch = {};
 
   lines.forEach(line => {
     line = line.trim();
 
     if (line.startsWith("#EXTINF")) {
-      channel = {};
-      channel.title = line.split(",").pop();
+      ch = {};
+      ch.title = line.split(",").pop();
 
-      const logoMatch = line.match(/tvg-logo="(.*?)"/);
-      channel.logo = logoMatch ? logoMatch[1] : "";
+      const logo = line.match(/tvg-logo="(.*?)"/);
+      ch.logo = logo ? logo[1] : "";
 
-      const groupMatch = line.match(/group-title="(.*?)"/);
-      channel.group = groupMatch ? groupMatch[1].toLowerCase() : "";
+      const group = line.match(/group-title="(.*?)"/);
+      ch.group = group ? group[1].toLowerCase() : "";
     }
 
     if (line && !line.startsWith("#")) {
-      channel.url = line;
-
-      // CATEGORY LOGIC (OPENLY WRITTEN)
-      if (channel.group.includes("jio")) {
-        channel.category = "Jio TV+";
-      } else {
-        channel.category = "App";
-      }
-
-      if (channel.logo) channels.push(channel);
+      ch.url = line;
+      ch.category = detectCategory(ch.group);
+      if (ch.logo) channels.push(ch);
     }
   });
 
   renderCategories();
-  renderChannels("All");
+  renderChannels();
 }
 
-/* CATEGORY BUTTONS */
+/* CATEGORY LOGIC (OPEN & CLEAR) */
+function detectCategory(group) {
+  if (group.includes("sport")) return "Sports";
+  if (group.includes("movie") || group.includes("cinema")) return "Movies";
+  if (group.includes("news")) return "News";
+  if (group.includes("music")) return "Music";
+  if (group.includes("kids") || group.includes("cartoon")) return "Kids";
+  if (group.includes("entertain")) return "Entertainment";
+  return "Other";
+}
+
+/* RENDER CATEGORY BUTTONS */
 function renderCategories() {
-  const cats = ["All", "Jio TV+", "App"];
+  const cats = [
+    "All","Sports","Entertainment","Movies","News","Music","Kids","Other"
+  ];
 
   categoriesDiv.innerHTML = "";
 
   cats.forEach(cat => {
     const btn = document.createElement("button");
-    btn.innerText = cat;
+    btn.textContent = cat;
     btn.className =
-      "bg-gray-700 text-white px-3 py-1 rounded text-sm hover:bg-blue-600";
-    btn.onclick = () => renderChannels(cat);
+      "px-4 py-1.5 rounded-full whitespace-nowrap " +
+      (cat === "All"
+        ? "bg-blue-600 text-white"
+        : "bg-slate-700 text-slate-200 hover:bg-slate-600");
+
+    btn.onclick = () => {
+      currentCategory = cat;
+      highlightCategory(cat);
+      renderChannels();
+    };
+
     categoriesDiv.appendChild(btn);
   });
 }
 
-/* RENDER GRID */
-function renderChannels(filter) {
+/* HIGHLIGHT ACTIVE CATEGORY */
+function highlightCategory(active) {
+  [...categoriesDiv.children].forEach(btn => {
+    btn.className = btn.textContent === active
+      ? "px-4 py-1.5 rounded-full bg-blue-600 text-white"
+      : "px-4 py-1.5 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600";
+  });
+}
+
+/* RENDER CHANNELS */
+function renderChannels() {
+  const query = searchInput.value.toLowerCase();
   grid.innerHTML = "";
 
   channels
-    .filter(ch => filter === "All" || ch.category === filter)
+    .filter(ch =>
+      (currentCategory === "All" || ch.category === currentCategory) &&
+      ch.title.toLowerCase().includes(query)
+    )
     .forEach(createCard);
 }
 
-/* CHANNEL CARD (CLICK = EXTERNAL PLAYER) */
-function createCard(ch) {
-  const card = document.createElement("a");
-  card.href = EXTERNAL_PLAYER + encodeURIComponent(ch.url);
-  card.target = "_blank";
-  card.className = "card block";
+/* SEARCH */
+searchInput.addEventListener("input", renderChannels);
 
-  card.innerHTML = `
-    <div class="overflow-hidden rounded-lg bg-gray-800">
+/* CHANNEL CARD – EXTERNAL PLAYER ONLY */
+function createCard(ch) {
+  const a = document.createElement("a");
+  a.href = EXTERNAL_PLAYER + encodeURIComponent(ch.url);
+  a.target = "_blank";
+  a.className = "card block";
+
+  a.innerHTML = `
+    <div class="rounded-xl overflow-hidden bg-slate-800 shadow-lg">
       <img src="${ch.logo}"
-        class="w-full h-40 object-cover">
+        class="w-full h-40 object-cover bg-black">
     </div>
 
-    <p class="text-white text-sm mt-1 truncate">
+    <p class="mt-2 text-sm text-slate-100 truncate">
       ${ch.title}
+    </p>
+
+    <p class="text-xs text-slate-400">
+      ${ch.category}
     </p>
   `;
 
-  grid.appendChild(card);
+  grid.appendChild(a);
 }
 </script>
 
