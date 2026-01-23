@@ -29,7 +29,7 @@ body { background:#0b1220; }
 <script>
 /* ================= CONFIG ================= */
 const PLAYLIST_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
-const CORS_PROXY = "https://cors.isomorphic-git.org/";
+const CORS_PROXY = "https://api.allorigins.win/raw?url="; // Free CORS proxy
 const PLAYER_URL = "https://teamrom3u8plyr2.pages.dev/?url=";
 
 /* ================= HELPERS ================= */
@@ -51,8 +51,7 @@ function parseM3U(text) {
         logo: getAttr(line, "tvg-logo"),
         group: getAttr(line, "group-title")
       };
-    } 
-    else if (line && !line.startsWith("#") && current) {
+    } else if (line && !line.startsWith("#") && current) {
       current.url = line.trim();
       channels.push(current);
       current = null;
@@ -64,7 +63,7 @@ function parseM3U(text) {
 /* ================= LOAD PLAYLIST ================= */
 async function loadPlaylist() {
   try {
-    const res = await fetch(CORS_PROXY + PLAYLIST_URL);
+    const res = await fetch(CORS_PROXY + encodeURIComponent(PLAYLIST_URL));
     const text = await res.text();
     const channels = parseM3U(text);
 
@@ -74,7 +73,7 @@ async function loadPlaylist() {
     renderChannels(channels);
   } catch (err) {
     document.getElementById("status").textContent =
-      "Failed to load playlist (CORS or network error)";
+      "Failed to load playlist. Proxy may be down.";
     console.error(err);
   }
 }
@@ -91,7 +90,7 @@ function renderChannels(channels) {
     card.innerHTML = `
       <div class="rounded-xl overflow-hidden bg-slate-900 border border-white/10">
         <img class="thumb w-full h-32 object-cover"
-          src="${ch.logo || "https://dummyimage.com/400x225/111827/ffffff&text=LIVE"}"
+          src="${ch.logo || 'https://dummyimage.com/400x225/111827/ffffff&text=LIVE'}"
           alt="${ch.name}">
       </div>
       <div class="mt-1 text-sm truncate">${ch.name}</div>
