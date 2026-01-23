@@ -2,128 +2,116 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Hotstar Style M3U Player</title>
 
-<!-- MOBILE FIX -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>TeamRohitOfficial45 Live</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-/* ===== GLOBAL STYLE ===== */
 body {
-    margin: 0;
-    font-family: 'Poppins', Arial, sans-serif;
-    background: radial-gradient(circle at top, #111 0%, #000 70%);
-    color: gold;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
+  background:#0f172a;
+  font-family: Arial, sans-serif;
 }
-
-/* ===== GOLD GLOW TEXT ===== */
-.loading-message {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 15px;
-    padding: 12px 25px;
-    border-radius: 12px;
-    color: #FFD700;
-    background: rgba(255, 215, 0, 0.08);
-    border: 1px solid rgba(255, 215, 0, 0.4);
-    box-shadow: 0 0 15px #FFD700, 0 0 30px #FFD700;
-    animation: pulse 1.6s infinite alternate;
+.card:hover img {
+  transform: scale(1.08);
 }
-
-@keyframes pulse {
-    from { box-shadow: 0 0 10px #FFD700; }
-    to { box-shadow: 0 0 30px #FFD700; }
-}
-
-/* ===== VIDEO PLAYER ===== */
-.player-container {
-    width: 95%;
-    max-width: 1200px;
-    margin: 20px auto;
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
-    background: #000;
-}
-
-/* IMPORTANT MOBILE FIX */
-.player-container iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-}
-
-/* ===== TELEGRAM BUTTON ===== */
-.join-telegram-container {
-    margin-top: 25px;
-}
-
-.join-telegram-btn {
-    padding: 14px 30px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #000;
-    background: linear-gradient(135deg, #FFD700, #ffae00);
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-    transition: 0.3s ease;
-}
-
-.join-telegram-btn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 35px gold;
-}
-
-/* ===== MOBILE FIX ===== */
-@media (max-width: 600px) {
-    .loading-message {
-        font-size: 16px;
-    }
+.card img {
+  transition: 0.3s;
 }
 </style>
 </head>
 
 <body>
 
-<div class="loading-message">
-    ⭐ Share This Link With Your Friends ⭐
+<!-- HEADER -->
+<div class="p-4 text-white text-2xl font-bold">
+  Live Channels
 </div>
 
-<div class="player-container">
-    <div style="padding:56.25% 0 0 0; position:relative;">
-        <iframe 
-            src="https://teamrom3u8plyr2.pages.dev/?url=https://allinonereborn.xyz/amit/hls2.php"
-            allow="fullscreen; encrypted-media; picture-in-picture"
-            allowfullscreen
-            webkitallowfullscreen
-            mozallowfullscreen
-            playsinline
-            style="position:absolute; top:0; left:0; width:100%; height:100%;">
-        </iframe>
-    </div>
-</div>
+<!-- CHANNEL GRID -->
+<div id="grid" class="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
 
-<div class="join-telegram-container">
-    <button class="join-telegram-btn"
-        onclick="window.open('https://t.me/+lkbpBqFd0FljNzJl','_blank')">
-        🔥 Join Telegram Channel
+<!-- PLAYER MODAL -->
+<div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+  <div class="bg-black w-full max-w-4xl p-3 rounded">
+    <video id="player" controls class="w-full h-[420px] bg-black"></video>
+    <button onclick="closePlayer()" class="mt-2 bg-red-600 px-4 py-1 text-white rounded">
+      Close
     </button>
+  </div>
 </div>
 
 <script>
-setTimeout(() => {
-    if (confirm("🔥 Join Our Telegram Channel @teamrohitofficial45 🔥")) {
-        window.open("https://t.me/+lkbpBqFd0FljNzJl", "_blank");
+const M3U_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
+const grid = document.getElementById("grid");
+const modal = document.getElementById("modal");
+const video = document.getElementById("player");
+let hls;
+
+fetch(M3U_URL)
+  .then(res => res.text())
+  .then(parseM3U)
+  .catch(err => console.error("M3U Error:", err));
+
+function parseM3U(data) {
+  const lines = data.split("\n");
+  let channel = {};
+
+  lines.forEach(line => {
+    line = line.trim();
+
+    if (line.startsWith("#EXTINF")) {
+      channel = {};
+      channel.title = line.split(",").pop();
+
+      const logoMatch = line.match(/tvg-logo="(.*?)"/);
+      channel.logo = logoMatch ? logoMatch[1] : "";
     }
-}, 3000);
+
+    if (line && !line.startsWith("#")) {
+      channel.url = line;
+      if (channel.logo) createCard(channel);
+    }
+  });
+}
+
+function createCard(ch) {
+  const card = document.createElement("div");
+  card.className = "card cursor-pointer";
+
+  card.innerHTML = `
+    <div class="overflow-hidden rounded-lg bg-gray-800">
+      <img src="${ch.logo}" class="w-full h-40 object-cover">
+    </div>
+    <p class="text-white text-sm mt-1 truncate">${ch.title}</p>
+  `;
+
+  card.onclick = () => playStream(ch.url);
+  grid.appendChild(card);
+}
+
+function playStream(url) {
+  modal.classList.remove("hidden");
+
+  if (hls) hls.destroy();
+
+  if (Hls.isSupported()) {
+    hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+  } else {
+    video.src = url;
+    video.play();
+  }
+}
+
+function closePlayer() {
+  modal.classList.add("hidden");
+  video.pause();
+  video.src = "";
+  if (hls) hls.destroy();
+}
 </script>
 
 </body>
