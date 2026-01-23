@@ -2,38 +2,45 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live TV • Premium IPTV Web</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live TV • Premium IPTV</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
 body {
-  background: #0b1220;
+  background:#0b1220;
   font-family: Inter, system-ui, Arial, sans-serif;
 }
 .card img {
-  transition: transform .35s ease;
+  transition: transform .3s ease;
 }
 .card:hover img {
-  transform: scale(1.08);
-}
-.card {
-  transition: transform .25s ease;
-}
-.card:hover {
-  transform: translateY(-4px);
+  transform: scale(1.06);
 }
 .section-title {
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: #e5e7eb;
 }
-::-webkit-scrollbar {
-  height: 6px;
+.scroll-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
 }
-::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 10px;
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}
+.card {
+  scroll-snap-align: start;
+}
+@media (min-width: 768px) {
+  .scroll-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    overflow: visible;
+  }
 }
 </style>
 </head>
@@ -41,8 +48,8 @@ body {
 <body>
 
 <!-- HEADER -->
-<header class="px-6 py-4 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-  <h1 class="text-2xl font-semibold text-white tracking-wide">
+<header class="sticky top-0 z-50 bg-[#0b1220] px-4 py-3 border-b border-slate-800">
+  <h1 class="text-xl font-semibold text-white mb-2">
     Live TV
   </h1>
 
@@ -50,12 +57,12 @@ body {
     id="search"
     type="text"
     placeholder="Search channels..."
-    class="w-full sm:w-80 bg-slate-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+    class="w-full bg-slate-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   />
 </header>
 
 <!-- CONTENT -->
-<main id="content" class="space-y-12 pb-10"></main>
+<main id="content" class="space-y-10 py-6"></main>
 
 <script>
 const M3U_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
@@ -66,12 +73,12 @@ const searchInput = document.getElementById("search");
 
 let channels = [];
 
-/* FETCH M3U */
+/* FETCH */
 fetch(M3U_URL)
   .then(r => r.text())
   .then(parseM3U);
 
-/* PARSE M3U */
+/* PARSE */
 function parseM3U(data) {
   const lines = data.split("\n");
   let ch = {};
@@ -97,68 +104,45 @@ function parseM3U(data) {
     }
   });
 
-  renderSections();
+  renderSections(channels);
 }
 
-/* SECTION LOGIC (CLEAR & EDITABLE) */
+/* SECTION RULES */
 function detectSection(group, title) {
   title = title.toLowerCase();
 
-  if (group.includes("cricket") || title.includes("cricket"))
-    return "Cricket";
-
-  if (group.includes("sport"))
-    return "Sports";
-
-  if (group.includes("india") || title.includes("india"))
-    return "Indian TV";
-
-  if (group.includes("movie"))
-    return "Movies";
-
-  if (group.includes("news"))
-    return "News";
-
-  if (group.includes("kids") || title.includes("cartoon"))
-    return "Kids";
-
-  if (group.includes("music"))
-    return "Music";
-
-  if (group.includes("uk") || group.includes("usa") || group.includes("international"))
-    return "International";
+  if (group.includes("cricket") || title.includes("cricket")) return "Cricket";
+  if (group.includes("sport")) return "Sports";
+  if (group.includes("india")) return "Indian TV";
+  if (group.includes("movie")) return "Movies";
+  if (group.includes("news")) return "News";
+  if (group.includes("kids")) return "Kids";
+  if (group.includes("music")) return "Music";
+  if (group.includes("uk") || group.includes("usa")) return "International";
 
   return "Other";
 }
 
-/* RENDER ALL SECTIONS */
-function renderSections() {
+/* RENDER SECTIONS */
+function renderSections(list) {
   const sections = [
-    "Cricket",
-    "Sports",
-    "Indian TV",
-    "Movies",
-    "News",
-    "Kids",
-    "Music",
-    "International",
-    "Other"
+    "Cricket","Sports","Indian TV","Movies",
+    "News","Kids","Music","International","Other"
   ];
 
   content.innerHTML = "";
 
   sections.forEach(sec => {
-    const sectionChannels = channels.filter(ch => ch.section === sec);
-    if (!sectionChannels.length) return;
+    const items = list.filter(ch => ch.section === sec);
+    if (!items.length) return;
 
     const section = document.createElement("section");
     section.innerHTML = `
-      <div class="px-6 mb-3 section-title">${sec}</div>
-      <div class="px-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-        ${sectionChannels.map(createCardHTML).join("")}
+      <div class="px-4 mb-3 section-title">${sec}</div>
+      <div class="px-4 scroll-row">
+        ${items.map(cardHTML).join("")}
       </div>
     `;
-
     content.appendChild(section);
   });
 }
@@ -166,34 +150,24 @@ function renderSections() {
 /* SEARCH */
 searchInput.addEventListener("input", () => {
   const q = searchInput.value.toLowerCase();
-  content.innerHTML = "";
+  if (!q) return renderSections(channels);
 
-  const filtered = channels.filter(ch =>
-    ch.title.toLowerCase().includes(q)
+  renderSections(
+    channels.filter(ch => ch.title.toLowerCase().includes(q))
   );
-
-  const section = document.createElement("section");
-  section.innerHTML = `
-    <div class="px-6 mb-3 section-title">Search Results</div>
-    <div class="px-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-      ${filtered.map(createCardHTML).join("")}
-    </div>
-  `;
-  content.appendChild(section);
 });
 
-/* CARD HTML */
-function createCardHTML(ch) {
+/* CARD */
+function cardHTML(ch) {
   return `
     <a href="${EXTERNAL_PLAYER + encodeURIComponent(ch.url)}"
        target="_blank"
-       class="card block">
-      <div class="rounded-xl overflow-hidden bg-slate-800 shadow-lg">
+       class="card min-w-[140px] md:min-w-0 block">
+      <div class="rounded-xl overflow-hidden bg-slate-800 shadow-md">
         <img src="${ch.logo}"
-             class="w-full h-40 object-cover bg-black">
+          class="w-full h-36 object-cover bg-black">
       </div>
       <p class="mt-2 text-sm text-slate-100 truncate">${ch.title}</p>
-      <p class="text-xs text-slate-400">${ch.section}</p>
     </a>
   `;
 }
