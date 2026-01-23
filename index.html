@@ -1,192 +1,429 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Live TV Player</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<style>
-body { background:#0b1220; }
-.card:hover img { transform: scale(1.08); }
-.card img { transition: 0.3s; }
-.glass { backdrop-filter: blur(10px); background: rgba(15,23,42,.7); }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Live Channels — M3U Sections + External Player</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background:#0b1220; }
+    .glass { backdrop-filter: blur(10px); background: rgba(15, 23, 42, 0.65); }
+    .ring-soft { box-shadow: 0 0 0 1px rgba(148,163,184,.18) inset; }
+    .thumb { transition: transform 220ms ease; }
+    .card:hover .thumb { transform: scale(1.06); }
+  </style>
 </head>
 
-<body class="text-white">
-
-<!-- HEADER -->
-<header class="glass sticky top-0 z-50 border-b border-white/10">
-  <div class="max-w-7xl mx-auto p-4 flex items-center justify-between">
-    <div>
-      <h1 class="text-xl font-bold">Live Channels</h1>
-      <p class="text-xs text-slate-300">Upload M3U • Auto Sections</p>
-    </div>
-
-    <label class="cursor-pointer bg-cyan-500/20 px-4 py-2 rounded-xl border border-cyan-400/30 hover:bg-cyan-500/30">
-      Upload M3U
-      <input type="file" accept=".m3u,.m3u8" id="fileInput" hidden>
-    </label>
-  </div>
-
-  <!-- TABS -->
-  <div id="tabs" class="flex gap-2 px-4 pb-3 overflow-x-auto"></div>
-</header>
-
-<!-- GRID -->
-<main class="max-w-7xl mx-auto p-4">
-  <div id="meta" class="text-sm text-slate-400 mb-3"></div>
-  <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
-
-  <div id="empty" class="hidden text-center text-slate-400 mt-20">
-    Upload an M3U playlist to begin
-  </div>
-</main>
-
-<!-- MODAL -->
-<div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-  <div class="bg-slate-950 rounded-xl max-w-lg w-full border border-white/10">
-    <div class="p-4 border-b border-white/10 flex justify-between">
-      <div>
-        <h3 id="modalTitle" class="font-semibold"></h3>
-        <p class="text-xs text-slate-400">Open in external player</p>
+<body class="text-slate-100">
+  <!-- Top Bar -->
+  <header class="sticky top-0 z-40 glass border-b border-white/10">
+    <div class="mx-auto max-w-7xl px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div class="flex items-center gap-2">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-400"></div>
+        <div>
+          <div class="text-lg font-bold leading-tight">Live Channels</div>
+          <div class="text-xs text-slate-300">Upload an M3U you’re allowed to use • auto sections • search</div>
+        </div>
       </div>
-      <button onclick="closeModal()">✕</button>
+
+      <div class="sm:ml-auto flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:items-center">
+        <label class="inline-flex items-center gap-2 rounded-xl bg-slate-900/60 border border-white/10 ring-soft px-3 py-2 text-sm cursor-pointer hover:bg-slate-900/80">
+          <input id="fileInput" type="file" accept=".m3u,.m3u8" class="hidden" />
+          <span class="font-medium">Upload .m3u</span>
+          <span id="fileName" class="text-slate-400">(none)</span>
+        </label>
+
+        <div class="relative w-full sm:w-80">
+          <input
+            id="search"
+            class="w-full rounded-xl bg-slate-900/60 ring-soft border border-white/10 px-4 py-2 pl-10 text-sm outline-none focus:border-cyan-400/60"
+            placeholder="Search channels..."
+          />
+          <svg class="absolute left-3 top-2.5 h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none">
+            <path d="M21 21l-4.3-4.3m1.8-5.2a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <select id="sort"
+          class="rounded-xl bg-slate-900/60 ring-soft border border-white/10 px-3 py-2 text-sm outline-none">
+          <option value="group">Group then A–Z</option>
+          <option value="az">A–Z</option>
+          <option value="za">Z–A</option>
+        </select>
+      </div>
     </div>
 
-    <div class="p-4 space-y-3">
-      <div class="text-xs text-slate-400 break-all" id="streamUrl"></div>
+    <!-- Tabs -->
+    <div class="mx-auto max-w-7xl px-4 pb-3">
+      <div id="tabs" class="flex flex-wrap gap-2"></div>
+    </div>
+  </header>
 
-      <button onclick="playExternal()"
-        class="w-full bg-cyan-500/20 border border-cyan-400/30 py-2 rounded-xl hover:bg-cyan-500/30">
-        ▶ Play
-      </button>
+  <!-- Hero -->
+  <section class="mx-auto max-w-7xl px-4 pt-6">
+    <div class="rounded-2xl border border-white/10 ring-soft overflow-hidden bg-gradient-to-r from-slate-900/60 to-slate-900/20">
+      <div class="p-5 sm:p-7 flex flex-col sm:flex-row gap-4 sm:items-center">
+        <div class="flex-1">
+          <div class="text-xs text-slate-300">Player</div>
+          <h1 class="text-xl sm:text-2xl font-bold mt-1">Opens streams in your external M3U8 player</h1>
+          <p class="text-slate-300 text-sm mt-2 max-w-2xl">
+            Click a channel card → it launches:
+            <span class="text-slate-100 font-medium">teamrom3u8plyr2.pages.dev/?url=</span>
+            with the stream URL.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button id="helpBtn"
+            class="rounded-xl bg-slate-900/60 border border-white/10 px-4 py-2 text-sm hover:bg-slate-900/80">
+            How sections work
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Grid -->
+  <main class="mx-auto max-w-7xl px-4 py-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <div id="sectionTitle" class="text-lg font-semibold">No playlist loaded</div>
+        <div id="sectionMeta" class="text-xs text-slate-400">Upload an .m3u to begin</div>
+      </div>
+    </div>
+    <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+
+    <div id="emptyState" class="hidden mt-10 text-center text-slate-400">
+      <div class="text-lg font-semibold text-slate-200">No channels found</div>
+      <div class="text-sm mt-1">Try another section or search.</div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl border border-white/10 ring-soft bg-slate-950/70 overflow-hidden">
+      <div class="p-4 border-b border-white/10 flex items-center justify-between">
+        <div>
+          <div id="modalTitle" class="font-semibold">Channel</div>
+          <div id="modalSub" class="text-xs text-slate-400"></div>
+        </div>
+        <button id="closeModal" class="rounded-xl bg-slate-900/60 border border-white/10 px-3 py-1.5 text-sm">
+          Close
+        </button>
+      </div>
+      <div class="p-4 space-y-3">
+        <div class="rounded-xl bg-slate-900/60 border border-white/10 p-3">
+          <div class="text-xs text-slate-400">Stream URL</div>
+          <div id="streamUrl" class="text-sm break-all mt-1"></div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button id="playExternal"
+            class="rounded-xl bg-cyan-500/20 border border-cyan-400/25 px-4 py-2 text-sm hover:bg-cyan-500/25">
+            Play in external player
+          </button>
+
+          <button id="copyUrl"
+            class="rounded-xl bg-slate-900/60 border border-white/10 px-4 py-2 text-sm hover:bg-slate-900/80">
+            Copy stream URL
+          </button>
+        </div>
+
+        <div class="text-xs text-slate-500">
+          Note: This app expects you to use playlists you have permission to use.
+        </div>
+      </div>
     </div>
   </div>
-</div>
+
+  <div id="toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+    <div class="rounded-xl bg-slate-900/80 border border-white/10 px-4 py-2 text-sm ring-soft">
+      Copied to clipboard
+    </div>
+  </div>
 
 <script>
-const grid = document.getElementById("grid");
-const tabs = document.getElementById("tabs");
-const empty = document.getElementById("empty");
-const meta = document.getElementById("meta");
+  /*******
+   * CONFIG
+   *******/
+  const EXTERNAL_PLAYER_BASE = "https://teamrom3u8plyr2.pages.dev/?url=";
 
-const modal = document.getElementById("modal");
-const modalTitle = document.getElementById("modalTitle");
-const streamUrlEl = document.getElementById("streamUrl");
+  /*******
+   * STATE
+   *******/
+  let channels = [];
+  let sections = ["All"];
+  let activeSection = "All";
+  let activeQuery = "";
+  let activeSort = "group";
 
-const PLAYER = "https://teamrom3u8plyr2.pages.dev/?url=";
+  const elTabs = document.getElementById("tabs");
+  const elGrid = document.getElementById("grid");
+  const elEmpty = document.getElementById("emptyState");
+  const elTitle = document.getElementById("sectionTitle");
+  const elMeta = document.getElementById("sectionMeta");
+  const elSearch = document.getElementById("search");
+  const elSort = document.getElementById("sort");
+  const elFileInput = document.getElementById("fileInput");
+  const elFileName = document.getElementById("fileName");
 
-let channels = [];
-let activeSection = "All";
-let currentUrl = "";
+  const modal = document.getElementById("modal");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalSub = document.getElementById("modalSub");
+  const streamUrlEl = document.getElementById("streamUrl");
+  const btnPlayExternal = document.getElementById("playExternal");
+  const btnCopyUrl = document.getElementById("copyUrl");
+  const btnCloseModal = document.getElementById("closeModal");
 
-/* FILE UPLOAD */
-document.getElementById("fileInput").addEventListener("change", e => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const toast = document.getElementById("toast");
+  let currentModalUrl = "";
 
-  const reader = new FileReader();
-  reader.onload = () => parseM3U(reader.result);
-  reader.readAsText(file);
-});
+  /*******
+   * UTIL
+   *******/
+  function normalize(s) {
+    return (s || "").toString().toLowerCase().trim();
+  }
 
-/* PARSE M3U */
-function parseM3U(data) {
-  channels = [];
-  let temp = {};
+  function safeAttr(extinf, key) {
+    // matches key="value"
+    const re = new RegExp(key + '="([^"]*)"', "i");
+    const m = extinf.match(re);
+    return m ? m[1] : "";
+  }
 
-  data.split("\n").forEach(line => {
-    line = line.trim();
+  function parseExtinf(line) {
+    // Example:// #EXTINF:-1 tvg-logo="..." group-title="Sports" tvg-country="IN",Channel Name
+    const title = line.includes(",") ? line.split(",").pop().trim() : "Untitled";
+    const logo = safeAttr(line, "tvg-logo");
+    const group = safeAttr(line, "group-title");
+    const country = safeAttr(line, "tvg-country");
+    const language = safeAttr(line, "tvg-language");
 
-    if (line.startsWith("#EXTINF")) {
-      temp = {};
-      temp.title = line.split(",").pop();
+    // Heuristic section priority
+    const section =
+      group  country  language || "Other";
 
-      const logo = line.match(/tvg-logo="(.*?)"/);
-      const group = line.match(/group-title="(.*?)"/);
+    return { title, logo, section, country, language, group };
+  }
 
-      temp.logo = logo ? logo[1] : "";
-      temp.section = group ? group[1] : "Other";
+  function parseM3U(text) {
+    const lines = text.split(/\r?\n/);
+    const out = [];
+    let current = null;
+
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line) continue;
+
+      if (line.startsWith("#EXTINF")) {
+        current = parseExtinf(line);
+      } else if (!line.startsWith("#")) {
+        // stream URL
+        if (current) {
+          current.url = line;
+          out.push(current);
+          current = null;
+        }
+      }
     }
-    else if (line && !line.startsWith("#")) {
-      temp.url = line;
-      channels.push(temp);
+    return out;
+  }
+
+  function buildSections(list) {
+    const set = new Set(["All"]);
+    for (const ch of list) set.add(ch.section || "Other");
+    return Array.from(set).sort((a,b) => {
+      if (a === "All") return -1;
+      if (b === "All") return 1;
+      return a.localeCompare(b);
+    });
+  }
+
+  function matchesQuery(ch, q) {
+    if (!q) return true;
+    const hay = [
+      ch.title,
+      ch.section,
+      ch.group,
+      ch.country,
+      ch.language
+    ].map(normalize).join(" ");
+    return hay.includes(q);
+  }
+
+  function getVisibleChannels() {
+    const q = normalize(activeQuery);
+    let list = channels.filter(ch => {
+      const inSection = (activeSection === "All") ? true : (ch.section === activeSection);
+      return inSection && matchesQuery(ch, q);
+    });
+
+    if (activeSort === "group") {
+      list.sort((a,b) =>
+        (a.section  "").localeCompare(b.section  "") ||
+        (a.title  "").localeCompare(b.title  "")
+      );
+    } else if (activeSort === "az") {
+      list.sort((a,b) => (a.title  "").localeCompare(b.title  ""));
+    } else if (activeSort === "za") {
+      list.sort((a,b) => (b.title  "").localeCompare(a.title  ""));
     }
-  });
+    return list;
+  }
 
-  buildTabs();
-  render();
-}
+  /*******
+   * RENDER
+   *******/
+  function renderTabs() {
+    elTabs.innerHTML = "";
+    sections.forEach(sec => {
+      const btn = document.createElement("button");
+      const isActive = sec === activeSection;
 
-/* TABS */
-function buildTabs() {
-  tabs.innerHTML = "";
-  const sections = ["All", ...new Set(channels.map(c => c.section))];
+      btn.className = [
+        "rounded-xl px-3 py-1.5 text-sm border transition",
+        isActive
+          ? "bg-cyan-500/20 border-cyan-400/30 text-white"
+          : "bg-slate-900/50 border-white/10 text-slate-200 hover:bg-slate-900/80"
+      ].join(" ");
 
-  sections.forEach(sec => {
-    const btn = document.createElement("button");
-    btn.textContent = sec;
-    btn.className = `px-3 py-1 rounded-xl text-sm border ${
-      sec === activeSection
-        ? "bg-cyan-500/20 border-cyan-400/30"
-        : "bg-slate-900 border-white/10"
-    }`;
+      btn.textContent = sec;
+      btn.onclick = () => {
+        activeSection = sec;
+        renderTabs();
+        renderGrid();
+      };
+      elTabs.appendChild(btn);
+    });
+  }
 
-    btn.onclick = () => {
-      activeSection = sec;
-      render();
-    };
-
-    tabs.appendChild(btn);
-  });
-}
-
-/* GRID */
-function render() {
-  grid.innerHTML = "";
-  const list = activeSection === "All"
-    ? channels
-    : channels.filter(c => c.section === activeSection);
-
-  meta.textContent = `${list.length} channels`;
-  empty.classList.toggle("hidden", list.length !== 0);
-
-  list.forEach(ch => {
+  function channelCard(ch) {
     const card = document.createElement("div");
-    card.className = "card cursor-pointer";
+    card.className = "card cursor-pointer group";
 
-    card.innerHTML = `
-      <div class="rounded-xl overflow-hidden border border-white/10 bg-slate-900">
-        <img src="${ch.logo || 'https://dummyimage.com/400x225/111827/ffffff&text=TV'}"
-             class="w-full h-32 object-cover">
+    const badge = ch.section || "Other";
+    const imgSrc = ch.logo || "https://dummyimage.com/640x360/111827/ffffff&text=LIVE";
+
+    card.innerHTML = 
+      <div class="rounded-2xl overflow-hidden border border-white/10 ring-soft bg-slate-900/40">
+        <div class="relative">
+          <img class="thumb w-full h-32 sm:h-36 object-cover" src="${imgSrc}" alt="${ch.title}">
+          <div class="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
+            <span class="text-[11px] text-slate-200/90 bg-black/30 border border-white/10 rounded-full px-2 py-0.5">
+              ${badge}
+            </span>
+          </div>
+        </div>
       </div>
-      <p class="text-sm mt-1 truncate">${ch.title}</p>
-    `;
+      <div class="mt-2">
+        <div class="text-sm font-medium truncate">${ch.title || "Untitled"}</div>
+        <div class="text-xs text-slate-400 truncate">${[ch.country, ch.language].filter(Boolean).join(" • ")}</div>
+      </div>
+    ;
 
     card.onclick = () => openModal(ch);
-    grid.appendChild(card);
+    return card;
+        }function renderGrid() {
+    const list = getVisibleChannels();
+
+    if (!channels.length) {
+      elTitle.textContent = "No playlist loaded";
+      elMeta.textContent = "Upload an .m3u to begin";
+    } else {
+      elTitle.textContent = activeSection;
+      elMeta.textContent = ${list.length} channel${list.length === 1 ? "" : "s"};
+    }
+
+    elGrid.innerHTML = "";
+    list.forEach(ch => elGrid.appendChild(channelCard(ch)));
+    elEmpty.classList.toggle("hidden", list.length !== 0 || !channels.length);
+  }
+
+  /*******
+   * MODAL
+   *******/
+  function openModal(ch) {
+    currentModalUrl = ch.url || "";
+    modalTitle.textContent = ch.title || "Channel";
+    modalSub.textContent = ch.section ? Section: ${ch.section} : "";
+    streamUrlEl.textContent = currentModalUrl || "(no url)";
+    modal.classList.remove("hidden");
+  }
+
+  function closeModal() {
+    modal.classList.add("hidden");
+    currentModalUrl = "";
+  }
+
+  btnCloseModal.onclick = closeModal;
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
   });
-}
 
-/* MODAL */
-function openModal(ch) {
-  modal.classList.remove("hidden");
-  modalTitle.textContent = ch.title;
-  streamUrlEl.textContent = ch.url;
-  currentUrl = ch.url;
-}
+  btnPlayExternal.onclick = () => {
+    if (!currentModalUrl) return;
+    window.open(EXTERNAL_PLAYER_BASE + encodeURIComponent(currentModalUrl), "_blank", "noopener,noreferrer");
+  };
 
-function closeModal() {
-  modal.classList.add("hidden");
-}
+  btnCopyUrl.onclick = async () => {
+    if (!currentModalUrl) return;
+    try {
+      await navigator.clipboard.writeText(currentModalUrl);
+      toast.classList.remove("hidden");
+      setTimeout(() => toast.classList.add("hidden"), 1200);
+    } catch (e) {
+      alert("Copy failed. Your browser may block clipboard access.");
+    }
+  };
 
-function playExternal() {
-  window.open(PLAYER + encodeURIComponent(currentUrl), "_blank");
-}
+  /*******
+   * EVENTS
+   *******/
+  elSearch.addEventListener("input", (e) => {
+    activeQuery = e.target.value;
+    renderGrid();
+  });
+
+  elSort.addEventListener("change", (e) => {
+    activeSort = e.target.value;
+    renderGrid();
+  });
+
+  document.getElementById("helpBtn").onclick = () => {
+    alert(
+Section mapping:
+1) Uses group-title="..." if present (best).
+2) Else uses tvg-country="..." if present.
+3) Else uses tvg-language="..." if present.
+4) Else goes to "Other".
+
+If you want a different rule (e.g., split by Country and also by Category),
+tell me your desired logic and I’ll adjust the code.
+    );
+  };
+
+  elFileInput.addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    elFileName.textContent = file.name;
+
+    const text = await file.text();
+    channels = parseM3U(text);
+
+    // Build sections from parsed channels
+    sections = buildSections(channels);
+    activeSection = "All";
+    activeQuery = "";
+    elSearch.value = "";
+
+    renderTabs();
+    renderGrid();
+  });
+
+  // init
+  renderTabs();
+  renderGrid();
 </script>
-
 </body>
 </html>
