@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Live Channels</title>
+<title>Live Channels — VIP Playlist</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body { background:#0b1220; }
@@ -25,10 +25,21 @@ body { background:#0b1220; }
 
 <script>
 const PLAYER_URL = "https://teamrom3u8plyr2.pages.dev/?url=";
-const PLAYLIST_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
-const CORS_PROXY = "https://api.allorigins.win/raw?url=";
 
-/* ====== HELPERS ====== */
+/* ====== HARDCODED PLAYLIST ====== */
+const playlistM3U = `
+#EXTM3U
+#EXTINF:-1 tvg-logo="https://example.com/logo1.png" group-title="Sports",Channel 1
+https://stream.example.com/channel1.m3u8
+#EXTINF:-1 tvg-logo="https://example.com/logo2.png" group-title="News",Channel 2
+https://stream.example.com/channel2.m3u8
+#EXTINF:-1 tvg-logo="https://example.com/logo3.png" group-title="Entertainment",Channel 3
+https://stream.example.com/channel3.m3u8
+#EXTINF:-1 tvg-logo="https://example.com/logo4.png" group-title="Music",Channel 4
+https://stream.example.com/channel4.m3u8
+`;
+
+/* ====== PARSE M3U ====== */
 function getAttr(line, key) {
   const m = line.match(new RegExp(key + '="([^"]*)"', "i"));
   return m ? m[1] : "";
@@ -54,6 +65,7 @@ function parseM3U(text) {
   return channels;
 }
 
+/* ====== RENDER CHANNELS ====== */
 function renderChannels(channels) {
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
@@ -76,21 +88,11 @@ function renderChannels(channels) {
   });
 }
 
-/* ====== LOAD PLAYLIST ====== */
-async function loadPlaylist() {
-  try {
-    const res = await fetch(CORS_PROXY + encodeURIComponent(PLAYLIST_URL));
-    const text = await res.text();
-    const channels = parseM3U(text);
-    document.getElementById("status").textContent = `Loaded ${channels.length} channels`;
-    renderChannels(channels);
-  } catch (err) {
-    document.getElementById("status").textContent = "Failed to load playlist. Proxy may be down.";
-    console.error(err);
-  }
-}
-
-loadPlaylist();
+/* ====== INIT ====== */
+const channels = parseM3U(playlistM3U);
+document.getElementById("status").textContent = `Loaded ${channels.length} channels`;
+renderChannels(channels);
 </script>
+
 </body>
 </html>
