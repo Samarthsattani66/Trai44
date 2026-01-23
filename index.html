@@ -1,100 +1,195 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VIP Live Channels</title>
+<title>Hotstar Style M3U Player</title>
+
+<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- HLS -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
-body { background:#0b1220; color:#e2e8f0; }
-.thumb { transition: transform .2s ease; }
-.card:hover .thumb { transform: scale(1.05); }
+body {
+  background:#0f172a;
+  font-family: Arial, sans-serif;
+}
+.card:hover img {
+  transform: scale(1.08);
+}
+.card img {
+  transition: 0.3s;
+}
 </style>
 </head>
-<body class="p-4">
 
-<header class="mb-4">
-  <h1 class="text-xl font-bold">VIP Live Channels</h1>
-  <p class="text-sm text-slate-400">Click a channel to open in external player</p>
-</header>
+<body>
 
-<div id="status" class="mb-4 text-sm text-slate-400">Loading playlist…</div>
-<div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+<!-- HEADER -->
+<div class="p-4 text-white text-2xl font-bold">
+  Live Channels
+</div>
+
+<!-- CATEGORY FILTER -->
+<div id="categories" class="px-4 pb-2 flex gap-2 flex-wrap"></div>
+
+<!-- CHANNEL GRID -->
+<div id="grid"
+class="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+</div>
+
+<!-- PLAYER MODAL -->
+<div id="modal"
+class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+  <div class="bg-black w-full max-w-4xl p-3 rounded">
+    <video id="player" controls
+      class="w-full h-[420px] bg-black"></video>
+
+    <button onclick="closePlayer()"
+      class="mt-2 bg-red-600 px-4 py-1 text-white rounded">
+      Close
+    </button>
+  </div>
+</div>
 
 <script>
-const PLAYER_URL = "https://teamrom3u8plyr2.pages.dev/?url=";
-const PLAYLIST_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
-const CORS_PROXY = "https://api.allorigins.win/raw?url="; // CORS proxy
+const M3U_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
+const EXTERNAL_PLAYER = "https://teamrom3u8plyr2.pages.dev/?url=";
 
-/* ====== UTIL ====== */
-function getAttr(line, key) {
-  const m = line.match(new RegExp(key + '="([^"]*)"', "i"));
-  return m ? m[1] : "";
-}
+const grid = document.getElementById("grid");
+const modal = document.getElementById("modal");
+const video = document.getElementById("player");
+const categoriesDiv = document.getElementById("categories");
 
-function parseM3U(text) {
-  const lines = text.split(/\r?\n/);
-  const channels = [];
-  let current = null;
-  for (const line of lines) {
+let hls;
+let channels = [];
+let categories = new Set();
+
+/* FETCH M3U */
+fetch(M3U_URL)
+  .then(res => res.text())
+  .then(parseM3U)
+  .catch(err => console.error("M3U Error:", err));
+
+/* PARSE M3U */
+function parseM3U(data) {
+  const lines = data.split("\n");
+  let channel = {};
+
+  lines.forEach(line => {
+    line = line.trim();
+
     if (line.startsWith("#EXTINF")) {
-      current = {
-        name: line.split(",").pop().trim(),
-        logo: getAttr(line, "tvg-logo"),
-        group: getAttr(line, "group-title"),
-        url: ""
-      };
-    } else if (line && !line.startsWith("#") && current) {
-      current.url = line.trim();
-      channels.push(current);
-      current = null;
+      channel = {};
+      channel.title = line.split(",").pop();
+
+      const logoMatch = line.match(/tvg-logo="(.*?)"/);
+      channel.logo = logoMatch ? logoMatch[1] : "";
+
+      const groupMatch = line.match(/group-title="(.*?)"/);
+      channel.category = groupMatch ? groupMatch[1] : "Other";
+
+      categories.add(channel.category);
     }
-  }
-  return channels;
+
+    if (line && !line.startsWith("#")) {
+      channel.url = line;
+      if (channel.logo) channels.push(channel);
+    }
+  });
+
+  renderCategories();
+  renderChannels("All");
 }
 
-/* ====== RENDER ====== */
-function renderChannels(channels) {
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "";
-  channels.forEach(ch => {
-    const card = document.createElement("div");
-    card.className = "card cursor-pointer";
-    card.innerHTML = `
-      <div class="rounded-xl overflow-hidden bg-slate-900 border border-white/10">
-        <img class="thumb w-full h-32 object-cover"
-          src="${ch.logo || 'https://dummyimage.com/400x225/111827/ffffff&text=LIVE'}"
-          alt="${ch.name}">
-      </div>
-      <div class="mt-1 text-sm truncate">${ch.name}</div>
-      <div class="text-xs text-slate-400 truncate">${ch.group || ""}</div>
-    `;
-    card.onclick = () => {
-      if (ch.url) window.open(PLAYER_URL + encodeURIComponent(ch.url), "_blank", "noopener,noreferrer");
-    };
-    grid.appendChild(card);
+/* RENDER CATEGORY BUTTONS */
+function renderCategories() {
+  categoriesDiv.innerHTML = `
+    <button onclick="renderChannels('All')"
+      class="bg-blue-600 text-white px-3 py-1 rounded text-sm">
+      All
+    </button>
+  `;
+
+  categories.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.className =
+      "bg-gray-700 text-white px-3 py-1 rounded text-sm";
+    btn.innerText = cat;
+    btn.onclick = () => renderChannels(cat);
+    categoriesDiv.appendChild(btn);
   });
 }
 
-/* ====== FETCH & INIT ====== */
-async function loadPlaylist() {
-  const status = document.getElementById("status");
-  try {
-    status.textContent = "Fetching playlist…";
-    const res = await fetch(CORS_PROXY + encodeURIComponent(PLAYLIST_URL));
-    if (!res.ok) throw new Error("Failed to fetch playlist");
-    const text = await res.text();
-    status.textContent = "Parsing playlist…";
-    const channels = parseM3U(text);
-    status.textContent = `Loaded ${channels.length} channels`;
-    renderChannels(channels);
-  } catch (err) {
-    console.error(err);
-    status.textContent = "Failed to load playlist. Try again later.";
+/* RENDER CHANNEL GRID */
+function renderChannels(filter) {
+  grid.innerHTML = "";
+
+  channels
+    .filter(ch => filter === "All" || ch.category === filter)
+    .forEach(createCard);
+}
+
+/* CREATE CHANNEL CARD */
+function createCard(ch) {
+  const card = document.createElement("div");
+  card.className = "card";
+
+  card.innerHTML = `
+    <div class="overflow-hidden rounded-lg bg-gray-800 cursor-pointer"
+      onclick="playStream('${ch.url}')">
+      <img src="${ch.logo}"
+        class="w-full h-40 object-cover">
+    </div>
+
+    <p class="text-white text-sm mt-1 truncate">
+      ${ch.title}
+    </p>
+
+    <div class="flex gap-2 mt-1">
+      <button
+        onclick="playStream('${ch.url}')"
+        class="bg-green-600 text-xs px-2 py-1 rounded">
+        Play
+      </button>
+
+      <a href="${EXTERNAL_PLAYER + encodeURIComponent(ch.url)}"
+        target="_blank"
+        class="bg-purple-600 text-xs px-2 py-1 rounded text-white">
+        External
+      </a>
+    </div>
+  `;
+
+  grid.appendChild(card);
+}
+
+/* PLAY INTERNAL */
+function playStream(url) {
+  modal.classList.remove("hidden");
+
+  if (hls) hls.destroy();
+
+  if (Hls.isSupported()) {
+    hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED,
+      () => video.play());
+  } else {
+    video.src = url;
+    video.play();
   }
 }
 
-loadPlaylist();
+/* CLOSE PLAYER */
+function closePlayer() {
+  modal.classList.add("hidden");
+  video.pause();
+  video.src = "";
+  if (hls) hls.destroy();
+}
 </script>
 
 </body>
