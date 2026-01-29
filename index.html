@@ -27,7 +27,6 @@ header{
 
 header h1{
   color:#d4af37;
-  font-weight:bold;
 }
 
 header h1 span{
@@ -42,7 +41,7 @@ header input{
   width:220px;
 }
 
-/* NAV */
+/* CATEGORY BAR */
 nav{
   padding:10px 25px;
 }
@@ -55,7 +54,7 @@ nav button{
   margin:6px;
   border-radius:25px;
   cursor:pointer;
-  transition:0.3s;
+  transition:.3s;
 }
 
 nav button:hover{
@@ -77,7 +76,7 @@ nav button:hover{
   border-radius:12px;
   overflow:hidden;
   cursor:pointer;
-  transition:0.35s;
+  transition:.35s;
 }
 
 .channel:hover{
@@ -100,33 +99,50 @@ nav button:hover{
   <input type="text" id="search" placeholder="Search channels...">
 </header>
 
-<nav>
-  <button onclick="filterChannels('All')">All Channels</button>
-  <button onclick="filterChannels('Cricket')">Cricket</button>
-  <button onclick="filterChannels('Sports')">Sports</button>
-  <button onclick="filterChannels('Movies')">Movies</button>
-  <button onclick="filterChannels('Entertainment')">Entertainment</button>
-  <button onclick="filterChannels('News')">News</button>
-</nav>
+<nav id="categoryBar"></nav>
 
 <main id="channelGrid"></main>
 
 <script>
-const JSON_URL = "https://allinonereborn.xyz/iptv-web/xchannels.json";
+const JSON_URL   = "https://allinonereborn.xyz/iptv-web/xchannels.json";
 const PLAYER_URL = "https://teamrom3u8plyr2.pages.dev/?url=";
 
 let allChannels = [];
+
 const grid = document.getElementById("channelGrid");
 const search = document.getElementById("search");
+const categoryBar = document.getElementById("categoryBar");
 
-/* FETCH CHANNELS */
+/* FETCH ALL DATA */
 fetch(JSON_URL)
   .then(res => res.json())
   .then(data => {
     allChannels = data;
+    buildCategories(allChannels);
     displayChannels(allChannels);
   })
-  .catch(err => console.error("Error loading JSON", err));
+  .catch(err => console.error("JSON ERROR", err));
+
+/* BUILD CATEGORY BUTTONS FROM JSON */
+function buildCategories(channels){
+  const categories = new Set();
+  channels.forEach(ch => {
+    if(ch.category) categories.add(ch.category);
+  });
+
+  categoryBar.innerHTML = `<button onclick="displayChannels(allChannels)">All Channels</button>`;
+
+  categories.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.textContent = cat;
+    btn.onclick = () => {
+      displayChannels(
+        allChannels.filter(c => c.category === cat)
+      );
+    };
+    categoryBar.appendChild(btn);
+  });
+}
 
 /* DISPLAY CHANNELS */
 function displayChannels(list){
@@ -134,41 +150,25 @@ function displayChannels(list){
   list.forEach(ch => {
     const card = document.createElement("div");
     card.className = "channel";
-
     card.innerHTML = `
-      <img src="${ch.logo || ch.image}" alt="${ch.name}">
+      <img src="${ch.logo || ch.image || ''}" alt="${ch.name || ''}">
     `;
-
     card.onclick = () => {
       window.open(
         PLAYER_URL + encodeURIComponent(ch.url || ch.link),
         "_blank"
       );
     };
-
     grid.appendChild(card);
   });
-}
-
-/* FILTER BY CATEGORY */
-function filterChannels(category){
-  if(category === "All"){
-    displayChannels(allChannels);
-  } else {
-    displayChannels(
-      allChannels.filter(c =>
-        (c.category || "").toLowerCase() === category.toLowerCase()
-      )
-    );
-  }
 }
 
 /* SEARCH */
 search.addEventListener("input", () => {
   const val = search.value.toLowerCase();
   displayChannels(
-    allChannels.filter(c =>
-      (c.name || "").toLowerCase().includes(val)
+    allChannels.filter(ch =>
+      (ch.name || "").toLowerCase().includes(val)
     )
   );
 });
