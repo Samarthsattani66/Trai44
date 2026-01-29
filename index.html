@@ -2,227 +2,176 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TEAMROHITOFFICIAL45 WEB</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
+<title>SAMARTH LIVE TV</title>
 
 <style>
-/* ===== BASE ===== */
-body {
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
   background:#000;
-  font-family: Inter, system-ui, Arial, sans-serif;
-  color:#e5e7eb;
+  color:#fff;
 }
 
-/* ===== NEON GOLD ===== */
-.neon-gold {
-  color:#FFD700;
-  text-shadow:
-    0 0 6px rgba(255,215,0,.6),
-    0 0 14px rgba(255,200,0,.7),
-    0 0 28px rgba(255,170,0,.8);
-}
-
-/* ===== SPLASH ===== */
-#splash {
-  position:fixed;
-  inset:0;
-  background:radial-gradient(circle,#0a0a0a,#000);
+/* HEADER */
+header{
   display:flex;
+  justify-content:space-between;
   align-items:center;
-  justify-content:center;
-  z-index:100;
-  animation:splashOut 1s ease forwards;
-  animation-delay:3s;
-}
-@keyframes splashOut {
-  to { opacity:0; visibility:hidden; }
-}
-.fade-in {
-  animation:fadeInUp 1.6s ease forwards;
-}
-@keyframes fadeInUp {
-  from { opacity:0; transform:translateY(20px); }
-  to { opacity:1; transform:translateY(0); }
+  padding:15px 30px;
 }
 
-/* ===== CARDS ===== */
-.card {
-  width:130px;
-  flex-shrink:0;
-}
-.card img {
-  aspect-ratio:16/9;
-  object-fit:contain;
-  background:#000;
-  transition:transform .3s ease;
-}
-.card:hover img {
-  transform:scale(1.05);
+header h1{
+  color:#d4af37;
+  font-weight:bold;
 }
 
-/* ===== ROW ===== */
-.row {
-  display:flex;
-  gap:12px;
-  overflow-x:auto;
+header h1 span{
+  color:#fff;
 }
-.row::-webkit-scrollbar { display:none; }
 
-/* ===== DESKTOP ===== */
-@media (min-width:768px) {
-  .card { width:auto; }
-  .row {
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  }
+header input{
+  padding:10px 18px;
+  border-radius:25px;
+  border:none;
+  outline:none;
+  width:220px;
+}
+
+/* NAV */
+nav{
+  padding:10px 25px;
+}
+
+nav button{
+  background:transparent;
+  color:#d4af37;
+  border:1px solid #d4af37;
+  padding:7px 16px;
+  margin:6px;
+  border-radius:25px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+nav button:hover{
+  background:#d4af37;
+  color:#000;
+}
+
+/* GRID */
+#channelGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:18px;
+  padding:25px;
+}
+
+/* CARD */
+.channel{
+  background:#111;
+  border-radius:12px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:0.35s;
+}
+
+.channel:hover{
+  transform:scale(1.1);
+  box-shadow:0 0 18px #d4af37;
+}
+
+.channel img{
+  width:100%;
+  height:230px;
+  object-fit:cover;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ===== SPLASH SCREEN ===== -->
-<div id="splash">
-  <div class="text-center fade-in">
-    <p class="text-sm tracking-widest text-slate-400 mb-2">
-      WELCOME TO
-    </p>
-    <p class="text-xl neon-gold font-semibold tracking-wider">
-      TEAMROHITOFFICIAL45 WEB
-    </p>
-  </div>
-</div>
-
-<!-- ===== HEADER ===== -->
-<header class="sticky top-0 z-40 bg-black px-4 py-3 border-b border-yellow-500/30">
-  <h1 class="text-lg neon-gold font-semibold mb-2">LIVE TV</h1>
-  <input id="search"
-    placeholder="SEARCH CHANNELS..."
-    class="w-full bg-zinc-900 text-white px-4 py-2 rounded-lg outline-none
-           focus:ring-2 focus:ring-yellow-400">
+<header>
+  <h1>SAMARTH <span>LIVE TV</span></h1>
+  <input type="text" id="search" placeholder="Search channels...">
 </header>
 
-<!-- ===== CONTENT ===== -->
-<main id="content" class="space-y-10 py-6"></main>
+<nav>
+  <button onclick="filterChannels('All')">All Channels</button>
+  <button onclick="filterChannels('Cricket')">Cricket</button>
+  <button onclick="filterChannels('Sports')">Sports</button>
+  <button onclick="filterChannels('Movies')">Movies</button>
+  <button onclick="filterChannels('Entertainment')">Entertainment</button>
+  <button onclick="filterChannels('News')">News</button>
+</nav>
+
+<main id="channelGrid"></main>
 
 <script>
-const M3U_URL = "https://allinonereborn.xyz/playlist/vip.m3u";
-const PLAYER = "https://teamrom3u8plyr2.pages.dev/?url=";
+const JSON_URL = "https://allinonereborn.xyz/iptv-web/xchannels.json";
+const PLAYER_URL = "https://teamrom3u8plyr2.pages.dev/?url=";
 
-const content = document.getElementById("content");
+let allChannels = [];
+const grid = document.getElementById("channelGrid");
 const search = document.getElementById("search");
 
-let channels = [];
-let activeCategory = null;
+/* FETCH CHANNELS */
+fetch(JSON_URL)
+  .then(res => res.json())
+  .then(data => {
+    allChannels = data;
+    displayChannels(allChannels);
+  })
+  .catch(err => console.error("Error loading JSON", err));
 
-/* ===== LOAD ===== */
-fetch(M3U_URL).then(r=>r.text()).then(parseM3U);
+/* DISPLAY CHANNELS */
+function displayChannels(list){
+  grid.innerHTML = "";
+  list.forEach(ch => {
+    const card = document.createElement("div");
+    card.className = "channel";
 
-/* ===== PARSE ===== */
-function parseM3U(data) {
-  let ch = {};
-  data.split("\n").forEach(line => {
-    line = line.trim();
-
-    if (line.startsWith("#EXTINF")) {
-      ch = {};
-      ch.title = line.split(",").pop();
-      ch.logo = (line.match(/tvg-logo="(.*?)"/)||[])[1] || "";
-      ch.group = ((line.match(/group-title="(.*?)"/)||[])[1]||"").toLowerCase();
-    }
-
-    if (line && !line.startsWith("#")) {
-      ch.url = line;
-      ch.section = sectionLogic(ch.group, ch.title);
-      if (ch.logo) channels.push(ch);
-    }
-  });
-
-  renderSections(channels);
-}
-
-/* ===== SECTION LOGIC ===== */
-function sectionLogic(group, title) {
-  title = title.toLowerCase();
-  if (group.includes("cricket") || title.includes("cricket")) return "CRICKET";
-  if (group.includes("sport")) return "SPORTS";
-  if (group.includes("india")) return "INDIAN TV";
-  if (group.includes("movie")) return "MOVIES";
-  if (group.includes("news")) return "NEWS";
-  if (group.includes("kids")) return "KIDS";
-  if (group.includes("music")) return "MUSIC";
-  if (group.includes("uk") || group.includes("usa")) return "INTERNATIONAL";
-  return "OTHER";
-}
-
-/* ===== RENDER ===== */
-function renderSections(list) {
-  const sections = [
-    "CRICKET","SPORTS","INDIAN TV","MOVIES",
-    "NEWS","KIDS","MUSIC","INTERNATIONAL","OTHER"
-  ];
-
-  content.innerHTML = "";
-
-  sections.forEach(sec => {
-    const items = list.filter(c => c.section === sec);
-    if (!items.length) return;
-
-    const show = activeCategory === sec ? items : items.slice(0, 12);
-
-    content.innerHTML += `
-      <section>
-        <div class="px-4 mb-3 flex justify-between items-center">
-          <h2 class="text-base font-semibold text-yellow-300">${sec}</h2>
-          ${items.length > 12 ? `
-            <button onclick="seeAll('${sec}')"
-              class="text-xs text-yellow-400 hover:underline">
-              SEE ALL
-            </button>` : ""}
-        </div>
-        <div class="row px-4">
-          ${show.map(card).join("")}
-        </div>
-      </section>
+    card.innerHTML = `
+      <img src="${ch.logo || ch.image}" alt="${ch.name}">
     `;
+
+    card.onclick = () => {
+      window.open(
+        PLAYER_URL + encodeURIComponent(ch.url || ch.link),
+        "_blank"
+      );
+    };
+
+    grid.appendChild(card);
   });
 }
 
-/* ===== SEE ALL ===== */
-function seeAll(cat) {
-  activeCategory = cat;
-  renderSections(channels);
+/* FILTER BY CATEGORY */
+function filterChannels(category){
+  if(category === "All"){
+    displayChannels(allChannels);
+  } else {
+    displayChannels(
+      allChannels.filter(c =>
+        (c.category || "").toLowerCase() === category.toLowerCase()
+      )
+    );
+  }
 }
 
-/* ===== SEARCH ===== */
+/* SEARCH */
 search.addEventListener("input", () => {
-  const q = search.value.toLowerCase();
-  if (!q) {
-    activeCategory = null;
-    renderSections(channels);
-    return;
-  }
-  renderSections(
-    channels.filter(c => c.title.toLowerCase().includes(q))
+  const val = search.value.toLowerCase();
+  displayChannels(
+    allChannels.filter(c =>
+      (c.name || "").toLowerCase().includes(val)
+    )
   );
 });
-
-/* ===== CARD ===== */
-function card(ch) {
-  return `
-    <a href="${PLAYER + encodeURIComponent(ch.url)}"
-       target="_blank"
-       class="card">
-      <div class="rounded-lg overflow-hidden bg-zinc-900 border
-                  border-yellow-500/20">
-        <img src="${ch.logo}">
-      </div>
-      <p class="mt-1 text-xs truncate text-slate-200">${ch.title}</p>
-    </a>
-  `;
-}
 </script>
 
 </body>
