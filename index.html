@@ -1,178 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>SAMARTH LIVE TV</title>
+  <meta charset="UTF-8">
+  <title>Piyush weds Utkarsh</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family: Arial, Helvetica, sans-serif;
-}
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
 
-body{
-  background:#000;
-  color:#fff;
-}
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #2b0a0a, #120606);
+      color: #f5e6c8;
+      font-family: 'Playfair Display', serif;
+      text-align: center;
+    }
 
-/* HEADER */
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:15px 30px;
-}
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 50px 20px;
+    }
 
-header h1{
-  color:#d4af37;
-}
+    .crown {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
 
-header h1 span{
-  color:#fff;
-}
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 48px;
+      margin: 10px 0;
+      letter-spacing: 2px;
+      color: #ffd700;
+    }
 
-header input{
-  padding:10px 18px;
-  border-radius:25px;
-  border:none;
-  outline:none;
-  width:220px;
-}
+    .date {
+      font-size: 20px;
+      margin-bottom: 30px;
+      color: #f0d68c;
+    }
 
-/* CATEGORY BAR */
-nav{
-  padding:10px 25px;
-}
+    .names {
+      font-family: 'Cinzel', serif;
+      font-size: 42px;
+      margin: 30px 0;
+      color: #ffd700;
+    }
 
-nav button{
-  background:transparent;
-  color:#d4af37;
-  border:1px solid #d4af37;
-  padding:7px 16px;
-  margin:6px;
-  border-radius:25px;
-  cursor:pointer;
-  transition:.3s;
-}
+    .divider {
+      width: 120px;
+      height: 3px;
+      background: linear-gradient(to right, #b8860b, #ffd700, #b8860b);
+      margin: 25px auto;
+      border-radius: 2px;
+    }
 
-nav button:hover{
-  background:#d4af37;
-  color:#000;
-}
+    .subtitle {
+      font-size: 20px;
+      max-width: 700px;
+      margin: auto;
+      line-height: 1.6;
+      color: #f5e6c8;
+    }
 
-/* GRID */
-#channelGrid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  gap:18px;
-  padding:25px;
-}
+    .photos {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin: 50px 0;
+    }
 
-/* CARD */
-.channel{
-  background:#111;
-  border-radius:12px;
-  overflow:hidden;
-  cursor:pointer;
-  transition:.35s;
-}
+    .photos img {
+      width: 240px;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 20px;
+      border: 4px solid #d4af37;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+    }
 
-.channel:hover{
-  transform:scale(1.1);
-  box-shadow:0 0 18px #d4af37;
-}
+    .details {
+      background: rgba(255, 215, 0, 0.08);
+      border: 2px solid #d4af37;
+      border-radius: 20px;
+      padding: 35px;
+      margin-top: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
 
-.channel img{
-  width:100%;
-  height:230px;
-  object-fit:cover;
-}
-</style>
+    .details h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 30px;
+      color: #ffd700;
+      margin-bottom: 20px;
+    }
+
+    .details p {
+      font-size: 20px;
+      margin: 12px 0;
+    }
+
+    footer {
+      margin-top: 50px;
+      font-size: 18px;
+      color: #e6c87a;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 38px;
+      }
+      .names {
+        font-size: 34px;
+      }
+    }
+  </style>
 </head>
-
 <body>
 
-<header>
-  <h1>SAMARTH <span>LIVE TV</span></h1>
-  <input type="text" id="search" placeholder="Search channels...">
-</header>
+  <div class="container">
 
-<nav id="categoryBar"></nav>
+    <div class="crown">👑</div>
 
-<main id="channelGrid"></main>
+    <h1>Wedding Invitation</h1>
+    <div class="date">2 February 2026</div>
 
-<script>
-const JSON_URL   = "https://allinonereborn.xyz/iptv-web/xchannels.json";
-const PLAYER_URL = "https://teamrom3u8plyr2.pages.dev/?url=";
+    <div class="names">
+      Piyush &nbsp;♥&nbsp; Utkarsh
+    </div>
 
-let allChannels = [];
+    <div class="divider"></div>
 
-const grid = document.getElementById("channelGrid");
-const search = document.getElementById("search");
-const categoryBar = document.getElementById("categoryBar");
+    <p class="subtitle">
+      With divine grace and boundless joy, we invite you to witness and bless
+      the sacred union of two souls as they begin their royal journey together.
+    </p>
 
-/* FETCH ALL DATA */
-fetch(JSON_URL)
-  .then(res => res.json())
-  .then(data => {
-    allChannels = data;
-    buildCategories(allChannels);
-    displayChannels(allChannels);
-  })
-  .catch(err => console.error("JSON ERROR", err));
+    <div class="photos">
+      <img src="https://i.ibb.co/mVc4ZBtW/IMG-20260131-WA0040.jpg" alt="Piyush">
+      <img src="https://i.ibb.co/sdQthZNY/IMG-20260202-WA0006.jpg" alt="Utkarsh">
+    </div>
 
-/* BUILD CATEGORY BUTTONS FROM JSON */
-function buildCategories(channels){
-  const categories = new Set();
-  channels.forEach(ch => {
-    if(ch.category) categories.add(ch.category);
-  });
+    <div class="details">
+      <h2>Royal Wedding Ceremony</h2>
+      <p>🕒 <strong>Time:</strong> 2:00 PM to 5:00 PM</p>
+      <p>📍 <strong>Venue:</strong> N.M.D College Ground, Gondia</p>
+    </div>
 
-  categoryBar.innerHTML = `<button onclick="displayChannels(allChannels)">All Channels</button>`;
+    <footer>
+      Your gracious presence will make this royal celebration truly complete ✨
+    </footer>
 
-  categories.forEach(cat => {
-    const btn = document.createElement("button");
-    btn.textContent = cat;
-    btn.onclick = () => {
-      displayChannels(
-        allChannels.filter(c => c.category === cat)
-      );
-    };
-    categoryBar.appendChild(btn);
-  });
-}
-
-/* DISPLAY CHANNELS */
-function displayChannels(list){
-  grid.innerHTML = "";
-  list.forEach(ch => {
-    const card = document.createElement("div");
-    card.className = "channel";
-    card.innerHTML = `
-      <img src="${ch.logo || ch.image || ''}" alt="${ch.name || ''}">
-    `;
-    card.onclick = () => {
-      window.open(
-        PLAYER_URL + encodeURIComponent(ch.url || ch.link),
-        "_blank"
-      );
-    };
-    grid.appendChild(card);
-  });
-}
-
-/* SEARCH */
-search.addEventListener("input", () => {
-  const val = search.value.toLowerCase();
-  displayChannels(
-    allChannels.filter(ch =>
-      (ch.name || "").toLowerCase().includes(val)
-    )
-  );
-});
-</script>
+  </div>
 
 </body>
 </html>
