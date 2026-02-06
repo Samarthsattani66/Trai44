@@ -10,8 +10,8 @@
 body {
     margin: 0;
     font-family: 'Poppins', Arial, sans-serif;
-    background: radial-gradient(circle at top, #0f2027, #000);
-    color: #00f7ff;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -19,34 +19,27 @@ body {
     min-height: 100vh;
 }
 
-/* Neon Message */
+/* Message */
 .loading-message {
     font-size: 18px;
-    font-weight: bold;
+    font-weight: 600;
     margin-bottom: 18px;
-    padding: 12px 24px;
+    padding: 12px 28px;
     border-radius: 14px;
-    color: #00f7ff;
-    background: rgba(0, 247, 255, 0.08);
-    border: 1px solid rgba(0, 247, 255, 0.5);
-    box-shadow: 0 0 15px #00f7ff;
-    animation: glow 1.5s infinite alternate;
+    backdrop-filter: blur(14px);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
 
-@keyframes glow {
-    from { box-shadow: 0 0 10px #00f7ff; }
-    to { box-shadow: 0 0 30px #a855f7; }
-}
-
-/* Player */
+/* Player – NO BORDER */
 .player-container {
     width: 95%;
     max-width: 1200px;
-    border-radius: 18px;
+    border-radius: 20px;
     overflow: hidden;
-    background: #000;
-    border: 2px solid transparent;
-    box-shadow: 0 0 25px #00f7ff;
+    backdrop-filter: blur(18px);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
 }
 
 .player-container iframe {
@@ -57,25 +50,25 @@ body {
 
 /* Telegram Button */
 .join-telegram-container {
-    margin-top: 28px;
+    margin-top: 26px;
 }
 
 .join-telegram-btn {
-    padding: 15px 34px;
+    padding: 14px 36px;
     font-size: 18px;
     font-weight: bold;
-    color: #fff;
-    background: linear-gradient(135deg, #00f7ff, #a855f7);
+    color: #000;
+    background: linear-gradient(135deg, #ffffff, #cfd9df);
     border: none;
     border-radius: 50px;
     cursor: pointer;
-    box-shadow: 0 0 25px #00f7ff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     transition: 0.3s ease;
 }
 
 .join-telegram-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 40px #a855f7;
+    transform: scale(1.08);
+    box-shadow: 0 15px 40px rgba(255,255,255,0.6);
 }
 
 @media (max-width: 600px) {
@@ -89,7 +82,7 @@ body {
 <body>
 
 <div class="loading-message">
-    ⚡ Share & Support the Stream ⚡
+    🎥 Live Streaming – Share With Friends
 </div>
 
 <div class="player-container">
@@ -107,7 +100,7 @@ body {
 <div class="join-telegram-container">
     <button class="join-telegram-btn"
         onclick="window.open('https://t.me/+lkbpBqFd0FljNzJl','_blank')">
-        🚀 Join Telegram
+        📢 Join Telegram Channel
     </button>
 </div>
 
