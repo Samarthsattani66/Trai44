@@ -1,542 +1,582 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <script>(function(s){s.dataset.zone='10408286',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FanCode Player - @allinone_reborn</title>
-  <style>
+  <meta charset="UTF-8">
+    <title>SHAKA PLAYER</title>
+
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/shaka-player.ui.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/controls.min.css">
+  
+
+  <style type="text/css">
+      body {position:absolute;
+        margin: 0;
+        padding: 0px;
+        background-color: #000000;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        height:100%;width:100%
+      }
+
+      .video-container {
+        position: absolute ;
+        width: 100%;height:100%;
+        aspect-ratio: 16/9;
+        background-color: #000;
+        border-radius: 1px;
+        overflow: hidden;
+        box-shadow: 0 4px 2px rgba(0,0,0,0.5);
+      }
+
+      .shaka-video-container {
+        position: absolute ;
+        width: 100%;height:100%;
+        
+        
+      }
+
+      video {
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        
+      }
+
+      .video-watermark {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        width: 80px;
+        height: 10px;
+        opacity: 0.7;
+        z-index: 1000;
+        pointer-events: none;
+      }
+
+      @media (max-width: 768px) {
+        body {width:100%;height:100%
+          padding: 1px;
+        }
+        
+        .video-container {
+          max-width: 100%;height:100%
+        }
+        
+        .video-watermark {
+          width: 30px;
+          height: 30px;
+          top: 10px;
+          left: 10px;
+        }
+      }
+
+      @media (min-width: 769px) and (max-width: 1024px) {
+        .video-container {
+          max-width: 854px;
+        }
+      }
+  
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      margin: 0;
-      height: 100%;
-      background: black;
-      display: flex;
-      flex-direction: column;
-    }
-    #banner-top, #banner-bottom {
-      display: flex;
-      justify-content: center;
-      align-items: center;
       background: #000;
-      padding: 5px 0;
-      width: 100%;
-      min-height: 50px;
+      
+      font-family: system-ui, -apple-system, sans-serif;
     }
-    #player {
-      flex: 1;
-      width: 100%;
-      max-width: 100%;
-      background: black;
+
+
+    /* YouTube Theme CSS */
+    @font-face {
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url(https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Me5Q.ttf) format('truetype');
     }
-    /* Loading overlay - only for initial load */
-    #loading-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      color: white;
-      font-family: Arial, sans-serif;
-      flex-direction: column;
-      pointer-events: none;
-    }
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid rgba(255,255,255,0.1);
-      border-radius: 50%;
-      border-top-color: #e94560;
-      animation: spin 1s linear infinite;
-      margin-bottom: 15px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    #match-info {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      background: rgba(0,0,0,0.7);
-      padding: 8px 15px;
-      border-radius: 20px;
-      font-size: 14px;
-      z-index: 10;
-      display: none;
-      pointer-events: none;
-    }
-    
-    /* Native-style Quality Selector */
-    .jw-quality-selector {
-      position: absolute;
-      bottom: 60px;
-      right: 20px;
-      background: rgba(28, 28, 28, 0.9);
-      backdrop-filter: blur(5px);
-      border-radius: 6px;
-      overflow: hidden;
-      z-index: 100;
-      display: none;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,255,255,0.1);
-      font-family: Arial, sans-serif;
-      min-width: 140px;
-    }
-    
-    .jw-quality-selector.show {
-      display: block;
-    }
-    
-    .jw-quality-item {
-      padding: 10px 20px;
-      color: rgba(255,255,255,0.8);
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-      text-align: right;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      letter-spacing: 0.5px;
-    }
-    
-    .jw-quality-item:last-child {
-      border-bottom: none;
-    }
-    
-    .jw-quality-item:hover {
-      background: rgba(233, 69, 96, 0.3);
-      color: white;
-    }
-    
-    .jw-quality-item.active {
-      background: #e94560;
-      color: white;
+    @font-face {
+      font-family: 'Roboto';
+      font-style: normal;
       font-weight: 500;
+      font-display: swap;
+      src: url(https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmEU9vAw.ttf) format('truetype');
+    }
+    .youtube-theme {
+      font-family: 'Roboto', sans-serif;
+    }
+    .youtube-theme .shaka-bottom-controls {
+      width: 100%;
+      padding: 0;
+      padding-bottom: 0;
+      z-index: 1;
+    }
+    .youtube-theme .shaka-bottom-controls {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: column;
+              flex-direction: column;
+    }
+    .youtube-theme .shaka-ad-controls {
+      -webkit-box-ordinal-group: 2;
+          -ms-flex-order: 1;
+              order: 1;
+    }
+    .youtube-theme .shaka-controls-button-panel {
+      -webkit-box-ordinal-group: 3;
+          -ms-flex-order: 2;
+              order: 2;
+      height: 60px;
+      padding: 0 10px;
+    }
+    .youtube-theme .shaka-range-container {
+      margin: 4px 10px 4px 10px;
+      top: 0;
+    }
+    .youtube-theme .shaka-small-play-button {
+      -webkit-box-ordinal-group: -2;
+          -ms-flex-order: -3;
+              order: -3;
+    }
+    .youtube-theme .shaka-mute-button {
+      -webkit-box-ordinal-group: -1;
+          -ms-flex-order: -2;
+              order: -2;
+    }
+    .youtube-theme .shaka-controls-button-panel > * {
+      margin: 0;
+      padding: 3px 8px;
+      color: #EEE;
+      height: 60px;
+    }
+    .youtube-theme .shaka-controls-button-panel > *:focus {
+      outline: none;
+      -webkit-box-shadow: inset 0 0 0 2px rgba(27, 127, 204, 0.8);
+              box-shadow: inset 0 0 0 2px rgba(27, 127, 204, 0.8);
+      color: #FFF;
+    }
+    .youtube-theme .shaka-controls-button-panel > *:hover {
+      color: #FFF;
+    }
+    .youtube-theme .shaka-controls-button-panel .shaka-volume-bar-container {
       position: relative;
+      z-index: 10;
+      left: -1px;
+      -webkit-box-ordinal-group: 0;
+          -ms-flex-order: -1;
+              order: -1;
+      opacity: 0;
+      width: 0px;
+      -webkit-transition: width 0.2s cubic-bezier(0.4, 0, 1, 1);
+      height: 3px;
+      transition: width 0.2s cubic-bezier(0.4, 0, 1, 1);
+      padding: 0;
     }
-    
-    .jw-quality-item.active::before {
-      content: '✓';
-      position: absolute;
-      left: 10px;
-      color: white;
-      font-weight: bold;
-    }
-    
-    /* Quality button in control bar */
-    .jw-quality-btn {
-      opacity: 0.8;
-      transition: opacity 0.2s;
-    }
-    
-    .jw-quality-btn:hover {
+    .youtube-theme .shaka-controls-button-panel .shaka-volume-bar-container:hover,
+    .youtube-theme .shaka-controls-button-panel .shaka-volume-bar-container:focus {
+      display: block;
+      width: 50px;
       opacity: 1;
+      padding: 0 6px;
+    }
+    .youtube-theme .shaka-mute-button:hover + div {
+      opacity: 1;
+      width: 50px;
+      padding: 0 6px;
+    }
+    .youtube-theme .shaka-current-time {
+      padding: 0 10px;
+      font-size: 12px;
+    }
+    .youtube-theme .shaka-seek-bar-container {
+      height: 3px;
+      position: relative;
+      top: -1px;
+      border-radius: 0;
+      margin-bottom: 0;
+    }
+    .youtube-theme .shaka-seek-bar-container .shaka-range-element {
+      opacity: 0;
+    }
+    .youtube-theme .shaka-seek-bar-container:hover {
+      height: 5px;
+      top: 0;
+      cursor: pointer;
+    }
+    .youtube-theme .shaka-seek-bar-container:hover .shaka-range-element {
+      opacity: 1;
+      cursor: pointer;
+    }
+    .youtube-theme .shaka-seek-bar-container input[type=range]::-webkit-slider-thumb {
+      background: #FF0000;
+      cursor: pointer;
+    }
+    .youtube-theme .shaka-seek-bar-container input[type=range]::-moz-range-thumb {
+      background: #FF0000;
+      cursor: pointer;
+    }
+    .youtube-theme .shaka-seek-bar-container input[type=range]::-ms-thumb {
+      background: #FF0000;
+      cursor: pointer;
+    }
+    .youtube-theme .shaka-video-container * {
+      font-family: 'Roboto', sans-serif;
+    }
+    .youtube-theme .shaka-video-container .material-icons-round {
+      font-family: 'Material Icons Sharp';
+    }
+    .youtube-theme .shaka-overflow-menu,
+    .youtube-theme .shaka-settings-menu {
+      border-radius: 2px;
+      background: rgba(28, 28, 28, 0.9);
+      text-shadow: 0 0 2px rgb(0 0 0%);
+      -webkit-transition: opacity 0.1s cubic-bezier(0, 0, 0.2, 1);
+      transition: opacity 0.1s cubic-bezier(0, 0, 0.2, 1);
+      -moz-user-select: none;
+      -ms-user-select: none;
+      -webkit-user-select: none;
+      right: 10px;
+      bottom: 50px;
+      padding: 8px 0;
+      min-width: 200px;
+    }
+    .youtube-theme .shaka-settings-menu {
+      padding: 0 0 8px 0;
+    }
+    .youtube-theme .shaka-settings-menu button {
+      font-size: 12px;
+    }
+    .youtube-theme .shaka-settings-menu button span {
+      margin-left: 33px;
+      font-size: 13px;
+    }
+    .youtube-theme .shaka-settings-menu button[aria-selected="true"] {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+    }
+    .youtube-theme .shaka-settings-menu button[aria-selected="true"] span {
+      -webkit-box-ordinal-group: 3;
+          -ms-flex-order: 2;
+              order: 2;
+      margin-left: 0;
+    }
+    .youtube-theme .shaka-settings-menu button[aria-selected="true"] i {
+      -webkit-box-ordinal-group: 2;
+          -ms-flex-order: 1;
+              order: 1;
+      font-size: 18px;
+      padding-left: 5px;
+    }
+    .youtube-theme .shaka-overflow-menu button {
+      padding: 0;
+    }
+    .youtube-theme .shaka-overflow-menu button i {
+      display: none;
+    }
+    .youtube-theme .shaka-overflow-menu button .shaka-overflow-button-label {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between;
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: row;
+              flex-direction: row;
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      cursor: default;
+      outline: none;
+      height: 60px;
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 100%;
+              flex: 0 0 100%;
+    }
+    .youtube-theme .shaka-overflow-menu button .shaka-overflow-button-label span {
+      -ms-flex-negative: initial;
+          flex-shrink: initial;
+      padding-left: 15px;
+      font-size: 13px;
+      font-weight: 500;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+    }
+    .youtube-theme .shaka-overflow-menu span + span {
+      color: #FFF;
+      font-weight: 400 !important;
+      font-size: 12px !important;
+      padding-right: 8px;
+      padding-left: 0 !important;
+    }
+    .youtube-theme .shaka-overflow-menu span + span:after {
+      content: "navigate_next";
+      font-family: 'Material Icons Sharp';
+      font-size: 20px;
+    }
+    .youtube-theme .shaka-overflow-menu .shaka-pip-button span + span {
+      padding-right: 15px !important;
+    }
+    .youtube-theme .shaka-overflow-menu .shaka-pip-button span + span:after {
+      content: "";
+    }
+    .youtube-theme .shaka-back-to-overflow-button {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 12px;
+      color: #eee;
+      height: 60px;
+    }
+    .youtube-theme .shaka-back-to-overflow-button .material-icons-round {
+      font-size: 15px;
+      padding-right: 10px;
+    }
+    .youtube-theme .shaka-back-to-overflow-button span {
+      margin-left: 3px !important;
+    }
+    .youtube-theme .shaka-overflow-menu button:hover,
+    .youtube-theme .shaka-settings-menu button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+    }
+    .youtube-theme .shaka-overflow-menu button:hover label,
+    .youtube-theme .shaka-settings-menu button:hover label {
+      cursor: pointer;
+    }
+    .youtube-theme .shaka-overflow-menu button:focus,
+    .youtube-theme .shaka-settings-menu button:focus {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: none;
+      outline: none;
+    }
+    .youtube-theme .shaka-overflow-menu button,
+    .youtube-theme .shaka-settings-menu button {
+      color: #EEE;
+    }
+    .youtube-theme .shaka-captions-off {
+      color: #BFBFBF;
+    }
+    .youtube-theme .shaka-overflow-menu-button {
+      font-size: 18px;
+      margin-right: 5px;
+    }
+    .youtube-theme .shaka-fullscreen-button:hover {
+      font-size: 25px;
+      -webkit-transition: font-size 0.1s cubic-bezier(0, 0, 0.2, 1);
+      transition: font-size 0.1s cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    /* Hide center loading spinner */
+    .shaka-spinner-container,
+    .shaka-spinner,
+    .shaka-spinner-svg {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+
+    /* Custom Seek Bar Colors */
+    .youtube-theme .shaka-seek-bar {
+      background: rgba(255,255,255,.2) !important;
     }
     
-    .jw-quality-btn svg {
-      width: 20px;
-      height: 20px;
-      fill: white;
+    .youtube-theme .shaka-buffered-range {
+      background: rgba(255,255,255,.4) !important;
     }
     
-    /* Small loading indicator for quality switch */
-    #quality-loading {
+    .youtube-theme .shaka-played-range {
+      background: rgb(255,0,0) !important;
+    }
+
+    /* Manual play button styles */
+    .manual-play-button {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.8);
+      background: rgba(0, 0, 0, 0.8);
       color: white;
-      padding: 8px 16px;
-      border-radius: 30px;
-      font-size: 14px;
-      z-index: 30;
+      padding: 20px 30px;
+      border-radius: 28px;
+      cursor: pointer;
+      font-size: 18px;
+      z-index: 2000;
+      border: 0px solid #ff0000;
       display: none;
-      pointer-events: none;
-      backdrop-filter: blur(5px);
-      border: 1px solid rgba(255,255,255,0.2);
-      font-weight: 500;
+      transition: all 0.3s ease;
     }
     
-    /* ✅ Responsive player for mobile/desktop */
-    @media (max-width: 768px) {
-      #player {
-        height: 60vh;
-      }
-      .jw-quality-selector {
-        bottom: 50px;
-        right: 10px;
-        min-width: 120px;
-      }
-      .jw-quality-item {
-        padding: 8px 16px;
-        font-size: 12px;
-      }
-    }
-    @media (min-width: 769px) {
-      #player {
-        height: 80vh;
-      }
-    }
-  </style>
-
-  <!-- ✅ Official JW Player library -->
-  <script src="https://cdn.jwplayer.com/libraries/IDzF9Zmk.js"></script>
-</head>
-<body style="position: relative; margin: 0; padding: 0; overflow: hidden;">
-
-  <!-- Loading overlay - only for initial load -->
-  <div id="loading-overlay">
-    <div class="spinner"></div>
-    <div>Loading stream...</div>
-  </div>
-  
-  <!-- Small quality switch indicator -->
-  <div id="quality-loading">Switching quality...</div>
-
-  <!-- Match info -->
-  <div id="match-info"></div>
-  
-  <!-- Native-style Quality Selector -->
-  <div id="quality-selector" class="jw-quality-selector"></div>
-
-  <!-- 🎬 Player -->
-  <div id="player"></div>
-script>
-
-    const _0x7be53b=_0x5eea;(function(_0xc4f53c,_0x4a9eab){const _0x1ffe1d=_0x5eea,_0x4b17c3=_0xc4f53c();while(!![]){try{const _0x814be7=parseInt(_0x1ffe1d(0x1dd))/(-0x222+-0x1*-0x106a+-0xe47)+parseInt(_0x1ffe1d(0x1e3))/(-0x1*-0x1fdb+-0x1b*0x139+-0x12a*-0x1)*(-parseInt(_0x1ffe1d(0x22b))/(0x21*0x47+-0x9e9+0xc5))+-parseInt(_0x1ffe1d(0x1d1))/(0x60*0x1+0x23d*-0x1+0x1e1)+parseInt(_0x1ffe1d(0x2e9))/(0x20ef+0x1d05+-0x3def*0x1)*(-parseInt(_0x1ffe1d(0x22d))/(0x7*0x8c+0x1*0x1bbf+-0x29*0xc5))+parseInt(_0x1ffe1d(0x2d3))/(0x2*-0x671+0xb1b+0xe*0x21)+parseInt(_0x1ffe1d(0x28b))/(-0x2bb+-0x1*-0x443+0x18*-0x10)*(parseInt(_0x1ffe1d(0x24e))/(0xb1c+-0x23c8+0x1*0x18b5))+-parseInt(_0x1ffe1d(0x25b))/(0x63c+-0x2283+0xb*0x293)*(-parseInt(_0x1ffe1d(0x24c))/(-0x79*-0x3d+-0x1345+0x1*-0x985));if(_0x814be7===_0x4a9eab)break;else _0x4b17c3['push'](_0x4b17c3['shift']());}catch(_0x20dd30){_0x4b17c3['push'](_0x4b17c3['shift']());}}}(_0x4970,-0x34a59*0x3+0xf6*0x8bd+0x35b*0x24b));const jsonUrl=_0x7be53b(0x213)+_0x7be53b(0x1cd)+_0x7be53b(0x28d)+_0x7be53b(0x2ce)+_0x7be53b(0x227)+_0x7be53b(0x290)+_0x7be53b(0x287)+_0x7be53b(0x221)+_0x7be53b(0x22a)+'n',urlParams=new URLSearchParams(window[_0x7be53b(0x23f)][_0x7be53b(0x1d0)]),matchId=urlParams[_0x7be53b(0x1f9)]('id');let player=null,qualityUrls=[],currentQuality='',isPlayerReady=![],isLoading=![];function showLoading(_0x4607cb){const _0x21e816=_0x7be53b,_0xa15da1={'DjQFw':_0x21e816(0x284)+_0x21e816(0x270),'xUibT':_0x21e816(0x2b1),'UxeaF':_0x21e816(0x29e)};document[_0x21e816(0x285)+_0x21e816(0x22c)](_0xa15da1[_0x21e816(0x2d2)])[_0x21e816(0x20c)][_0x21e816(0x2f8)]=_0x4607cb?_0xa15da1[_0x21e816(0x205)]:_0xa15da1[_0x21e816(0x217)];}function showQualityLoading(_0x48a4c9){const _0x4d47bf=_0x7be53b,_0x245a31={'xOzCm':_0x4d47bf(0x2e0)+_0x4d47bf(0x2a9),'uMMBI':_0x4d47bf(0x228),'FXFLH':_0x4d47bf(0x29e)};document[_0x4d47bf(0x285)+_0x4d47bf(0x22c)](_0x245a31[_0x4d47bf(0x271)])[_0x4d47bf(0x20c)][_0x4d47bf(0x2f8)]=_0x48a4c9?_0x245a31[_0x4d47bf(0x20f)]:_0x245a31[_0x4d47bf(0x256)];}function showMatchInfo(_0x2bc037,_0xc3300f){const _0x51b84d=_0x7be53b,_0x4ea5d8={'iLJtE':_0x51b84d(0x2ad),'jBEzq':_0x51b84d(0x228)},_0x34f2c1=document[_0x51b84d(0x285)+_0x51b84d(0x22c)](_0x4ea5d8[_0x51b84d(0x248)]);_0x34f2c1[_0x51b84d(0x299)]=_0x2bc037+_0x51b84d(0x277)+_0xc3300f,_0x34f2c1[_0x51b84d(0x20c)][_0x51b84d(0x2f8)]=_0x4ea5d8[_0x51b84d(0x200)];}function _0x5eea(_0x69a000,_0x3879ba){_0x69a000=_0x69a000-(0x11ff*-0x1+0x28*-0x38+0x1c86);const _0x1de011=_0x4970();let _0x474106=_0x1de011[_0x69a000];return _0x474106;}function extractStreamUrls(_0x3a536d){const _0x20cd9b=_0x7be53b,_0x5d5d4f={'ULedL':_0x20cd9b(0x1fd),'YZbdY':_0x20cd9b(0x20a),'ncmxm':_0x20cd9b(0x208),'YGbcI':_0x20cd9b(0x230),'xIdSR':_0x20cd9b(0x225),'FFtML':_0x20cd9b(0x1f0),'YeemW':_0x20cd9b(0x219),'PzbJP':_0x20cd9b(0x2eb),'ctFFD':_0x20cd9b(0x263)};if(!_0x3a536d)return[];const _0xfef2e2=_0x3a536d[_0x20cd9b(0x1f2)]('\x0a'),_0x334ae5=[],_0x16326f={'240p':{'bandwidth':0x6d1d8,'order':0x1},'360p':{'bandwidth':0xab7a8,'order':0x2},'480p':{'bandwidth':0xf9cf8,'order':0x3},'540p':{'bandwidth':0x1382c8,'order':0x4},'720p':{'bandwidth':0x1b4e48,'order':0x5},'1080p':{'bandwidth':0x32b108,'order':0x6}};for(let _0x4b1db1 of _0xfef2e2){_0x4b1db1=_0x4b1db1[_0x20cd9b(0x1fa)]();if(_0x4b1db1[_0x20cd9b(0x2a5)](_0x5d5d4f[_0x20cd9b(0x2e7)])&&_0x4b1db1[_0x20cd9b(0x1ef)](_0x5d5d4f[_0x20cd9b(0x2c0)])){let _0x2f7dd9=_0x5d5d4f[_0x20cd9b(0x294)];if(_0x4b1db1[_0x20cd9b(0x1ef)](_0x5d5d4f[_0x20cd9b(0x234)]))_0x2f7dd9=_0x5d5d4f[_0x20cd9b(0x234)];else{if(_0x4b1db1[_0x20cd9b(0x1ef)](_0x5d5d4f[_0x20cd9b(0x1f3)]))_0x2f7dd9=_0x5d5d4f[_0x20cd9b(0x1f3)];else{if(_0x4b1db1[_0x20cd9b(0x1ef)](_0x5d5d4f[_0x20cd9b(0x2b7)]))_0x2f7dd9=_0x5d5d4f[_0x20cd9b(0x2b7)];else{if(_0x4b1db1[_0x20cd9b(0x1ef)](_0x5d5d4f[_0x20cd9b(0x23b)]))_0x2f7dd9=_0x5d5d4f[_0x20cd9b(0x23b)];else{if(_0x4b1db1[_0x20cd9b(0x1ef)](_0x5d5d4f[_0x20cd9b(0x27e)]))_0x2f7dd9=_0x5d5d4f[_0x20cd9b(0x27e)];else{if(_0x4b1db1[_0x20cd9b(0x1ef)](_0x5d5d4f[_0x20cd9b(0x283)]))_0x2f7dd9=_0x5d5d4f[_0x20cd9b(0x283)];}}}}}_0x334ae5[_0x20cd9b(0x2cc)]({'url':_0x4b1db1,'quality':_0x2f7dd9,'bandwidth':_0x16326f[_0x2f7dd9]?.[_0x20cd9b(0x2cd)]||-0x1bf5+-0x1856*0x1+0x344b,'order':_0x16326f[_0x2f7dd9]?.[_0x20cd9b(0x1cf)]||-0x1*0xa45+-0x1a5c+0x24a1});}}return _0x334ae5[_0x20cd9b(0x2fa)]((_0x4293d8,_0x55e408)=>_0x55e408[_0x20cd9b(0x1cf)]-_0x4293d8[_0x20cd9b(0x1cf)]);}function createQualitySelector(_0x4aaf09){const _0x9d04f8=_0x7be53b,_0xd415ef={'MISKZ':function(_0x29bf26,_0x5feae9,_0x3be3a8){return _0x29bf26(_0x5feae9,_0x3be3a8);},'LViQb':function(_0x7cceb9){return _0x7cceb9();},'TCknO':_0x9d04f8(0x2ac),'wBzwP':_0x9d04f8(0x249)+_0x9d04f8(0x1eb),'KDWqy':function(_0x2b828b,_0x3cc07e){return _0x2b828b===_0x3cc07e;},'vHPga':_0x9d04f8(0x241),'uvxkc':_0x9d04f8(0x1d8)+_0x9d04f8(0x2e4)},_0x5814d4=document[_0x9d04f8(0x285)+_0x9d04f8(0x22c)](_0xd415ef[_0x9d04f8(0x1fe)]);_0x5814d4[_0x9d04f8(0x299)]='',_0x4aaf09[_0x9d04f8(0x1c8)](_0x3bf0e3=>{const _0x250629=_0x9d04f8,_0x597fb7=document[_0x250629(0x1df)+_0x250629(0x274)](_0xd415ef[_0x250629(0x20b)]);_0x597fb7[_0x250629(0x246)]=_0xd415ef[_0x250629(0x2a8)];if(_0xd415ef[_0x250629(0x252)](_0x3bf0e3[_0x250629(0x26c)],currentQuality))_0x597fb7[_0x250629(0x257)][_0x250629(0x279)](_0xd415ef[_0x250629(0x2d6)]);_0x597fb7[_0x250629(0x2e5)+'t']=_0x3bf0e3[_0x250629(0x26c)],_0x597fb7[_0x250629(0x238)]=_0x156902=>{const _0x5656b6=_0x250629;_0x156902[_0x5656b6(0x296)+_0x5656b6(0x268)](),_0xd415ef[_0x5656b6(0x275)](changeQuality,_0x3bf0e3[_0x5656b6(0x2c6)],_0x3bf0e3[_0x5656b6(0x26c)]),_0xd415ef[_0x5656b6(0x2da)](hideQualitySelector);},_0x5814d4[_0x250629(0x207)+'d'](_0x597fb7);});}function _0x4970(){const _0x231032=['xOzCm','.jw-right','insertBefo','ent','MISKZ','length','\x20-\x20','Found\x20qual','add','h-8v-2h-2v','tournament','noIcQ','match','PzbJP','FDRKC','show','OJuVm','100%','ctFFD','loading-ov','getElement','error','fs/heads/m','stener','lbar','hRLkA','40foNBgm','mQbxw','ercontent.','alignItems','NgpBX','fancode/re','fDiHD','AopQY','bewSI','ncmxm','24\x22\x20width=','stopPropag','\x20for\x20this\x20','tent','innerHTML','NsCXQ','w-reset\x20jw','ready','Match\x20not\x20','none','YBCGU','tream\x20URLs','remove','xBcXe','lytMY','LfEuz','startsWith','yDSqN','h-2v6z\x22/>\x0a','wBzwP','ading','REwxE','YPohl','div','match-info','0.8','gaUIx','log','flex','3zM3\x205v2h1','SHOJT','status','VTrie','find','FFtML','dioXq','HYeIF','\x20Please\x20tr','tYhso','dZAHm','Nyljs','ity\x20URLs:','yeXEN','YZbdY','load','y\x20again.','or\x22\x20d=\x22M3\x20','transition','opacity\x200.','url','justifyCon','VIKsy','found\x20with','getPositio','JnCuF','push','bandwidth','com/Jitend','dy\x20with\x20qu','svg>\x0a\x20\x20\x20\x20\x20','fMzle','DjQFw','3535483AQtpIN','16v-2h8v-2','ZbdTb','vHPga','\x20data.\x20Ple','Player\x20rea','your\x20conne','LViQb','ne\x20jw-butt','ath\x20fill=\x22','d.\x20Please\x20','OCYhZ','meta','quality-lo','setupError','Stream\x20not','UYLOn','lector','textConten','KIzjf','ULedL','7h4V5h-4V3','20mquaLM','ase\x20check\x20','720p','ZXZeB','\x2220\x22\x20heigh','\x20available','.jw-icon-p','Lcmwo','QzPKy','KKXZa','pointer','D\x20provided','querySelec','up\x20failed.','currentCol','display','QhLbm','sort','awCSc','oFtWw','forEach','lsdgi','\x0a\x20\x20\x20\x20\x20\x20\x20\x20<','on-color\x20j','mImqc','w.githubus','LhHOY','order','search','1420952BJSweW','-quality-b','gWXef','height','4|2|3|0|1','\x20found','This\x20match','quality-se','aiKLQ','torAll','hNxyj','\x20is\x20not\x20li','13788mWeUKf','No\x20match\x20I','createElem','parentNode','uniform','getState','74xnRSIe','Error\x20load','click','sqVoB','V9H7zm14\x204','target','json','toggle','-item','17v2h6v-2H','once','-icon-inli','includes','480p','play','split','xIdSR','No\x20valid\x20s','ing\x20match:','QJQyr','JWPlayer\x20e','center','get','trim','gxDfv','ODzHg','http','uvxkc','TRulb','jBEzq','AfQQG','Tqojg','RGImF','html5','xUibT','cjcVl','appendChil','auto','.jw-contro','.m3u8','TCknO','style','eANOQ','\x20\x20\x20\x20\x20\x20\x20\x20</','uMMBI','HiViO','oVgCY','player','https://ra','auto_strea','cVBAU','H3v2h4v2h2','UxeaF','playing','540p','mLilu','match_id','Stream\x20fai','.jw-qualit','title','LIVE','ivXpP','ain/data/f','OiKnD','live222.ph','ality:','360p','try\x20again.','ra-unatti/','block','stoHd','ancode.jso','29814NYuezQ','ById','981336EoSQMU','6h2zM7\x209v2','LDHyj','240p','LLWkh','yotiJ','contains','YGbcI','rror:','0zm-6-4h2V','\x20ID:\x20','onclick','NrQmx','JAfzq','YeemW','matches','NFrZA','ZObuu','location','DuznC','active','rDTLP','ction.','GCFZL','bikxQ','className','t=\x2220\x22>\x0a\x20\x20','iLJtE','jw-quality','44px','SvLNS','77CbPoje','YFIIN','337959uJdpgA','opacity','jw-icon\x20jw','tor','KDWqy','width','x=\x220\x200\x2024\x20','CbqJo','FXFLH','classList','setup','y-item','cMsUY','1540240JYoDom','0V5H3zm10\x20','svg\x20viewBo','Failed\x20to\x20','Player\x20set','yYujd','okngC','\x20\x20\x20\x20\x20\x20\x20\x20<p','1080p','p?url=','XxgPP','led\x20to\x20loa','addEventLi','ation','cursor','zRJgG','jZGRe','quality','seek','load\x20match','v-2H11v2h1','erlay'];_0x4970=function(){return _0x231032;};return _0x4970();}function toggleQualitySelector(){const _0x16041c=_0x7be53b,_0x2bea77={'RGImF':_0x16041c(0x1d8)+_0x16041c(0x2e4),'zRJgG':_0x16041c(0x280)},_0x105921=document[_0x16041c(0x285)+_0x16041c(0x22c)](_0x2bea77[_0x16041c(0x203)]);_0x105921[_0x16041c(0x257)][_0x16041c(0x1ea)](_0x2bea77[_0x16041c(0x26a)]);}function hideQualitySelector(){const _0x30b2cd=_0x7be53b,_0x6acfc={'JnCuF':_0x30b2cd(0x1d8)+_0x30b2cd(0x2e4),'ivXpP':_0x30b2cd(0x280)};document[_0x30b2cd(0x285)+_0x30b2cd(0x22c)](_0x6acfc[_0x30b2cd(0x2cb)])[_0x30b2cd(0x257)][_0x30b2cd(0x2a1)](_0x6acfc[_0x30b2cd(0x220)]);}function addQualityButton(){const _0x26080d=_0x7be53b,_0x5dc188={'KKXZa':function(_0x41c541){return _0x41c541();},'lytMY':_0x26080d(0x1d8)+_0x26080d(0x2e4),'stoHd':_0x26080d(0x209)+_0x26080d(0x289),'oFtWw':function(_0x45f279,_0x381a90){return _0x45f279(_0x381a90);},'NFrZA':_0x26080d(0x272),'dioXq':_0x26080d(0x2ef)+'ip','mLilu':_0x26080d(0x1e5),'bewSI':_0x26080d(0x212),'gWXef':_0x26080d(0x2ac),'OCYhZ':_0x26080d(0x250)+_0x26080d(0x1ee)+_0x26080d(0x2db)+_0x26080d(0x1cb)+_0x26080d(0x29b)+_0x26080d(0x1d2)+'tn','mQbxw':_0x26080d(0x2b1),'jZGRe':_0x26080d(0x1f8),'gaUIx':_0x26080d(0x24a),'UYLOn':_0x26080d(0x2f3),'FDRKC':_0x26080d(0x2ae),'hRLkA':_0x26080d(0x2c5)+'2s','yeXEN':function(_0x10ce09,_0x4bcec3,_0xfe6312){return _0x10ce09(_0x4bcec3,_0xfe6312);}};if(!player)return;const _0x59a145=document[_0x26080d(0x285)+_0x26080d(0x22c)](_0x5dc188[_0x26080d(0x293)]),_0x2a905c=document[_0x26080d(0x1df)+_0x26080d(0x274)](_0x5dc188[_0x26080d(0x1d3)]);_0x2a905c[_0x26080d(0x246)]=_0x5dc188[_0x26080d(0x2de)],_0x2a905c[_0x26080d(0x20c)][_0x26080d(0x2f8)]=_0x5dc188[_0x26080d(0x28c)],_0x2a905c[_0x26080d(0x20c)][_0x26080d(0x28e)]=_0x5dc188[_0x26080d(0x26b)],_0x2a905c[_0x26080d(0x20c)][_0x26080d(0x2c7)+_0x26080d(0x298)]=_0x5dc188[_0x26080d(0x26b)],_0x2a905c[_0x26080d(0x20c)][_0x26080d(0x253)]=_0x5dc188[_0x26080d(0x2af)],_0x2a905c[_0x26080d(0x20c)][_0x26080d(0x1d4)]=_0x5dc188[_0x26080d(0x2af)],_0x2a905c[_0x26080d(0x20c)][_0x26080d(0x269)]=_0x5dc188[_0x26080d(0x2e3)],_0x2a905c[_0x26080d(0x20c)][_0x26080d(0x24f)]=_0x5dc188[_0x26080d(0x27f)],_0x2a905c[_0x26080d(0x20c)][_0x26080d(0x2c4)]=_0x5dc188[_0x26080d(0x28a)],_0x2a905c[_0x26080d(0x299)]=_0x26080d(0x1ca)+_0x26080d(0x25d)+_0x26080d(0x254)+_0x26080d(0x295)+_0x26080d(0x2ed)+_0x26080d(0x247)+_0x26080d(0x262)+_0x26080d(0x2dc)+_0x26080d(0x2f7)+_0x26080d(0x2c3)+_0x26080d(0x1ec)+_0x26080d(0x2b2)+_0x26080d(0x25c)+_0x26080d(0x2d4)+_0x26080d(0x27a)+_0x26080d(0x22e)+_0x26080d(0x216)+_0x26080d(0x1e7)+_0x26080d(0x26f)+_0x26080d(0x236)+_0x26080d(0x2e8)+_0x26080d(0x2a7)+_0x26080d(0x20e)+_0x26080d(0x2d0)+'\x20';const _0x401e44=_0x5dc188[_0x26080d(0x2bf)](setInterval,()=>{const _0xb2648a=_0x26080d,_0xcccaab={'LfEuz':function(_0x38f975){const _0x3bdf2e=_0x5eea;return _0x5dc188[_0x3bdf2e(0x2f2)](_0x38f975);},'JAfzq':_0x5dc188[_0xb2648a(0x2a3)]},_0x3dd1ba=_0x59a145[_0xb2648a(0x2f5)+_0xb2648a(0x251)](_0x5dc188[_0xb2648a(0x229)]);if(_0x3dd1ba){_0x5dc188[_0xb2648a(0x1c7)](clearInterval,_0x401e44);const _0x4a3ff4=_0x3dd1ba[_0xb2648a(0x2f5)+_0xb2648a(0x251)](_0x5dc188[_0xb2648a(0x23d)])||_0x3dd1ba,_0x3b782d=_0x3dd1ba[_0xb2648a(0x2f5)+_0xb2648a(0x251)](_0x5dc188[_0xb2648a(0x2b8)]);_0x3b782d?_0x3b782d[_0xb2648a(0x1e0)][_0xb2648a(0x273)+'re'](_0x2a905c,_0x3b782d):_0x4a3ff4[_0xb2648a(0x207)+'d'](_0x2a905c),_0x2a905c[_0xb2648a(0x267)+_0xb2648a(0x288)](_0x5dc188[_0xb2648a(0x21a)],_0x1c64eb=>{const _0x149e66=_0xb2648a;_0x1c64eb[_0x149e66(0x296)+_0x149e66(0x268)](),_0xcccaab[_0x149e66(0x2a4)](toggleQualitySelector);}),document[_0xb2648a(0x267)+_0xb2648a(0x288)](_0x5dc188[_0xb2648a(0x21a)],_0x2e3594=>{const _0x2517e9=_0xb2648a;!_0x2a905c[_0x2517e9(0x233)](_0x2e3594[_0x2517e9(0x1e8)])&&!document[_0x2517e9(0x285)+_0x2517e9(0x22c)](_0xcccaab[_0x2517e9(0x23a)])[_0x2517e9(0x233)](_0x2e3594[_0x2517e9(0x1e8)])&&_0xcccaab[_0x2517e9(0x2a4)](hideQualitySelector);});}},-0x1a07+0x7cd+0x142e);}function changeQuality(_0x297ab8,_0xcc7609){const _0x107f70=_0x7be53b,_0x5e876f={'HYeIF':_0x107f70(0x241),'GCFZL':function(_0x485b83,_0x23860d){return _0x485b83===_0x23860d;},'mImqc':function(_0x40b912,_0x30808a){return _0x40b912(_0x30808a);},'LLWkh':function(_0x42c51e,_0x42851c){return _0x42c51e(_0x42851c);},'rDTLP':function(_0x321ac2,_0xb4ca15){return _0x321ac2>_0xb4ca15;},'SHOJT':function(_0x4f37c3,_0x37290c){return _0x4f37c3||_0x37290c;},'LDHyj':_0x107f70(0x21d)+_0x107f70(0x259),'Lcmwo':_0x107f70(0x218),'TRulb':function(_0x3ec4bc,_0x11943b){return _0x3ec4bc+_0x11943b;},'QhLbm':_0x107f70(0x223)+_0x107f70(0x264),'bikxQ':function(_0x54627d,_0x386f0c){return _0x54627d(_0x386f0c);},'NsCXQ':_0x107f70(0x1f1),'VTrie':_0x107f70(0x286),'Tqojg':_0x107f70(0x2df)};if(_0x5e876f[_0x107f70(0x2b3)](!player,!isPlayerReady)||isLoading)return;isLoading=!![],currentQuality=_0xcc7609,document[_0x107f70(0x2f5)+_0x107f70(0x1da)](_0x5e876f[_0x107f70(0x22f)])[_0x107f70(0x1c8)](_0x11f8f8=>{const _0x5e0c21=_0x107f70;_0x11f8f8[_0x5e0c21(0x257)][_0x5e0c21(0x2a1)](_0x5e876f[_0x5e0c21(0x2b9)]);if(_0x5e876f[_0x5e0c21(0x244)](_0x11f8f8[_0x5e0c21(0x2e5)+'t'],_0xcc7609))_0x11f8f8[_0x5e0c21(0x257)][_0x5e0c21(0x279)](_0x5e876f[_0x5e0c21(0x2b9)]);}),_0x5e876f[_0x107f70(0x1cc)](showQualityLoading,!![]);const _0x3db46e=player[_0x107f70(0x2ca)+'n'](),_0x3d9387=_0x5e876f[_0x107f70(0x244)](player[_0x107f70(0x1e2)](),_0x5e876f[_0x107f70(0x2f0)]),_0x446248=_0x5e876f[_0x107f70(0x1ff)](_0x5e876f[_0x107f70(0x2f9)],_0x5e876f[_0x107f70(0x245)](encodeURIComponent,_0x297ab8));player[_0x107f70(0x2c1)]([{'file':_0x446248,'label':_0xcc7609}]),player[_0x107f70(0x1ed)](_0x5e876f[_0x107f70(0x29a)],function(){const _0x5c7f4c=_0x107f70;_0x5e876f[_0x5c7f4c(0x1cc)](showQualityLoading,![]),isLoading=![];}),player[_0x107f70(0x1ed)](_0x5e876f[_0x107f70(0x2b5)],function(){const _0x59977f=_0x107f70;_0x5e876f[_0x59977f(0x231)](showQualityLoading,![]),isLoading=![];}),player[_0x107f70(0x1ed)](_0x5e876f[_0x107f70(0x202)],function(){const _0x3f2938=_0x107f70;_0x5e876f[_0x3f2938(0x242)](_0x3db46e,0x5f3*0x5+0x1aa+-0x2b*0xbb)&&player[_0x3f2938(0x26d)](_0x3db46e);});}async function loadStreamFromId(){const _0x378c36=_0x7be53b,_0x1dc6a2={'hNxyj':_0x378c36(0x1d5),'dZAHm':function(_0x337339,_0x1e3c3e){return _0x337339(_0x1e3c3e);},'tYhso':function(_0x158fa3){return _0x158fa3();},'AopQY':_0x378c36(0x2d8)+_0x378c36(0x2cf)+_0x378c36(0x224),'yotiJ':_0x378c36(0x1f7)+_0x378c36(0x235),'YBCGU':function(_0x1ab185,_0x4b3dd5){return _0x1ab185(_0x4b3dd5);},'LhHOY':function(_0x5bbf4d,_0x5a0178){return _0x5bbf4d(_0x5a0178);},'KIzjf':function(_0xbbefbb,_0x46af58){return _0xbbefbb>_0x46af58;},'ZObuu':function(_0x188c30,_0x5a6e93,_0x425306){return _0x188c30(_0x5a6e93,_0x425306);},'okngC':function(_0x3b2ac1,_0x52147d){return _0x3b2ac1(_0x52147d);},'ZXZeB':_0x378c36(0x21c)+_0x378c36(0x266)+_0x378c36(0x2dd)+_0x378c36(0x226),'Nyljs':function(_0x2ba455,_0x15b24c){return _0x2ba455(_0x15b24c);},'cMsUY':function(_0x24deb0,_0x4ab960){return _0x24deb0(_0x4ab960);},'fDiHD':_0x378c36(0x25f)+_0x378c36(0x2f6)+_0x378c36(0x2ba)+_0x378c36(0x2c2),'VIKsy':function(_0x6e1f3d,_0x3670a8){return _0x6e1f3d(_0x3670a8);},'NgpBX':_0x378c36(0x1de)+_0x378c36(0x2f4),'NrQmx':function(_0x5d7fae,_0x2cfecf){return _0x5d7fae(_0x2cfecf);},'oVgCY':function(_0x1e852f,_0xd49170){return _0x1e852f+_0xd49170;},'gxDfv':_0x378c36(0x29d)+_0x378c36(0x2c9)+_0x378c36(0x237),'xBcXe':function(_0x1d5c70,_0xbf9632,_0x5c783d){return _0x1d5c70(_0xbf9632,_0x5c783d);},'REwxE':function(_0xc3a7aa,_0x497d0b){return _0xc3a7aa!==_0x497d0b;},'HiViO':_0x378c36(0x21f),'cVBAU':function(_0x4b8df5,_0x537e3e){return _0x4b8df5(_0x537e3e);},'DuznC':_0x378c36(0x1d7)+_0x378c36(0x1dc)+'ve','yYujd':function(_0x53e08a,_0x61ffe3){return _0x53e08a(_0x61ffe3);},'sqVoB':function(_0x465be5,_0x659dc4){return _0x465be5(_0x659dc4);},'SvLNS':_0x378c36(0x2e2)+_0x378c36(0x2ee)+_0x378c36(0x297)+_0x378c36(0x27d),'XxgPP':function(_0x214c9c,_0x5c337e){return _0x214c9c===_0x5c337e;},'lsdgi':function(_0x9904cb,_0x596a19){return _0x9904cb(_0x596a19);},'AfQQG':function(_0x5c1def,_0x13b1bd){return _0x5c1def(_0x13b1bd);},'QzPKy':_0x378c36(0x1f4)+_0x378c36(0x2a0)+_0x378c36(0x1d6),'aiKLQ':_0x378c36(0x278)+_0x378c36(0x2be),'YFIIN':function(_0x4ff7a9,_0x170cf1){return _0x4ff7a9(_0x170cf1);},'cjcVl':function(_0x483e0a,_0x7f45d){return _0x483e0a+_0x7f45d;},'noIcQ':_0x378c36(0x223)+_0x378c36(0x264),'ZbdTb':function(_0x564822,_0x17dee5){return _0x564822(_0x17dee5);},'awCSc':_0x378c36(0x212),'QJQyr':_0x378c36(0x282),'YPohl':_0x378c36(0x1e1),'eANOQ':_0x378c36(0x204),'OiKnD':_0x378c36(0x208),'OJuVm':_0x378c36(0x29c),'ODzHg':_0x378c36(0x286),'fMzle':_0x378c36(0x2e1),'CbqJo':_0x378c36(0x1e4)+_0x378c36(0x1f5),'yDSqN':_0x378c36(0x25e)+_0x378c36(0x26e)+_0x378c36(0x2d7)+_0x378c36(0x2ea)+_0x378c36(0x2d9)+_0x378c36(0x243)};if(!matchId){_0x1dc6a2[_0x378c36(0x2c8)](showLoading,![]),_0x1dc6a2[_0x378c36(0x2c8)](alert,_0x1dc6a2[_0x378c36(0x28f)]);return;}try{const _0x17f067=await _0x1dc6a2[_0x378c36(0x2bd)](fetch,jsonUrl),_0xa693d5=await _0x17f067[_0x378c36(0x1e9)](),_0xa9a043=_0xa693d5[_0x378c36(0x23c)][_0x378c36(0x2b6)](_0x83df08=>_0x83df08[_0x378c36(0x21b)]==matchId);if(!_0xa9a043){_0x1dc6a2[_0x378c36(0x239)](showLoading,![]),_0x1dc6a2[_0x378c36(0x239)](alert,_0x1dc6a2[_0x378c36(0x211)](_0x1dc6a2[_0x378c36(0x1fb)],matchId));return;}_0x1dc6a2[_0x378c36(0x2a2)](showMatchInfo,_0xa9a043[_0x378c36(0x21e)],_0xa9a043[_0x378c36(0x27b)]);if(_0x1dc6a2[_0x378c36(0x2aa)](_0xa9a043[_0x378c36(0x2b4)],_0x1dc6a2[_0x378c36(0x210)])){_0x1dc6a2[_0x378c36(0x215)](showLoading,![]),_0x1dc6a2[_0x378c36(0x215)](alert,_0x1dc6a2[_0x378c36(0x240)]);return;}const _0x5a4eb0=_0xa9a043[_0x378c36(0x214)+'ms']&&_0xa9a043[_0x378c36(0x214)+'ms'][-0x1658+0xe1c+0x83c]?_0xa9a043[_0x378c36(0x214)+'ms'][0x784*0x1+-0x202d+0x3b*0x6b][_0x378c36(0x208)]:null;if(!_0x5a4eb0){_0x1dc6a2[_0x378c36(0x260)](showLoading,![]),_0x1dc6a2[_0x378c36(0x1e6)](alert,_0x1dc6a2[_0x378c36(0x24b)]);return;}qualityUrls=_0x1dc6a2[_0x378c36(0x2bd)](extractStreamUrls,_0x5a4eb0);if(!qualityUrls||_0x1dc6a2[_0x378c36(0x265)](qualityUrls[_0x378c36(0x276)],0x15b1+-0x13f3+-0x1be)){_0x1dc6a2[_0x378c36(0x1c9)](showLoading,![]),_0x1dc6a2[_0x378c36(0x201)](alert,_0x1dc6a2[_0x378c36(0x2f1)]);return;}console[_0x378c36(0x2b0)](_0x1dc6a2[_0x378c36(0x1d9)],qualityUrls);const _0xf90a2b=qualityUrls[0x1877+-0x3*-0xa39+-0x3722];currentQuality=_0xf90a2b[_0x378c36(0x26c)],_0x1dc6a2[_0x378c36(0x24d)](createQualitySelector,qualityUrls);const _0x3545e2=_0x1dc6a2[_0x378c36(0x206)](_0x1dc6a2[_0x378c36(0x27c)],_0x1dc6a2[_0x378c36(0x2d5)](encodeURIComponent,_0xf90a2b[_0x378c36(0x2c6)]));player=_0x1dc6a2[_0x378c36(0x201)](jwplayer,_0x1dc6a2[_0x378c36(0x2fb)]),player[_0x378c36(0x258)]({'file':_0x3545e2,'autostart':!![],'mute':![],'width':_0x1dc6a2[_0x378c36(0x1f6)],'height':_0x1dc6a2[_0x378c36(0x1f6)],'stretching':_0x1dc6a2[_0x378c36(0x2ab)],'controls':!![],'primary':_0x1dc6a2[_0x378c36(0x20d)],'hlshtml':!![],'androidhls':!![],'preload':_0x1dc6a2[_0x858e82(0x292)],currentQuality);continue;}break;}}),player['on'](_0x1dc6a2[_0x378c36(0x1fc)],function(_0x115f47){const _0x4a19df=_0x378c36;console[_0x4a19df(0x286)](_0x1dc6a2[_0x4a19df(0x232)],_0x115f47),isLoading=![],_0x1dc6a2[_0x4a19df(0x29f)](showQualityLoading,![]);if(!isPlayerReady){_0x1dc6a2[_0x4a19df(0x1ce)](showLoading,![]);if(_0x1dc6a2[_0x4a19df(0x2e6)](qualityUrls[_0x4a19df(0x276)],0x1e4c+0x14d4+-0x331f)){const _0x281f44=qualityUrls[0x1*-0x1eab+-0x68*-0x4+-0x152*-0x16];_0x1dc6a2[_0x4a19df(0x23e)](changeQuality,_0x281f44[_0x4a19df(0x2c6)],_0x281f44[_0x4a19df(0x26c)]);}else _0x1dc6a2[_0x4a19df(0x261)](alert,_0x1dc6a2[_0x4a19df(0x2ec)]);}}),player['on'](_0x1dc6a2[_0x378c36(0x2d1)],function(){const _0x4eb415=_0x378c36;isLoading=![],_0x1dc6a2[_0x4eb415(0x2bd)](showQualityLoading,![]),_0x1dc6a2[_0x4eb415(0x25a)](showLoading,![]),_0x1dc6a2[_0x4eb415(0x25a)](alert,_0x1dc6a2[_0x4eb415(0x291)]);});}catch(_0x1be1f6){console[_0x378c36(0x286)](_0x1dc6a2[_0x378c36(0x255)],_0x1be1f6),_0x1dc6a2[_0x378c36(0x29f)](showLoading,![]),_0x1dc6a2[_0x378c36(0x2bc)](alert,_0x1dc6a2[_0x378c36(0x2a6)]);}}loadStreamFromId();
-
-    </script>
-          <!-- Anti-Adblock Popup -->
-
-<div class="adb" id="adb" style="display: none;">
-
-  <div class="adbs">
-
-    <h3>Adblock/Brave Shields Detected</h3>
-
-    <p>Please disable your adblocker or Brave Shields to continue browsing this site.</p>
-
-  </div>
-
-</div>
-
-
-
-<style>
-
-.adb {
-
-  position: fixed;
-
-  width: 100%;
-
-  height: 100%;
-
-  left: 0;
-
-  top: 0;
-
-  background: rgba(0, 0, 0, 0.85);
-
-  z-index: 99999;
-
-  display: none;
-
-  align-items: center;
-
-  justify-content: center;
-
-}
-
-.adbs {
-
-  background: #fff;
-
-  padding: 30px;
-
-  border-radius: 12px;
-
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
-
-  text-align: center;
-
-  max-width: 400px;
-
-  width: 90%;
-
-}
-
-@keyframes glow {
-
-  from { text-shadow: 0 0 0px #ff0000; }
-
-  to { text-shadow: 0 0 1px #ff0000; }
-
-}
-
-.adbs h3 {
-
-  color: #d00;
-
-  font-size: 24px;
-
-  margin-bottom: 15px;
-
-}
-
-.adbs p {
-
-  font-size: 16px;
-
-  color: #333;
-
-}
-
+    .manual-play-button:hover {
+      background: rgba(255, 0, 0, 0.8);
+      transform: translate(-50%, -50%) scale(1.05);
+    }#myLogo {width:60px;height:40px;
+  position: absolute;
+  right: 5px;
+  top: 10px;
+             }
 </style>
+
+
+  
+</head>
+
+
+<div class="video-container">
+
+<div class="shaka-video-container" data-shaka-player>
+  <video id="video" autoplay muted playsinline preload="auto"></video>
+  <img id="myLogo" src="https://blogger.googleusercontent.com/img/a/AVvXsEiQ92h-ekVYskxW9qCgLvpQVMpAs4tqUQXnH9nDi37JW5B95V7Cq2Rz_mlGO68vTZmA2H5Qp4p8B0I9EUlW-6W1aVOZgITWN3xyE65Hd6G5G_D6HJFxiuXJaK-wMfYD0PiiUR9EBodkzuPH0-ubAMJQK_3F3rpDMEIJKCxlEzNZucpRzsumlBFXWqinGOw=s885">
+
+</div></div>
 
 
 
 <script>
 
-// ----------------- Popup Function -----------------
-
-function showPopup(reason = "Adblock Detected") {
-
-  document.getElementById("adb").style.display = "flex";
-
-  document.querySelector("#adb .adbs h3").innerText = reason;
-
-
-
-  if (reason.includes("Brave")) {
-
-  document.querySelector("#adb .adbs p").innerHTML = `
-
-    Please disable Brave Shields (click Brave logo → toggle Shields off) to continue browsing.<br>
-
-    <span style="
-
-      color: #ff0000;
-
-      font-weight: bold;
-
-      animation: glow 1s ease-in-out infinite alternate;
-
-    ">
-
-      If still showing message after disabling please reload page
-
-    </span>
-
-  `;
-
-}
-
-  console.warn("⚠️ Popup Triggered:", reason);
-
-}
-
-
-
-// ----------------- PC Browser Adblock Detection -----------------
-
-async function detectAdblock() {
-
-  let detected = false;
-
-
-
-  // bait div
-
-  const bait = document.createElement("div");
-
-  bait.className = "ad adsbox ad-banner adsense ad-container sponsored";
-
-  bait.style.cssText = "width:1px;height:1px;position:absolute;left:-9999px;top:-9999px;";
-
-  document.body.appendChild(bait);
-
-
-
-  // bait img
-
-  const img = document.createElement("img");
-
-  img.src = "https://pagead2.googlesyndication.com/pagead/imgad?id=CAASFeDxyz";
-
-  img.style.cssText = "width:1px;height:1px;position:absolute;left:-9999px;top:-9999px;";
-
-  img.onerror = () => { detected = true; };
-
-  document.body.appendChild(img);
-
-
-
-  // bait iframe
-
-  const iframe = document.createElement("iframe");
-
-  iframe.src = "https://googleads.g.doubleclick.net/pagead/html/r2023/sample-ad.html";
-
-  iframe.style.cssText = "width:1px;height:1px;position:absolute;left:-9999px;top:-9999px;";
-
-  iframe.onerror = () => { detected = true; };
-
-  document.body.appendChild(iframe);
-
-
-
-  // bait script
-
-  const script = document.createElement("script");
-
-  script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
-
-  script.async = true;
-
-  script.onerror = () => { detected = true; };
-
-  document.head.appendChild(script);
-
-
-
-  await new Promise(resolve => setTimeout(resolve, 500));
-
-
-
-  if (
-
-    window.getComputedStyle(bait).display === "none" ||
-
-    bait.offsetHeight === 0 ||
-
-    bait.offsetParent === null
-
-  ) {
-
-    detected = true;
-
-  }
-
-
-
-  bait.remove();
-
-  img.remove();
-
-  iframe.remove();
-
-  script.remove();
-
-
-
-  return detected;
-
-}
-
-
-
-// ----------------- Brave Shields Detection -----------------
-
-async function detectBraveShields() {
-
-  try {
-
-    let res = await fetch("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js", {
-
-      method: "GET",
-
-      cache: "no-store",
-
-      mode: "no-cors"
-
-    });
-
-
-
-    if (res.type === "opaque") {
-
+  const queryParams = new URLSearchParams(window.location.search);
+        const url = queryParams.get('url');
+  
+    
+    const channelstreamInfo = {  
+      streamUrl: url, 
+      authBearer: "",   
+      streamPoster: "https://raw.githubusercontent.com/abusaeeidx/Tv-Channel-Logo/heads/main/CricHD/runded/1745008895589.png"
+    };
+
+    let player;
+    const video = document.getElementById('video');
+
+    async function initializePlayer() {
       try {
-
-        const buf = await res.clone().arrayBuffer();
-
-        console.log("🟡 Brave Response Size:", buf.byteLength);
-
+        // Initialize Shaka Player first for better HLS support
+        player = new shaka.Player();
+        await player.attach(video);
 
 
-        // Corrected Logic:
 
-        // Size < 100 = Shields OFF
+const container = document.querySelector('.shaka-video-container');
+const ui = new shaka.ui.Overlay(player, container, video);
+  
+  // Custom UI configuration with seek bar colors
+  const config = {
+    'seekBarColors': {
+      base: 'rgba(255,255,255,.2)',
+      buffered: 'rgba(255,255,255,.4)',
+      played: 'rgb(255,0,0)',
+    },
+    'controlPanelElements': [
+      'play_pause',
+      
+      'mute',
+      'time_and_duration',
+       'restart', 
+      'spacer',
+      'quality',
+        'language',
 
-        // Size >= 100 = Shields ON
+      'picture_in_picture',
+      'fullscreen',
 
-        if (buf.byteLength < 100) {
+      'overflow_menu'
+    ]
+  };
+  
+  ui.configure(config);
+  const controls = ui.getControls();
 
-          return false; // Shields OFF
+        // Configure player for better performance
+        player.configure({
+          streaming: {
+            bufferingGoal: 10,
+            rebufferingGoal: 2,
+            bufferBehind: 30
+          },
+          manifest: {
+            retryParameters: {
+              timeout: 30000,
+              maxAttempts: 2,
+              baseDelay: 1000,
+              backoffFactor: 2,
+              fuzzFactor: 0.5
+            }
+          }
+        });
 
+        
+
+        // Set video properties for autoplay
+        video.autoplay = true;
+        video.controls = false;
+        video.volume = 1;
+        video.muted = false;
+        video.preload = 'auto';
+
+        console.log(`Loading stream: ${channelstreamInfo.streamUrl}`);
+        
+        // Load the stream
+        await player.load(channelstreamInfo.streamUrl);
+        
+console.log('Stream loaded successfully.');
+
+        // Force autoplay with multiple attempts
+        const attemptAutoplay = async () => {
+          try {
+            await video.play();
+            console.log('Autoplay successful');
+          } catch (playError) {
+            console.log('Autoplay blocked, trying with muted audio');
+            video.muted = true;
+            try {
+              await video.play();
+              console.log('Autoplay successful with muted audio');
+            } catch (mutedError) {
+              console.log('Autoplay failed completely, user interaction required');
+            }
+          }
+        };
+
+        // Immediate autoplay attempt
+        if (video.readyState >= 2) {
+          await attemptAutoplay();
         } else {
-
-          return true;  // Shields ON
-
+          video.addEventListener('canplay', attemptAutoplay, { once: true });
         }
 
-      } catch (e) {
-
-        console.warn("🟡 Brave fetch blocked", e);
-
-        return true; // Shields ON
-
+      } catch (error) {
+        console.error('Error initializing player:', error);
+        
+        // Fallback to direct video source
+        video.src = channelstreamInfo.streamUrl;
+        video.autoplay = true;
+        video.muted = false;
+        
+        try {
+          await video.play();
+        } catch (fallbackError) {
+          video.muted = true;
+          await video.play();
+        }
       }
-
     }
+        
 
-    return true; // default treat as ON
-
-  } catch (e) {
-
-    console.error("🛑 Brave Shields hard blocked", e);
-
-    return true; // Shields ON
-
-  }
-
-}
-
-
-
-// ----------------- Main -----------------
-
-window.addEventListener("load", async () => {
-
-  const shieldsOn = await detectBraveShields();
-
-  if (shieldsOn) {
-
-    showPopup("Brave Shields Detected");
-
-    return;
-
-  }
-
-
-
-  const adblocker = await detectAdblock();
-
-  if (adblocker) {
-
-    showPopup("Adblock Detected");
-
-  }
-
-});
-
+        
+      
+  // Initialize player when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      initializePlayer().catch(error => {
+        console.error('Error initializing player:', error);
+      });
+    });
+    
 </script>
-
-</body>
-
-</html>
