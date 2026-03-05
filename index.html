@@ -1,12 +1,17 @@
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>TEAMROHITOFFICIAL45</title>
 
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <style>
 
@@ -18,9 +23,9 @@ color:white;
 
 .match-tile{
 background:#131d2f;
-border-radius:30px;
-overflow:hidden;
+border-radius:28px;
 border:1px solid #253247;
+overflow:hidden;
 transition:0.3s;
 }
 
@@ -32,6 +37,7 @@ border-color:#3b82f6;
 .img-wrapper{
 height:210px;
 overflow:hidden;
+position:relative;
 }
 
 .match-img{
@@ -41,23 +47,24 @@ object-fit:cover;
 }
 
 .live-badge{
-background:#dc2626;
-padding:4px 10px;
-border-radius:30px;
-font-size:12px;
 position:absolute;
 top:10px;
 left:10px;
+background:#dc2626;
+color:white;
+font-size:12px;
+padding:4px 10px;
+border-radius:30px;
 }
 
 .btn-watch{
 background:#2563eb;
 padding:12px;
 border-radius:40px;
-text-align:center;
 display:block;
-margin-top:10px;
+text-align:center;
 font-weight:bold;
+margin-top:10px;
 }
 
 .btn-watch:hover{
@@ -65,7 +72,9 @@ background:#1d4ed8;
 }
 
 </style>
+
 </head>
+
 
 <body class="p-5 max-w-7xl mx-auto">
 
@@ -91,55 +100,23 @@ WEB BY @Cricinsider365
 </div>
 
 
+<!-- MATCH CONTAINER -->
 
-<!-- MATCHES -->
-
-<div id="matches-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-
+<div id="matches-container"
+class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+</div>
 
 
 <script>
 
-const DATA_URL="https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json";
+const DATA_URL =
+"https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json";
 
-const WATCH_BASE="https://teamrofemcodeplyr2.pages.dev/match.html?id=";
+const WATCH_BASE =
+"https://teamrofemcodeplyr2.pages.dev/match.html?id=";
 
-
-
-function actionButton(matchId,isLive){
-
-if(isLive){
-
-let a=document.createElement("a");
-
-a.href=WATCH_BASE+matchId;
-
-a.target="_blank";
-
-a.className="btn-watch";
-
-a.innerHTML='<i class="fas fa-play-circle"></i> WATCH LIVE';
-
-return a;
-
-}
-
-else{
-
-let div=document.createElement("div");
-
-div.className="btn-watch";
-
-div.style.opacity="0.4";
-
-div.innerHTML="NOT LIVE";
-
-return div;
-
-}
-
-}
-
+const container =
+document.getElementById("matches-container");
 
 
 fetch(DATA_URL)
@@ -148,55 +125,100 @@ fetch(DATA_URL)
 
 .then(data=>{
 
-const container=document.getElementById("matches-container");
-
 container.innerHTML="";
 
-data.matches.forEach(m=>{
+const matches = data.matches || [];
 
-const isLive=m.status==="LIVE";
+if(matches.length===0){
 
-const matchId=m.match_id;
+container.innerHTML=
+"<p class='text-center col-span-3 text-gray-400'>No matches available</p>";
 
-const card=document.createElement("div");
+return;
+
+}
+
+matches.forEach(m=>{
+
+const matchId =
+m.match_id || m.id || "";
+
+const isLive =
+(m.status || "").toUpperCase() === "LIVE";
+
+let img = m.image || "";
+
+if(!img && m.image_cdn){
+
+img =
+m.image_cdn.APP ||
+m.image_cdn.TATAPLAY ||
+m.image_cdn.PLAYBACK ||
+"";
+
+}
+
+if(!img){
+
+img =
+"https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg";
+
+}
+
+const title =
+m.title || "Match";
+
+const tournament =
+m.tournament || "";
+
+const time =
+m.startTime || "";
+
+
+const card =
+document.createElement("div");
 
 card.className="match-tile";
 
 
-
-let img=m.image || "https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg";
-
-
-
 card.innerHTML=`
 
-<div class="img-wrapper relative">
+<div class="img-wrapper">
 
 <img src="${img}" class="match-img">
 
-${isLive?'<span class="live-badge">LIVE</span>':''}
+${isLive ? '<span class="live-badge">LIVE</span>' : ''}
 
 </div>
 
 <div class="p-5">
 
-<h3 class="font-bold text-lg">${m.title}</h3>
+<h3 class="font-bold text-lg">
+${title}
+</h3>
 
-<p class="text-gray-400 text-sm mt-1">${m.tournament||""}</p>
+<p class="text-gray-400 text-sm mt-1">
+${tournament}
+</p>
 
-<p class="text-gray-400 text-sm mt-1">${m.startTime||""}</p>
+<p class="text-gray-400 text-sm mt-1">
+${time}
+</p>
+
+<a href="${WATCH_BASE+matchId}"
+target="_blank"
+class="btn-watch">
+
+${isLive ?
+'<i class="fas fa-play-circle"></i> WATCH LIVE'
+:
+'NOT LIVE'}
+
+</a>
 
 </div>
 
 `;
-
-
-
-const content=card.querySelector(".p-5");
-
-content.appendChild(actionButton(matchId,isLive));
-
-
 
 container.appendChild(card);
 
@@ -206,8 +228,7 @@ container.appendChild(card);
 
 .catch(()=>{
 
-document.getElementById("matches-container").innerHTML=
-
+container.innerHTML=
 "<p class='text-center col-span-3 text-gray-400'>Failed to load matches</p>";
 
 });
@@ -215,6 +236,6 @@ document.getElementById("matches-container").innerHTML=
 </script>
 
 
-
 </body>
 </html>
+```
