@@ -1,241 +1,132 @@
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>TEAMROHITOFFICIAL45</title>
-
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<title>Live Matches</title>
 
 <style>
 
 body{
-background:#0a0f1c;
-font-family:system-ui;
+background:#0f172a;
+font-family:Arial, Helvetica, sans-serif;
+margin:0;
+padding:20px;
 color:white;
 }
 
-.match-tile{
-background:#131d2f;
-border-radius:28px;
-border:1px solid #253247;
+h1{
+text-align:center;
+margin-bottom:25px;
+}
+
+#matches{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:20px;
+}
+
+.card{
+background:#1e293b;
+border-radius:12px;
 overflow:hidden;
+box-shadow:0 4px 15px rgba(0,0,0,0.5);
 transition:0.3s;
 }
 
-.match-tile:hover{
-transform:translateY(-4px);
-border-color:#3b82f6;
+.card:hover{
+transform:translateY(-5px);
 }
 
-.img-wrapper{
-height:210px;
-overflow:hidden;
-position:relative;
-}
-
-.match-img{
+.card img{
 width:100%;
-height:100%;
+height:160px;
 object-fit:cover;
 }
 
-.live-badge{
-position:absolute;
-top:10px;
-left:10px;
-background:#dc2626;
-color:white;
-font-size:12px;
-padding:4px 10px;
-border-radius:30px;
+.card-content{
+padding:15px;
 }
 
-.btn-watch{
-background:#2563eb;
-padding:12px;
-border-radius:40px;
-display:block;
-text-align:center;
+.match-title{
+font-size:16px;
 font-weight:bold;
-margin-top:10px;
+margin-bottom:10px;
 }
 
-.btn-watch:hover{
-background:#1d4ed8;
+.watch-btn{
+display:inline-block;
+padding:8px 15px;
+background:#ff3b3b;
+color:white;
+text-decoration:none;
+border-radius:6px;
+font-size:14px;
+}
+
+.watch-btn:hover{
+background:#ff0000;
+}
+
+#nomatch{
+text-align:center;
+font-size:18px;
+margin-top:40px;
+display:none;
 }
 
 </style>
-
 </head>
 
+<body>
 
-<body class="p-5 max-w-7xl mx-auto">
+<h1>Live Matches</h1>
 
-
-<!-- HEADER -->
-
-<div class="text-center mb-10">
-
-<div class="inline-flex items-center gap-3 bg-[#131d2f] py-3 px-7 rounded-full border border-blue-900/50">
-
-<i class="fas fa-bolt text-blue-500"></i>
-
-<span class="text-3xl font-black">
-TEAMROHITOFFICIAL45
-</span>
-
-</div>
-
-<p class="text-gray-500 text-sm mt-3">
-WEB BY @Cricinsider365
-</p>
-
-</div>
-
-
-<!-- MATCH CONTAINER -->
-
-<div id="matches-container"
-class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-</div>
-
+<div id="matches"></div>
+<div id="nomatch">No match available</div>
 
 <script>
 
-const DATA_URL =
-"https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json";
-
-const WATCH_BASE =
-"https://teamrofemcodeplyr2.pages.dev/match.html?id=";
-
-const container =
-document.getElementById("matches-container");
-
-
-fetch(DATA_URL)
-
-.then(res=>res.json())
-
-.then(data=>{
-
-container.innerHTML="";
-
-const matches = data.matches || [];
-
-if(matches.length===0){
-
-container.innerHTML=
-"<p class='text-center col-span-3 text-gray-400'>No matches available</p>";
-
-return;
-
+// JSON DATA inside HTML
+const matches = [
+{
+name:"CSK vs MI",
+image:"https://via.placeholder.com/400x200",
+stream:"https://example.com/stream1"
+},
+{
+name:"India vs Australia",
+image:"https://via.placeholder.com/400x200",
+stream:"https://example.com/stream2"
 }
+];
 
-matches.forEach(m=>{
+const container = document.getElementById("matches");
 
-const matchId =
-m.match_id || m.id || "";
+if(matches.length === 0){
+document.getElementById("nomatch").style.display="block";
+}else{
 
-const isLive =
-(m.status || "").toUpperCase() === "LIVE";
+matches.forEach(match=>{
 
-let img = m.image || "";
-
-if(!img && m.image_cdn){
-
-img =
-m.image_cdn.APP ||
-m.image_cdn.TATAPLAY ||
-m.image_cdn.PLAYBACK ||
-"";
-
-}
-
-if(!img){
-
-img =
-"https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg";
-
-}
-
-const title =
-m.title || "Match";
-
-const tournament =
-m.tournament || "";
-
-const time =
-m.startTime || "";
-
-
-const card =
-document.createElement("div");
-
-card.className="match-tile";
-
+const card=document.createElement("div");
+card.className="card";
 
 card.innerHTML=`
-
-<div class="img-wrapper">
-
-<img src="${img}" class="match-img">
-
-${isLive ? '<span class="live-badge">LIVE</span>' : ''}
-
+<img src="${match.image}">
+<div class="card-content">
+<div class="match-title">${match.name}</div>
+<a class="watch-btn" href="${match.stream}" target="_blank">Watch</a>
 </div>
-
-<div class="p-5">
-
-<h3 class="font-bold text-lg">
-${title}
-</h3>
-
-<p class="text-gray-400 text-sm mt-1">
-${tournament}
-</p>
-
-<p class="text-gray-400 text-sm mt-1">
-${time}
-</p>
-
-<a href="${WATCH_BASE+matchId}"
-target="_blank"
-class="btn-watch">
-
-${isLive ?
-'<i class="fas fa-play-circle"></i> WATCH LIVE'
-:
-'NOT LIVE'}
-
-</a>
-
-</div>
-
 `;
 
 container.appendChild(card);
 
 });
 
-})
-
-.catch(()=>{
-
-container.innerHTML=
-"<p class='text-center col-span-3 text-gray-400'>Failed to load matches</p>";
-
-});
+}
 
 </script>
 
-
 </body>
 </html>
-```
