@@ -1,240 +1,228 @@
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEAMROHITOFFICIAL45</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background: #0a0f1c;
+            font-family: 'system-ui', -apple-system, sans-serif;
+            color: white;
+            padding-bottom: 50px;
+        }
 
-<title>TEAMROHITOFFICIAL45</title>
+        .match-tile {
+            background: #131d2f;
+            border-radius: 28px;
+            border: 1px solid #253247;
+            overflow: hidden;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
 
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        .match-tile:hover {
+            transform: translateY(-6px);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.2);
+        }
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        .img-wrapper {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+            background: #1e293b;
+        }
 
-<style>
+        .match-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-body{
-background:#0a0f1c;
-font-family:system-ui;
-color:white;
-}
+        .live-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #dc2626;
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 30px;
+            z-index: 10;
+        }
 
-.match-tile{
-background:#131d2f;
-border-radius:28px;
-border:1px solid #253247;
-overflow:hidden;
-transition:0.3s;
-}
+        .btn-watch {
+            background: #2563eb;
+            padding: 14px;
+            border-radius: 16px;
+            display: block;
+            text-align: center;
+            font-weight: 800;
+            margin-top: auto;
+            cursor: pointer;
+            transition: 0.2s;
+        }
 
-.match-tile:hover{
-transform:translateY(-4px);
-border-color:#3b82f6;
-}
+        .btn-watch.not-live {
+            background: #1e293b;
+            color: #64748b;
+            cursor: not-allowed;
+        }
 
-.img-wrapper{
-height:210px;
-overflow:hidden;
-position:relative;
-}
+        /* QUALITY MODAL STYLES */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
 
-.match-img{
-width:100%;
-height:100%;
-object-fit:cover;
-}
+        .modal-content {
+            background: #131d2f;
+            width: 90%;
+            max-width: 350px;
+            padding: 30px;
+            border-radius: 30px;
+            border: 1px solid #253247;
+            text-align: center;
+        }
 
-.live-badge{
-position:absolute;
-top:10px;
-left:10px;
-background:#dc2626;
-color:white;
-font-size:12px;
-padding:4px 10px;
-border-radius:30px;
-}
+        .quality-btn {
+            background: #1e293b;
+            border: 1px solid #253247;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
 
-.btn-watch{
-background:#2563eb;
-padding:12px;
-border-radius:40px;
-display:block;
-text-align:center;
-font-weight:bold;
-margin-top:10px;
-}
+        .quality-btn:hover {
+            background: #2563eb;
+            border-color: #3b82f6;
+        }
 
-.btn-watch:hover{
-background:#1d4ed8;
-}
+        .quality-btn i { color: #3b82f6; }
+        .quality-btn:hover i { color: white; }
 
-</style>
-
+        .close-btn {
+            margin-top: 15px;
+            color: #ef4444;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-block;
+        }
+    </style>
 </head>
-
-
 <body class="p-5 max-w-7xl mx-auto">
 
-
-<!-- HEADER -->
-
-<div class="text-center mb-10">
-
-<div class="inline-flex items-center gap-3 bg-[#131d2f] py-3 px-7 rounded-full border border-blue-900/50">
-
-<i class="fas fa-bolt text-blue-500"></i>
-
-<span class="text-3xl font-black">
-TEAMROHITOFFICIAL45
-</span>
-
-</div>
-
-<p class="text-gray-500 text-sm mt-3">
-WEB BY @Cricinsider365
-</p>
-
-</div>
-
-
-<!-- MATCH CONTAINER -->
-
-<div id="matches-container"
-class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-</div>
-
-
-<script>
-
-const DATA_URL =
-"https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json";
-
-const WATCH_BASE =
-"https://teamrofemcodeplyr2.pages.dev/match.html?id=";
-
-const container =
-document.getElementById("matches-container");
-
-
-fetch(DATA_URL)
-
-.then(res=>res.json())
-
-.then(data=>{
-
-container.innerHTML="";
-
-const matches = data.matches || [];
-
-if(matches.length===0){
-
-container.innerHTML=
-"<p class='text-center col-span-3 text-gray-400'>No matches available</p>";
-
-return;
-
-}
-
-matches.forEach(m=>{
-
-const matchId =
-m.match_id || m.id || "";
-
-const isLive =
-(m.status || "").toUpperCase() === "LIVE";
-
-let img = m.image || "";
-
-if(!img && m.image_cdn){
-
-img =
-m.image_cdn.APP ||
-m.image_cdn.TATAPLAY ||
-m.image_cdn.PLAYBACK ||
-"";
-
-}
-
-if(!img){
-
-img =
-"https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg";
-
-}
-
-const title =
-m.title || "Match";
-
-const tournament =
-m.tournament || "";
-
-const time =
-m.startTime || "";
-
-
-const card =
-document.createElement("div");
-
-card.className="match-tile";
-
-
-card.innerHTML=`
-
-<div class="img-wrapper">
-
-<img src="${img}" class="match-img">
-
-${isLive ? '<span class="live-badge">LIVE</span>' : ''}
-
-</div>
-
-<div class="p-5">
-
-<h3 class="font-bold text-lg">
-${title}
-</h3>
-
-<p class="text-gray-400 text-sm mt-1">
-${tournament}
-</p>
-
-<p class="text-gray-400 text-sm mt-1">
-${time}
-</p>
-
-<a href="${WATCH_BASE+matchId}"
-target="_blank"
-class="btn-watch">
-
-${isLive ?
-'<i class="fas fa-play-circle"></i> WATCH LIVE'
-:
-'NOT LIVE'}
-
-</a>
-
-</div>
-
-`;
-
-container.appendChild(card);
-
-});
-
-})
-
-.catch(()=>{
-
-container.innerHTML=
-"<p class='text-center col-span-3 text-gray-400'>Failed to load matches</p>";
-
-});
-
-</script>
-
-
+    <div class="text-center mb-10 mt-5">
+        <div class="inline-flex items-center gap-3 bg-[#131d2f] py-4 px-8 rounded-full border border-blue-900/50">
+            <i class="fas fa-bolt text-yellow-400"></i> 
+            <span class="text-2xl font-black"> TEAMROHITOFFICIAL45 </span>
+        </div>
+        <p class="text-gray-500 text-xs mt-3">WEB BY @Cricinsider365</p>
+    </div>
+
+    <div id="matches-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+    <div id="quality-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-5">Select Quality</h3>
+            <div id="quality-list"></div>
+            <div class="close-btn" onclick="closeModal()">CLOSE</div>
+        </div>
+    </div>
+
+    <script>
+        const DATA_URL = "https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json";
+        const PLAYER_URL = "https://teamrofemcodeplyr2.pages.dev/match.html?url=";
+        const container = document.getElementById("matches-container");
+        let allMatches = [];
+
+        function initApp() {
+            fetch(DATA_URL)
+                .then(res => res.json())
+                .then(data => {
+                    allMatches = data.matches || [];
+                    renderMatches(allMatches);
+                })
+                .catch(() => {
+                    container.innerHTML = "<p class='text-center col-span-full'>Failed to load matches</p>";
+                });
+        }
+
+        function renderMatches(matches) {
+            container.innerHTML = "";
+            matches.forEach((m, index) => {
+                const isLive = (m.status || "").toUpperCase() === "LIVE";
+                let img = m.image_cdn?.APP  m.image  "https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg";
+
+                const card = document.createElement("div");
+                card.className = "match-tile";
+                card.innerHTML = 
+                    <div class="img-wrapper">
+                        <img src="${img}" class="match-img">
+                        ${isLive ? '<span class="live-badge">LIVE</span>' : ''}
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h3 class="font-bold text-lg h-14 line-clamp-2">${m.title}</h3>
+                        <p class="text-gray-400 text-xs mt-2 uppercase tracking-widest font-bold">${m.tournament}</p>
+                        <p class="text-gray-500 text-xs mt-1 mb-5">${m.startTime}</p>
+                        
+                        <div onclick="${isLive ? openQuality(${index}) : ''}" class="btn-watch ${!isLive ? 'not-live' : ''}">
+                            ${isLive ? '<i class="fas fa-play-circle mr-2"></i> WATCH LIVE' : 'NOT LIVE'}
+                        </div>
+                    </div>
+                ;
+                container.appendChild(card);
+            });
+        }
+
+        function openQuality(index) {
+            const match = allMatches[index];
+            const streamData = match.auto_streams?.[0]?.auto || "";
+            const list = document.getElementById("quality-list");
+            list.innerHTML = "";
+
+            if(!streamData) return alert("Stream not found!");
+
+            const lines = streamData.split('\n');
+            lines.forEach((line, i) => {
+                if (line.includes('RESOLUTION=')) {
+                    const resolution = line.split('RESOLUTION=')[1].split(',')[0].split('x')[1] + 'p';
+                    const streamUrl = lines[i + 1].trim();
+                    
+                    const btn = document.createElement("div");
+                    btn.className = "quality-btn";
+                    btn.innerHTML = <span>${resolution}</span> <i class="fas fa-chevron-right"></i>;
+                    btn.onclick = () => {
+                        window.location.href = PLAYER_URL + encodeURIComponent(streamUrl);
+                    };
+                    list.appendChild(btn);
+                }
+            });
+
+            document.getElementById("quality-modal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("quality-modal").style.display = "none";
+        }
+
+        initApp();
+    </script>
 </body>
 </html>
